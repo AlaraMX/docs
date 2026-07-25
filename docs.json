@@ -129,6 +129,43 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "API",
+        "groups": [
+          {
+            "group": "Empezar",
+            "pages": [
+              "api/introduccion",
+              "api/autenticacion",
+              "api/conceptos",
+              "api/errores",
+              "api/convenciones"
+            ]
+          },
+          {
+            "group": "Referencia",
+            "pages": [
+              "api/pases",
+              "api/plantillas-de-pases",
+              "api/escaneos",
+              "api/tarjetas-fisicas",
+              "api/notificaciones",
+              "api/reglas-de-activacion",
+              "api/recompensas"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api/webhooks/introduccion",
+              "api/webhooks/suscripciones",
+              "api/webhooks/eventos",
+              "api/webhooks/verificar-firmas",
+              "api/webhooks/entregas"
+            ]
+          }
+        ]
       }
     ]
   },

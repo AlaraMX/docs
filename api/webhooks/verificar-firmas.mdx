@@ -1,0 +1,269 @@
+---
+title: "Verificar firmas"
+description: "Comprueba que un webhook proviene realmente de Alara antes de procesarlo."
+---
+
+# Verificar firmas
+
+Tu endpoint de webhooks es una URL pública: cualquiera podría enviarle un `POST` fingiendo ser Alara. Por eso cada entrega va firmada con el secreto de tu suscripción.
+
+<Warning>
+  **Verifica siempre la firma antes de procesar un evento.** Sin esa comprobación, cualquiera podría inventar escaneos o saldos en tu sistema.
+</Warning>
+
+---
+
+## Encabezados de la entrega
+
+| Encabezado | Contenido |
+| --- | --- |
+| `Alara-Webhook-Id` | Identificador del evento. Igual en todos los reintentos; úsalo para descartar duplicados. |
+| `Alara-Webhook-Timestamp` | Momento del intento, en segundos Unix. |
+| `Alara-Signature` | La firma, con el formato `t=<unix>,v1=<hmac_hex>`. |
+| `Content-Type` | Siempre `application/json`. |
+
+Ejemplo:
+
+```http
+POST /webhooks/alara HTTP/1.1
+Content-Type: application/json
+Alara-Webhook-Id: 0f9c1a3e-5d02-4b17-9c3b-a1d2e3f40506
+Alara-Webhook-Timestamp: 1784899462
+Alara-Signature: t=1784899462,v1=5f8d2c1a9b3e4f6072839a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f
+```
+
+---
+
+## Cómo se calcula la firma
+
+<Steps>
+  <Step title="Se arma la cadena a firmar">
+    El *timestamp* en segundos Unix, un punto, y el **cuerpo crudo** de la petición:
+
+    ```
+    <timestamp>.<cuerpo_json_crudo>
+    ```
+  </Step>
+
+  <Step title="Se calcula el HMAC">
+    HMAC-SHA256 sobre esa cadena, usando como llave el `secret` de tu suscripción.
+  </Step>
+
+  <Step title="Se codifica en hexadecimal">
+    El resultado, en hexadecimal minúsculas, es el valor de `v1` dentro de `Alara-Signature`.
+  </Step>
+</Steps>
+
+<Warning>
+  Debes firmar los **bytes exactos** que recibiste, no un JSON reserializado. Si tu framework parsea el cuerpo automáticamente, configúralo para conservar también el cuerpo crudo; de lo contrario un simple cambio de espacios hará que la firma nunca coincida.
+</Warning>
+
+El valor `t=` dentro de `Alara-Signature` siempre coincide con `Alara-Webhook-Timestamp`. Puedes usar cualquiera de los dos.
+
+---
+
+## Ejemplos
+
+<CodeGroup>
+```javascript Node.js
+import crypto from "node:crypto";
+
+const TOLERANCIA_SEGUNDOS = 300; // 5 minutos
+
+export function verificarFirma(cuerpoCrudo, encabezados, secreto) {
+  const firma = encabezados["alara-signature"];
+  if (!firma) return false;
+
+  // "t=1784899462,v1=5f8d..."
+  const partes = Object.fromEntries(
+    firma.split(",").map((p) => p.split("=", 2)),
+  );
+  const { t, v1 } = partes;
+  if (!t || !v1) return false;
+
+  // Rechaza mensajes viejos (protección contra reenvíos)
+  const ahora = Math.floor(Date.now() / 1000);
+  if (Math.abs(ahora - Number(t)) > TOLERANCIA_SEGUNDOS) return false;
+
+  const esperada = crypto
+    .createHmac("sha256", secreto)
+    .update(`${t}.`)
+    .update(cuerpoCrudo)
+    .digest("hex");
+
+  // Comparación en tiempo constante
+  const a = Buffer.from(esperada, "utf8");
+  const b = Buffer.from(v1, "utf8");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+```
+
+```python Python
+import hashlib
+import hmac
+import time
+
+TOLERANCIA_SEGUNDOS = 300  # 5 minutos
+
+
+def verificar_firma(cuerpo_crudo: bytes, encabezados: dict, secreto: str) -> bool:
+    firma = encabezados.get("Alara-Signature")
+    if not firma:
+        return False
+
+    partes = dict(
+        p.split("=", 1) for p in firma.split(",") if "=" in p
+    )
+    t, v1 = partes.get("t"), partes.get("v1")
+    if not t or not v1:
+        return False
+
+    # Rechaza mensajes viejos (protección contra reenvíos)
+    if abs(int(time.time()) - int(t)) > TOLERANCIA_SEGUNDOS:
+        return False
+
+    esperada = hmac.new(
+        secreto.encode("utf-8"),
+        f"{t}.".encode("utf-8") + cuerpo_crudo,
+        hashlib.sha256,
+    ).hexdigest()
+
+    return hmac.compare_digest(esperada, v1)
+```
+
+```php PHP
+<?php
+const TOLERANCIA_SEGUNDOS = 300; // 5 minutos
+
+function verificarFirma(string $cuerpoCrudo, array $encabezados, string $secreto): bool {
+    $firma = $encabezados['Alara-Signature'] ?? '';
+    if ($firma === '') {
+        return false;
+    }
+
+    $partes = [];
+    foreach (explode(',', $firma) as $p) {
+        [$k, $v] = array_pad(explode('=', $p, 2), 2, null);
+        $partes[$k] = $v;
+    }
+
+    $t  = $partes['t']  ?? null;
+    $v1 = $partes['v1'] ?? null;
+    if (!$t || !$v1) {
+        return false;
+    }
+
+    // Rechaza mensajes viejos (protección contra reenvíos)
+    if (abs(time() - (int) $t) > TOLERANCIA_SEGUNDOS) {
+        return false;
+    }
+
+    $esperada = hash_hmac('sha256', $t . '.' . $cuerpoCrudo, $secreto);
+
+    return hash_equals($esperada, $v1);
+}
+```
+
+```go Go
+package webhooks
+
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"math"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const toleranciaSegundos = 300 // 5 minutos
+
+func VerificarFirma(cuerpoCrudo []byte, h http.Header, secreto string) bool {
+	firma := h.Get("Alara-Signature")
+	if firma == "" {
+		return false
+	}
+
+	var t, v1 string
+	for _, parte := range strings.Split(firma, ",") {
+		clave, valor, ok := strings.Cut(parte, "=")
+		if !ok {
+			continue
+		}
+		switch clave {
+		case "t":
+			t = valor
+		case "v1":
+			v1 = valor
+		}
+	}
+	if t == "" || v1 == "" {
+		return false
+	}
+
+	ts, err := strconv.ParseInt(t, 10, 64)
+	if err != nil {
+		return false
+	}
+
+	// Rechaza mensajes viejos (protección contra reenvíos)
+	if math.Abs(float64(time.Now().Unix()-ts)) > toleranciaSegundos {
+		return false
+	}
+
+	mac := hmac.New(sha256.New, []byte(secreto))
+	fmt.Fprintf(mac, "%s.", t)
+	mac.Write(cuerpoCrudo)
+	esperada := hex.EncodeToString(mac.Sum(nil))
+
+	return hmac.Equal([]byte(esperada), []byte(v1))
+}
+```
+</CodeGroup>
+
+---
+
+## Protección contra reenvíos
+
+Alara **no** aplica una ventana de tolerancia del lado del servidor: esa validación te corresponde a ti.
+
+<Steps>
+  <Step title="Rechaza mensajes viejos">
+    Descarta la entrega si `Alara-Webhook-Timestamp` se aleja del reloj de tu servidor más de lo razonable. Cinco minutos es un valor habitual.
+  </Step>
+
+  <Step title="Descarta duplicados">
+    Guarda los `Alara-Webhook-Id` ya procesados y descarta los repetidos. La entrega es **al menos una vez**, así que los duplicados son normales, no un error.
+  </Step>
+</Steps>
+
+<Note>
+  El *timestamp* y la firma se recalculan en **cada intento**, así que un reintento llega con `t` y `v1` distintos. Lo único estable entre intentos es `Alara-Webhook-Id`.
+</Note>
+
+---
+
+## Lista de verificación
+
+<AccordionGroup>
+  <Accordion title="Conserva el cuerpo crudo">
+    En Express, usa `express.raw({ type: 'application/json' })` en la ruta del webhook. En otros frameworks, busca la opción equivalente antes de que el JSON se parsee.
+  </Accordion>
+
+  <Accordion title="Compara en tiempo constante">
+    Usa `timingSafeEqual`, `hmac.compare_digest`, `hash_equals` o `hmac.Equal` según tu lenguaje. Comparar cadenas con `==` filtra información sobre la firma correcta.
+  </Accordion>
+
+  <Accordion title="Guarda el secreto de forma segura">
+    Trátalo como cualquier otra credencial: variables de entorno o gestor de secretos, nunca en el repositorio.
+  </Accordion>
+
+  <Accordion title="Responde 2xx incluso si ignoras el evento">
+    Si la firma es válida pero el evento no te interesa, responde `200` de todos modos. Un código de error hará que Alara lo reintente durante horas sin necesidad.
+
+    Cuando la firma **no** es válida, responde `401` y no proceses nada.
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,160 @@
+---
+title: "Convenciones"
+description: "Paginación, filtros, ordenamiento y formatos de fecha en la API de Alara."
+---
+
+# Convenciones
+
+Reglas que aplican de forma transversal a los endpoints de listado y a los formatos de datos.
+
+---
+
+## Paginación
+
+Los listados usan paginación por desplazamiento (`limit` / `offset`).
+
+<ParamField query="limit" type="integer" default="25">
+  Cuántos elementos devolver. Mínimo `1`, máximo `100`.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Cuántos elementos omitir desde el inicio. Mínimo `0`.
+</ParamField>
+
+Un valor fuera de rango o no numérico devuelve `400 INVALID_INPUT`.
+
+<Note>
+  `GET /v1/notifications` usa `100` como valor por omisión de `limit` cuando no lo especificas. El resto de los listados usa `25`.
+</Note>
+
+### Totales
+
+Los listados de pases, escaneos y notificaciones devuelven el conteo en encabezados de respuesta:
+
+| Encabezado | Contenido |
+| --- | --- |
+| `X-Total-Count` | Total de elementos que cumplen el filtro, ignorando la paginación. |
+| `X-Has-More` | `true` o `false`: si quedan más elementos después de esta página. |
+
+<Warning>
+  Estos encabezados **no están expuestos por CORS**, por lo que un navegador no puede leerlos. Es una razón más para llamar a la API desde tu servidor y no desde el navegador.
+</Warning>
+
+### Recorrer todas las páginas
+
+```javascript
+async function* listarTodosLosPases(filtros = {}) {
+  const limit = 100; // el máximo permitido
+  let offset = 0;
+
+  while (true) {
+    const params = new URLSearchParams({ ...filtros, limit, offset });
+
+    const res = await fetch(`https://api.alaramx.com/v1/passes?${params}`, {
+      headers: { Authorization: `Bearer ${process.env.ALARA_API_KEY}` },
+    });
+    if (!res.ok) throw new Error(`Alara respondió ${res.status}`);
+
+    // Este endpoint devuelve un arreglo directo, sin envoltura
+    const pases = await res.json();
+    yield* pases;
+
+    // X-Has-More te dice si vale la pena pedir otra página
+    if (res.headers.get("X-Has-More") !== "true") break;
+    offset += limit;
+  }
+}
+
+for await (const pase of listarTodosLosPases({ status: "active" })) {
+  console.log(pase.id, pase.balance);
+}
+```
+
+---
+
+## Forma de las respuestas de listado
+
+No todos los listados usan la misma envoltura. Tenlo presente al escribir tu cliente:
+
+| Endpoint | Forma de la respuesta |
+| --- | --- |
+| `GET /v1/passes` | Arreglo directo: `[ ... ]` |
+| `GET /v1/scans` | Arreglo directo: `[ ... ]` |
+| `GET /v1/notifications` | Arreglo directo: `[ ... ]` |
+| `GET /v1/trigger-rules` | Arreglo directo: `[ ... ]` |
+| `GET /v1/passes/{id}/cards` | Arreglo directo: `[ ... ]` |
+| `GET /v1/rewards` | Objeto: `{ "rewards": [ ... ] }` |
+| `GET /v1/passes/{id}/rewards` | Objeto: `{ "entitlements": [ ... ] }` |
+| `GET /v1/webhook-subscriptions` | Objeto: `{ "subscriptions": [ ... ] }` |
+
+---
+
+## Filtros
+
+<ParamField query="q" type="string">
+  Búsqueda de texto libre. Disponible en pases, escaneos y notificaciones. Lo que busca depende del recurso: identificadores, valores de campos visibles, nombres de lector o el texto del mensaje.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filtra por estado. **Es repetible**: `?status=active&status=issued` devuelve los pases en cualquiera de los dos estados.
+</ParamField>
+
+Los valores repetidos de un mismo parámetro se combinan con **O**; parámetros distintos se combinan con **Y**.
+
+---
+
+## Ordenamiento
+
+<ParamField query="sort_by" type="string">
+  Campo por el cual ordenar. Los valores permitidos dependen del recurso y se documentan en cada endpoint.
+</ParamField>
+
+<ParamField query="sort_dir" type="string" default="desc">
+  Dirección: `asc` o `desc`.
+</ParamField>
+
+---
+
+## Rangos de fechas
+
+Los listados aceptan pares de límites temporales. Todos usan **RFC 3339**:
+
+```
+2026-07-24T00:00:00Z
+```
+
+| Parámetros | Recurso |
+| --- | --- |
+| `created_from`, `created_to` | Pases, escaneos |
+| `updated_from`, `updated_to` | Pases |
+| `scheduled_from`, `scheduled_to` | Notificaciones |
+
+El límite inferior es **inclusivo** y el superior **exclusivo**. Si `from` es posterior a `to`, la API responde `400 INVALID_INPUT`.
+
+---
+
+## Formatos de fecha en las respuestas
+
+<Warning>
+  Los formatos de fecha **no son uniformes en toda la API**. Al parsear, usa la tabla siguiente en lugar de asumir RFC 3339 en todas partes.
+</Warning>
+
+| Campo | Formato | Ejemplo |
+| --- | --- | --- |
+| Fechas de pases, tarjetas, recompensas y derechos | RFC 3339 | `2026-07-24T14:41:59Z` |
+| `created_at` de la respuesta de `POST /v1/scans` | RFC 3339 | `2026-07-24T14:41:59Z` |
+| `created_at` en `GET /v1/scans` | Fecha con espacios | `2026-07-24 14:41:58.842 +0000 UTC` |
+| `created_at` / `updated_at` de reglas de activación | Fecha con espacios | `2026-07-24 14:41:58.842 +0000 UTC` |
+| Fechas de notificaciones | RFC 3339, zona **America/Mexico_City** | `2026-07-24T09:41:59-06:00` |
+
+---
+
+## Valores booleanos en parámetros
+
+Los parámetros booleanos (`include_deleted`, `include_history`, `include_archived`, `pass_info`) aceptan `true`, `false`, `1`, `0`, `t`, `f`. Un valor no reconocido devuelve `400 INVALID_INPUT`.
+
+---
+
+## Tamaño de las peticiones
+
+La API no impone un límite explícito al tamaño del cuerpo en `/v1`. Aun así, mantén las cargas dentro de lo razonable: para altas masivas de pases, usa la importación por archivo del Dashboard en lugar de una única petición gigante.

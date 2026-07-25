@@ -1,0 +1,212 @@
+---
+title: "Suscripciones"
+description: "Registra, edita y elimina los endpoints que reciben eventos de Alara."
+---
+
+# Suscripciones de webhook
+
+Una suscripción es un endpoint HTTPS tuyo más la lista de eventos que quieres recibir en él.
+
+<Note>
+  Todos los endpoints de esta página requieren que la función de webhooks esté habilitada en tu cuenta; de lo contrario devuelven `403 FEATURE_DISABLED`.
+</Note>
+
+---
+
+## Límites
+
+- Máximo **5 suscripciones activas** por cuenta. Las inactivas no cuentan.
+- Una sola suscripción activa por URL.
+- El secreto de firma se muestra **una única vez**, al crearla.
+
+---
+
+## El objeto suscripción
+
+<ResponseField name="id" type="string">Identificador (UUID) de la suscripción.</ResponseField>
+<ResponseField name="url" type="string">Endpoint HTTPS que recibe los eventos.</ResponseField>
+<ResponseField name="event_types" type="array">Eventos a los que está suscrita.</ResponseField>
+<ResponseField name="active" type="boolean">Si está recibiendo eventos.</ResponseField>
+<ResponseField name="created_at" type="string">RFC 3339.</ResponseField>
+<ResponseField name="updated_at" type="string">RFC 3339.</ResponseField>
+<ResponseField name="secret" type="string">
+  Secreto de firma. **Solo aparece en la respuesta de creación.**
+</ResponseField>
+
+---
+
+## Crear una suscripción
+
+```http
+POST /v1/webhook-subscriptions
+```
+
+<ParamField body="url" type="string" required>
+  Endpoint que recibirá los eventos. Debe ser `https` y públicamente accesible.
+</ParamField>
+
+<ParamField body="event_types" type="array" required>
+  Lista no vacía de eventos. Consulta el [catálogo](/api/webhooks/eventos).
+</ParamField>
+
+Devuelve `201 Created` con la suscripción **y el secreto de firma**.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/webhook-subscriptions" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://api.mi-negocio.com/webhooks/alara",
+    "event_types": ["pass.created", "pass.balanceUpdate", "scan.created"]
+  }'
+```
+
+```json Respuesta 201
+{
+  "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+  "url": "https://api.mi-negocio.com/webhooks/alara",
+  "event_types": ["pass.created", "pass.balanceUpdate", "scan.created"],
+  "active": true,
+  "created_at": "2026-07-24T17:00:00Z",
+  "updated_at": "2026-07-24T17:00:00Z",
+  "secret": "9f2c4d6e8a0b2c4d6e8a0b2c4d6e8a0b2c4d6e8a0b2c4d6e8a0b2c4d6e8a0b2c"
+}
+```
+</CodeGroup>
+
+<Warning>
+  **Guarda el `secret` en ese momento.** No vuelve a aparecer en ninguna respuesta y no existe endpoint de rotación. Si lo pierdes, elimina la suscripción y crea una nueva.
+</Warning>
+
+### URLs rechazadas
+
+Por seguridad, Alara rechaza con `400 INVALID_WEBHOOK_URL`:
+
+- Cualquier esquema que no sea `https`.
+- `localhost` y dominios terminados en `.internal`.
+- Direcciones IP de bucle local, privadas o de enlace local.
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `400` | `INVALID_WEBHOOK_URL` | La URL no cumple los requisitos anteriores. |
+| `400` | `INVALID_WEBHOOK_EVENT_TYPE` | Un evento no existe, o la lista viene vacía. |
+| `409` | `WEBHOOK_SUBSCRIPTION_LIMIT_REACHED` | Ya tienes 5 suscripciones activas. |
+| `409` | `WEBHOOK_SUBSCRIPTION_DUPLICATE_URL` | Ya existe una suscripción activa con esa URL. |
+| `403` | `FEATURE_DISABLED` | La función no está habilitada. |
+
+---
+
+## Listar suscripciones
+
+```http
+GET /v1/webhook-subscriptions
+```
+
+Devuelve `200 OK` con un objeto `{ "subscriptions": [ ... ] }`. **Nunca incluye el secreto.**
+
+```bash
+curl "https://api.alaramx.com/v1/webhook-subscriptions" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Consultar una suscripción
+
+```http
+GET /v1/webhook-subscriptions/{id}
+```
+
+<ParamField path="id" type="string" required>UUID de la suscripción.</ParamField>
+
+Devuelve `200 OK` con la suscripción, o `404 WEBHOOK_SUBSCRIPTION_NOT_FOUND`.
+
+---
+
+## Actualizar una suscripción
+
+```http
+PATCH /v1/webhook-subscriptions/{id}
+```
+
+Actualización parcial: lo que no envíes no cambia.
+
+<ParamField body="url" type="string">
+  Nuevo endpoint. Si lo omites, no cambia.
+</ParamField>
+
+<ParamField body="event_types" type="array">
+  Nueva lista de eventos, **reemplaza** la anterior. Una lista vacía o ausente deja la suscripción sin cambios.
+</ParamField>
+
+<ParamField body="active" type="boolean">
+  Activa o pausa la suscripción. Si lo omites, no cambia.
+</ParamField>
+
+Devuelve `200 OK` con la suscripción actualizada.
+
+<CodeGroup>
+```bash Pausar
+curl -X PATCH "https://api.alaramx.com/v1/webhook-subscriptions/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "active": false }'
+```
+
+```bash Cambiar eventos
+curl -X PATCH "https://api.alaramx.com/v1/webhook-subscriptions/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "event_types": ["scan.created"] }'
+```
+</CodeGroup>
+
+<Warning>
+  Al desactivar una suscripción, las entregas que ya estaban en cola para ella **se descartan**; no quedan en pausa a la espera de reactivarla. Vuelve a activarla solo cuando tu endpoint esté listo.
+</Warning>
+
+<Note>
+  No puedes vaciar la lista de eventos con `PATCH`. Para dejar de recibir todo, desactiva o elimina la suscripción.
+</Note>
+
+---
+
+## Eliminar una suscripción
+
+```http
+DELETE /v1/webhook-subscriptions/{id}
+```
+
+Devuelve `204 No Content`.
+
+```bash
+curl -X DELETE "https://api.alaramx.com/v1/webhook-subscriptions/a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Rotar el secreto
+
+No existe un endpoint de rotación. Para cambiar el secreto de un endpoint:
+
+<Steps>
+  <Step title="Crea una suscripción nueva">
+    Apunta a una ruta distinta de tu servidor, por ejemplo `/webhooks/alara-v2`, y guarda el secreto nuevo.
+  </Step>
+
+  <Step title="Verifica que recibe eventos">
+    Confirma que la ruta nueva procesa y valida correctamente.
+  </Step>
+
+  <Step title="Elimina la anterior">
+    Borra la suscripción vieja cuando dejes de recibir tráfico en ella.
+  </Step>
+</Steps>
+
+<Tip>
+  Si mantienes las dos activas un rato, recibirás cada evento por ambas rutas. Como el `id` del evento es el mismo en las dos entregas, tu lógica de idempotencia evitará procesarlo dos veces.
+</Tip>

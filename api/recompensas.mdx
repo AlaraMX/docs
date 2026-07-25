@@ -1,0 +1,424 @@
+---
+title: "Recompensas"
+description: "Publica un catálogo de beneficios, asígnalos a pases y regístralos al canjearse."
+---
+
+# Recompensas
+
+Las recompensas separan **el catálogo** de **las asignaciones individuales**:
+
+- Una **recompensa** es la definición del beneficio: qué es, cuántas veces se canjea, cuándo expira. Se identifica con un `slug` estable.
+- Un **derecho** (*entitlement*) es esa recompensa ya asignada a un pase concreto, con su propio vencimiento y sus canjes restantes.
+
+<Note>
+  Esta función debe estar habilitada en tu cuenta. Consultar y administrar el catálogo siempre funciona; **asignar y canjear** requieren la función activa. Si recibes `403 REWARDS_DISABLED`, escríbenos a [dev@alaramx.com](mailto:dev@alaramx.com).
+</Note>
+
+---
+
+## El objeto recompensa
+
+<ResponseField name="slug" type="string">
+  Identificador estable y legible, por ejemplo `cafe_gratis`. Es inmutable.
+</ResponseField>
+<ResponseField name="name" type="string">Nombre visible del beneficio.</ResponseField>
+<ResponseField name="kind" type="string">`gift`, `discount` o `custom`.</ResponseField>
+<ResponseField name="description" type="string">Descripción del beneficio.</ResponseField>
+<ResponseField name="status" type="string">`active` o `archived`.</ResponseField>
+<ResponseField name="version" type="integer">
+  Versión actual. Cada edición publica una versión nueva; los derechos ya asignados conservan la versión con la que se crearon.
+</ResponseField>
+<ResponseField name="repeat_assignment" type="boolean">
+  Si un mismo pase puede recibir la recompensa más de una vez.
+</ResponseField>
+<ResponseField name="redemption_allowance" type="integer">
+  Cuántos canjes permite cada derecho asignado.
+</ResponseField>
+<ResponseField name="assignment_limit" type="integer | null">
+  Cuántas veces puede asignarse en total. `null` significa sin límite.
+</ResponseField>
+<ResponseField name="expiration" type="object">
+  Política de vencimiento.
+
+  <Expandable title="propiedades">
+    <ResponseField name="kind" type="string">
+      `none` (no expira), `relative_window` (expira X tiempo después de asignarse) o `fixed_end` (expira en una fecha fija).
+    </ResponseField>
+    <ResponseField name="window_seconds" type="integer">
+      Segundos de vigencia. Presente solo con `relative_window`.
+    </ResponseField>
+    <ResponseField name="fixed_end" type="string">
+      Fecha límite en RFC 3339. Presente solo con `fixed_end`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="created_at" type="string">RFC 3339.</ResponseField>
+<ResponseField name="updated_at" type="string">RFC 3339.</ResponseField>
+
+---
+
+## El objeto derecho
+
+<ResponseField name="id" type="string">Identificador (UUID) del derecho.</ResponseField>
+<ResponseField name="family_id" type="string">Identificador de la familia de recompensa.</ResponseField>
+<ResponseField name="definition_id" type="string">Versión concreta de la recompensa asignada.</ResponseField>
+<ResponseField name="reward_slug" type="string">`slug` de la recompensa.</ResponseField>
+<ResponseField name="reward_name" type="string">Nombre en el momento de la asignación.</ResponseField>
+<ResponseField name="reward_kind" type="string">`gift`, `discount` o `custom`.</ResponseField>
+<ResponseField name="pass_id" type="string">Pase al que pertenece.</ResponseField>
+<ResponseField name="status" type="string">`available`, `redeemed` o `expired`.</ResponseField>
+<ResponseField name="remaining_redemptions" type="integer">Canjes disponibles.</ResponseField>
+<ResponseField name="expiration_timestamp" type="string | null">Cuándo expira, RFC 3339.</ResponseField>
+<ResponseField name="expiration_reason" type="string | null">
+  `time_elapsed` o `replaced`.
+</ResponseField>
+<ResponseField name="assignment_source_type" type="string">
+  `manual` (asignado por API o desde el Dashboard) o `automatic` (asignado por una regla de activación).
+</ResponseField>
+<ResponseField name="created_at" type="string">RFC 3339.</ResponseField>
+<ResponseField name="updated_at" type="string">RFC 3339.</ResponseField>
+
+---
+
+## Crear una recompensa
+
+```http
+POST /v1/rewards
+```
+
+<ParamField body="name" type="string" required>
+  Nombre del beneficio. Máximo 200 caracteres.
+</ParamField>
+
+<ParamField body="kind" type="string" required>
+  `gift`, `discount` o `custom`.
+</ParamField>
+
+<ParamField body="slug" type="string">
+  Identificador estable. Debe cumplir el patrón `minusculas_y_numeros` (segmentos alfanuméricos separados por guion bajo), máximo 80 caracteres. Si lo omites, se genera a partir del `name`.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Descripción. Máximo 2 000 caracteres.
+</ParamField>
+
+<ParamField body="repeat_assignment" type="boolean">
+  Permite que un mismo pase reciba la recompensa más de una vez.
+</ParamField>
+
+<ParamField body="redemption_allowance" type="integer">
+  Canjes por derecho asignado. Debe ser al menos `1`; enviar `0` equivale a `1`.
+</ParamField>
+
+<ParamField body="assignment_limit" type="integer">
+  Tope total de asignaciones. Omítelo para que sea ilimitado.
+</ParamField>
+
+<ParamField body="expiration" type="object" required>
+  Política de vencimiento.
+
+  <Expandable title="propiedades">
+    <ParamField body="kind" type="string" required>
+      `none`, `relative_window` o `fixed_end`.
+    </ParamField>
+    <ParamField body="window_seconds" type="integer">
+      Obligatorio **si y solo si** `kind` es `relative_window`. Debe ser mayor que `0`.
+    </ParamField>
+    <ParamField body="fixed_end" type="string">
+      Obligatorio **si y solo si** `kind` es `fixed_end`. RFC 3339.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+Devuelve `201 Created` con la recompensa.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/rewards" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Café gratis",
+    "slug": "cafe_gratis",
+    "kind": "gift",
+    "description": "Un café del tamaño que elijas, por cuenta de la casa.",
+    "redemption_allowance": 1,
+    "repeat_assignment": true,
+    "expiration": {
+      "kind": "relative_window",
+      "window_seconds": 2592000
+    }
+  }'
+```
+
+```json Respuesta 201
+{
+  "slug": "cafe_gratis",
+  "name": "Café gratis",
+  "kind": "gift",
+  "description": "Un café del tamaño que elijas, por cuenta de la casa.",
+  "status": "active",
+  "version": 1,
+  "repeat_assignment": true,
+  "redemption_allowance": 1,
+  "expiration": {
+    "kind": "relative_window",
+    "window_seconds": 2592000
+  },
+  "created_at": "2026-07-24T16:00:00Z",
+  "updated_at": "2026-07-24T16:00:00Z"
+}
+```
+</CodeGroup>
+
+---
+
+## Listar el catálogo
+
+```http
+GET /v1/rewards
+```
+
+<ParamField query="include_archived" type="boolean" default="false">
+  Incluye también las recompensas archivadas.
+</ParamField>
+
+Devuelve `200 OK` con un objeto `{ "rewards": [ ... ] }`. Este listado no está paginado.
+
+```bash
+curl "https://api.alaramx.com/v1/rewards" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Consultar una recompensa
+
+```http
+GET /v1/rewards/{slug}
+```
+
+Devuelve `200 OK` con la recompensa, o `404 RESOURCE_NOT_FOUND`.
+
+---
+
+## Editar una recompensa
+
+```http
+PUT /v1/rewards/{slug}
+```
+
+Publica una **versión nueva**. Los derechos ya asignados conservan las condiciones con las que se crearon; solo las asignaciones futuras usan la versión nueva.
+
+Acepta los mismos campos que la creación, salvo `slug`, que es inmutable.
+
+Devuelve `200 OK` con la recompensa y su `version` incrementada.
+
+---
+
+## Archivar, restaurar y eliminar
+
+```http
+POST /v1/rewards/{slug}/archive
+```
+
+Archiva la recompensa: deja de poder asignarse, pero los derechos ya otorgados siguen siendo válidos y canjeables. Devuelve `204 No Content`.
+
+```http
+POST /v1/rewards/{slug}/restore
+```
+
+Restaura una recompensa archivada publicando una versión nueva. Acepta el mismo cuerpo que la edición. Devuelve `200 OK`.
+
+```http
+DELETE /v1/rewards/{slug}
+```
+
+Elimina la recompensa del catálogo. Devuelve `204 No Content`.
+
+<Warning>
+  Archivar o eliminar devuelve `409 RESOURCE_CONFLICT` si una [regla de activación](/api/reglas-de-activacion) todavía referencia el `slug`, o si ya existen derechos asignados. Actualiza primero la regla.
+</Warning>
+
+---
+
+## Asignar una recompensa a un pase
+
+```http
+POST /v1/passes/{id}/rewards/assign
+```
+
+<ParamField path="id" type="string" required>El `pass_id` del pase.</ParamField>
+
+<ParamField body="slug" type="string" required>
+  `slug` de la recompensa a asignar.
+</ParamField>
+
+Devuelve `201 Created` con el derecho creado.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/passes/cliente-001/rewards/assign" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "slug": "cafe_gratis" }'
+```
+
+```json Respuesta 201
+{
+  "id": "d4c3b2a1-9f8e-4d7c-8b6a-5f4e3d2c1b0a",
+  "family_id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "definition_id": "9f8e7d6c-5b4a-4392-8180-7a6b5c4d3e2f",
+  "reward_slug": "cafe_gratis",
+  "reward_name": "Café gratis",
+  "reward_kind": "gift",
+  "pass_id": "cliente-001",
+  "status": "available",
+  "remaining_redemptions": 1,
+  "expiration_timestamp": "2026-08-23T16:05:00Z",
+  "assignment_source_type": "manual",
+  "created_at": "2026-07-24T16:05:00Z",
+  "updated_at": "2026-07-24T16:05:00Z"
+}
+```
+</CodeGroup>
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `409` | `REWARD_NOT_ASSIGNABLE` | La recompensa está archivada, o el pase ya la tiene y `repeat_assignment` es `false`. |
+| `409` | `REWARD_ASSIGNMENT_LIMIT_REACHED` | Se agotó el `assignment_limit`. |
+| `409` | `REWARD_FIXED_END_PASSED` | La fecha fija de expiración ya pasó. |
+| `404` | `RESOURCE_NOT_FOUND` | El pase o el `slug` no existen. |
+| `403` | `REWARDS_DISABLED` | La función no está habilitada. |
+
+---
+
+## Listar los derechos de un pase
+
+```http
+GET /v1/passes/{id}/rewards
+```
+
+<ParamField query="include_history" type="boolean" default="false">
+  Por omisión devuelve solo los derechos canjeables. Con `true` incluye también los canjeados y expirados.
+</ParamField>
+
+Devuelve `200 OK` con un objeto `{ "entitlements": [ ... ] }`.
+
+```bash
+curl "https://api.alaramx.com/v1/passes/cliente-001/rewards?include_history=true" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+<Tip>
+  Este es el endpoint que consulta tu punto de venta al escanear un pase, para mostrarle al cajero qué beneficios puede aplicar en ese momento.
+</Tip>
+
+---
+
+## Canjear un derecho
+
+```http
+POST /v1/passes/{id}/rewards/{entitlement_id}/redeem
+```
+
+<ParamField path="id" type="string" required>El `pass_id` del pase.</ParamField>
+<ParamField path="entitlement_id" type="string" required>UUID del derecho.</ParamField>
+
+<ParamField body="amount" type="integer" default="1">
+  Cuántos canjes descontar.
+</ParamField>
+
+<ParamField body="context" type="string">
+  Dónde se canjeó, por ejemplo la sucursal o la caja.
+</ParamField>
+
+<ParamField body="note" type="string">
+  Nota libre sobre el canje.
+</ParamField>
+
+Devuelve `200 OK` con el registro del canje y el derecho actualizado.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/passes/cliente-001/rewards/d4c3b2a1-9f8e-4d7c-8b6a-5f4e3d2c1b0a/redeem" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 1,
+    "context": "sucursal-centro-01",
+    "note": "Ticket A-4471"
+  }'
+```
+
+```json Respuesta 200
+{
+  "redemption": {
+    "id": "2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
+    "entitlement_id": "d4c3b2a1-9f8e-4d7c-8b6a-5f4e3d2c1b0a",
+    "amount": 1,
+    "context": "sucursal-centro-01",
+    "note": "Ticket A-4471",
+    "created_at": "2026-07-24T18:20:00Z"
+  },
+  "entitlement": {
+    "id": "d4c3b2a1-9f8e-4d7c-8b6a-5f4e3d2c1b0a",
+    "reward_slug": "cafe_gratis",
+    "reward_name": "Café gratis",
+    "reward_kind": "gift",
+    "pass_id": "cliente-001",
+    "status": "redeemed",
+    "remaining_redemptions": 0,
+    "assignment_source_type": "manual",
+    "created_at": "2026-07-24T16:05:00Z",
+    "updated_at": "2026-07-24T18:20:00Z"
+  }
+}
+```
+</CodeGroup>
+
+<Warning>
+  **El canje es irreversible.** No existe un endpoint para deshacerlo. Confirma con la persona antes de registrarlo.
+</Warning>
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `409` | `REWARD_NOT_REDEEMABLE` | El derecho ya está canjeado o expiró. |
+| `409` | `REWARD_INSUFFICIENT_REDEMPTIONS` | El `amount` supera los canjes restantes. |
+| `404` | `RESOURCE_NOT_FOUND` | El pase o el derecho no existen. |
+
+---
+
+## Conteo de derechos
+
+```http
+GET /v1/rewards/entitlement-counts
+```
+
+Resumen agregado de todos los derechos de tu cuenta.
+
+<CodeGroup>
+```bash cURL
+curl "https://api.alaramx.com/v1/rewards/entitlement-counts" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+```json Respuesta
+{
+  "total": 4820,
+  "redeemable": 1207,
+  "redeemed": 3401,
+  "expired": 212
+}
+```
+</CodeGroup>
+
+---
+
+## Asignación automática
+
+Para otorgar recompensas sin intervención manual, usa la acción `assign_reward` de una [regla de activación](/api/reglas-de-activacion#tipos-de-acci-n). Los derechos así creados llegan con `assignment_source_type: "automatic"`.

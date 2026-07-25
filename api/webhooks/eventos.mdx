@@ -1,0 +1,286 @@
+---
+title: "Catálogo de eventos"
+description: "Todos los eventos que Alara puede enviar a tu servidor, con ejemplos de su carga útil."
+---
+
+# Catálogo de eventos
+
+Estos son los tipos de evento que puedes incluir en `event_types` al crear una [suscripción](/api/webhooks/suscripciones).
+
+| Evento | Se dispara cuando |
+| --- | --- |
+| [`pass.created`](#pass-created) | Se emite un pase. |
+| [`pass.updated`](#pass-updated) | Cambian los campos visibles de un pase. |
+| [`pass.deleted`](#pass-deleted) | Un pase se desactiva o expira. |
+| [`pass.balanceUpdate`](#pass-balanceupdate) | Cambia el saldo de lealtad de un pase. |
+| [`pass.stamp_card_updated`](#pass-stamp-card-updated) | Cambia el estado de una tarjeta de sellos. |
+| [`scan.created`](#scan-created) | Se registra un escaneo. |
+
+<Note>
+  Fíjate en que `pass.balanceUpdate` usa mayúscula intercalada, mientras que el resto usa guion bajo. Cópialos tal cual.
+</Note>
+
+---
+
+## Carga útil de los eventos de pase
+
+Los cinco eventos `pass.*` comparten la misma forma de `data`:
+
+<ResponseField name="id" type="string">El `pass_id` del pase.</ResponseField>
+<ResponseField name="template_id" type="string">Plantilla con la que se emitió.</ResponseField>
+<ResponseField name="status" type="string">
+  `creating`, `creation_failed`, `issued`, `active`, `removed` o `deactivated`.
+</ResponseField>
+<ResponseField name="visible" type="object">
+  Campos visibles del pase. Nota que la llave es `visible`, no `visible_data`.
+</ResponseField>
+<ResponseField name="balance" type="integer">
+  Saldo o número de sellos. **Ausente** en pases sin programa de lealtad.
+</ResponseField>
+<ResponseField name="created_at" type="string">Creación del pase, RFC 3339.</ResponseField>
+<ResponseField name="updated_at" type="string">Última modificación del pase, RFC 3339.</ResponseField>
+
+<Warning>
+  La carga útil **no incluye** los datos ocultos (`hidden`), el `qr_value` ni el `download_url`. Si los necesitas, consulta [`GET /v1/passes/{id}`](/api/pases#consultar-un-pase) al recibir el evento.
+</Warning>
+
+---
+
+## `pass.created`
+
+Se emite un pase nuevo.
+
+Como la emisión es asíncrona, el `status` de la carga útil suele ser `creating` o `issued`. Si necesitas el `download_url`, consulta el pase al recibir este evento.
+
+```json
+{
+  "id": "0f9c1a3e-5d02-4b17-9c3b-a1d2e3f40506",
+  "type": "pass.created",
+  "created_at": "2026-07-24T09:14:22.481Z",
+  "data": {
+    "id": "cliente-001",
+    "template_id": "lealtad_oro",
+    "status": "creating",
+    "visible": {
+      "nombre": "Ada Lovelace",
+      "miembro_desde": "2026-07-24",
+      "puntos": "0"
+    },
+    "balance": 0,
+    "created_at": "2026-07-24T09:14:22.402Z",
+    "updated_at": "2026-07-24T09:14:22.402Z"
+  }
+}
+```
+
+---
+
+## `pass.updated`
+
+Cambian los **campos visibles** de un pase. Ocurre al actualizarlo por API, al restaurarlo o reactivarlo, y cuando una regla de activación escribe un campo.
+
+<Note>
+  Una actualización que toca **solo** datos ocultos (`hidden`) **no** genera este evento. Solo los cambios en `visible` lo disparan.
+</Note>
+
+```json
+{
+  "id": "3a77b1c8-9e40-4f2a-b6d1-77c0e9a2b311",
+  "type": "pass.updated",
+  "created_at": "2026-07-24T11:02:07.115Z",
+  "data": {
+    "id": "cliente-001",
+    "template_id": "lealtad_oro",
+    "status": "active",
+    "visible": {
+      "nombre": "Ada Lovelace",
+      "nivel": "Oro"
+    },
+    "balance": 42,
+    "created_at": "2026-07-01T08:30:00.000Z",
+    "updated_at": "2026-07-24T11:02:06.981Z"
+  }
+}
+```
+
+---
+
+## `pass.deleted`
+
+Un pase se desactiva, se elimina o expira automáticamente.
+
+```json
+{
+  "id": "c41d0e6b-2a8f-4d90-8e3c-5b6a7c8d9e01",
+  "type": "pass.deleted",
+  "created_at": "2026-07-24T00:05:11.006Z",
+  "data": {
+    "id": "cliente-001",
+    "template_id": "lealtad_oro",
+    "status": "deactivated",
+    "visible": {
+      "nombre": "Ada Lovelace",
+      "puntos": "42"
+    },
+    "balance": 42,
+    "created_at": "2026-07-01T08:30:00.000Z",
+    "updated_at": "2026-07-24T00:05:10.884Z"
+  }
+}
+```
+
+---
+
+## `pass.balanceUpdate`
+
+Cambia el saldo de lealtad de un pase, ya sea por [`POST /v1/passes/{id}/loyalty`](/api/pases#ajustar-saldo-de-lealtad) o por una regla de activación.
+
+El campo `balance` trae el valor **posterior** al cambio; el evento no incluye el delta aplicado.
+
+```json
+{
+  "id": "9d2e5f01-77aa-4c3b-9012-3456789abcde",
+  "type": "pass.balanceUpdate",
+  "created_at": "2026-07-24T14:41:59.220Z",
+  "data": {
+    "id": "cliente-001",
+    "template_id": "lealtad_oro",
+    "status": "active",
+    "visible": {
+      "nombre": "Ada Lovelace",
+      "puntos": "47"
+    },
+    "balance": 47,
+    "created_at": "2026-07-01T08:30:00.000Z",
+    "updated_at": "2026-07-24T14:41:59.118Z"
+  }
+}
+```
+
+---
+
+## `pass.stamp_card_updated`
+
+Cambia el estado de una tarjeta de sellos: el contador avanza y, con él, la imagen que ve el portador.
+
+En este evento, `balance` es el número de sellos acumulados.
+
+```json
+{
+  "id": "5b8c9d0e-1f23-4456-a789-bcdef0123456",
+  "type": "pass.stamp_card_updated",
+  "created_at": "2026-07-24T14:42:00.004Z",
+  "data": {
+    "id": "cliente-001",
+    "template_id": "sellos_cafe",
+    "status": "active",
+    "visible": {
+      "nombre": "Ada Lovelace",
+      "sellos": "7"
+    },
+    "balance": 7,
+    "created_at": "2026-07-01T08:30:00.000Z",
+    "updated_at": "2026-07-24T14:41:59.993Z"
+  }
+}
+```
+
+<Tip>
+  Un cambio de saldo en una tarjeta de sellos puede generar tanto `pass.balanceUpdate` como `pass.stamp_card_updated`. Suscríbete solo al que necesites para no duplicar trabajo.
+</Tip>
+
+---
+
+## `scan.created`
+
+Se registra un escaneo.
+
+### Carga útil
+
+<ResponseField name="id" type="string">Identificador del escaneo.</ResponseField>
+<ResponseField name="scanner_id" type="string">Lector donde se registró.</ResponseField>
+<ResponseField name="scanner_name" type="string">
+  Nombre del lector. Ausente si el lector no tiene nombre registrado.
+</ResponseField>
+<ResponseField name="pass_id" type="string">Pase escaneado.</ResponseField>
+<ResponseField name="created_at" type="string">
+  Momento del escaneo, con formato `2026-07-24 14:41:58.842 +0000 UTC`.
+</ResponseField>
+<ResponseField name="metadata" type="object">Metadatos enviados al registrar el escaneo.</ResponseField>
+<ResponseField name="status" type="string">Veredicto: `succeeded` o `failed`.</ResponseField>
+<ResponseField name="reason" type="string">
+  Motivo del rechazo cuando `status` es `failed`. Cadena vacía si fue exitoso.
+</ResponseField>
+
+<Warning>
+  El `created_at` **dentro de `data`** usa el formato con espacios, para coincidir exactamente con `GET /v1/scans`. El `created_at` de la envoltura sí es RFC 3339. Son dos formatos distintos en el mismo mensaje.
+</Warning>
+
+<Warning>
+  **Los escaneos rechazados también se entregan.** Revisa `status` antes de reaccionar: un `scan.created` no significa que el acceso se haya concedido.
+</Warning>
+
+<CodeGroup>
+```json Aceptado
+{
+  "id": "e1f2a3b4-c5d6-4789-9012-3456789abcde",
+  "type": "scan.created",
+  "created_at": "2026-07-24T14:41:58.900Z",
+  "data": {
+    "id": "7c1f9a20-4b3d-4e5f-8a90-1b2c3d4e5f60",
+    "scanner_id": "sucursal-centro-01",
+    "scanner_name": "Sucursal Centro",
+    "pass_id": "cliente-001",
+    "created_at": "2026-07-24 14:41:58.842 +0000 UTC",
+    "metadata": {
+      "ticket": "A-4471"
+    },
+    "status": "succeeded",
+    "reason": ""
+  }
+}
+```
+
+```json Rechazado
+{
+  "id": "a0b1c2d3-e4f5-4678-89ab-cdef01234567",
+  "type": "scan.created",
+  "created_at": "2026-07-24T14:52:03.771Z",
+  "data": {
+    "id": "9e8d7c6b-5a49-4382-9170-6f5e4d3c2b1a",
+    "scanner_id": "sucursal-centro-01",
+    "pass_id": "cliente-001",
+    "created_at": "2026-07-24 14:52:03.688 +0000 UTC",
+    "metadata": {},
+    "status": "failed",
+    "reason": "DOUBLE_SCAN"
+  }
+}
+```
+</CodeGroup>
+
+---
+
+## Elegir a qué suscribirte
+
+<CardGroup cols={2}>
+  <Card title="Sincronizar tu CRM" icon="arrows-rotate">
+    `pass.created`, `pass.updated` y `pass.deleted`.
+  </Card>
+
+  <Card title="Contabilizar visitas" icon="door-open">
+    `scan.created`, filtrando por `status: "succeeded"`.
+  </Card>
+
+  <Card title="Seguir la lealtad" icon="star">
+    `pass.balanceUpdate`, o `pass.stamp_card_updated` para tarjetas de sellos.
+  </Card>
+
+  <Card title="Detectar bajas" icon="user-minus">
+    `pass.deleted`, y `pass.updated` con `status: "removed"`.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Suscríbete solo a lo que vas a procesar. Cada evento extra es tráfico y trabajo adicional en tu servidor sin beneficio.
+</Tip>

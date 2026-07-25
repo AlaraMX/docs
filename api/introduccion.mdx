@@ -1,0 +1,141 @@
+---
+title: "Introducción a la API"
+description: "Integra Alara en tus sistemas: emite pases, registra escaneos, envía notificaciones y automatiza tu programa de lealtad."
+---
+
+# API de Alara
+
+La API de Alara te permite hacer desde tu propio sistema todo lo que harías desde el Dashboard: emitir pases digitales, registrar escaneos, mover saldos de lealtad, programar notificaciones push, administrar recompensas y recibir eventos en tiempo real mediante webhooks.
+
+Es una API REST sobre HTTPS. Todas las peticiones y respuestas usan JSON.
+
+<CardGroup cols={2}>
+  <Card title="Autenticación" icon="key" href="/api/autenticacion">
+    Cómo firmar tus peticiones con tu API key.
+  </Card>
+
+  <Card title="Conceptos" icon="book-open" href="/api/conceptos">
+    Pases, plantillas, escaneos, recompensas y cómo se relacionan.
+  </Card>
+
+  <Card title="Referencia" icon="code" href="/api/pases">
+    Todos los endpoints con sus parámetros y respuestas.
+  </Card>
+
+  <Card title="Webhooks" icon="bolt" href="/api/webhooks/introduccion">
+    Recibe eventos en tu servidor cuando algo cambia.
+  </Card>
+</CardGroup>
+
+---
+
+## URL base
+
+Todos los endpoints públicos viven bajo el prefijo de versión `/v1`.
+
+```
+https://api.alaramx.com/v1
+```
+
+<Info>
+  Los ejemplos de esta documentación usan esa URL directamente, así que puedes copiarlos y pegarlos tal cual. Solo necesitas definir `ALARA_API_KEY` con tu API key.
+</Info>
+
+La versión se indica únicamente en la ruta. No existen versiones por encabezado ni por fecha, y `/v1` es la única versión pública actualmente disponible.
+
+---
+
+## Tu primera petición
+
+<Steps>
+  <Step title="Guarda tu API key">
+    Exporta tu API key como variable de entorno para no dejarla escrita en tu código. Hecho esto, los ejemplos de esta documentación funcionan copiándolos tal cual.
+
+    ```bash
+    export ALARA_API_KEY="Ab3xZ_k_..."
+    ```
+  </Step>
+
+  <Step title="Consulta los campos de tu plantilla">
+    Antes de emitir un pase necesitas saber qué campos acepta tu plantilla.
+
+    ```bash
+    curl "https://api.alaramx.com/v1/pass-templates/accepted-fields" \
+      -H "Authorization: Bearer $ALARA_API_KEY"
+    ```
+  </Step>
+
+  <Step title="Emite un pase">
+    Usa esos campos como llaves del objeto `visible`.
+
+    ```bash
+    curl -X POST "https://api.alaramx.com/v1/passes" \
+      -H "Authorization: Bearer $ALARA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "pass_id": "cliente-001",
+        "visible": {
+          "nombre": "Ada Lovelace",
+          "puntos": "0"
+        }
+      }'
+    ```
+
+    La respuesta incluye el `download_url` que puedes compartir con la persona para que instale su pase.
+  </Step>
+
+  <Step title="Registra un escaneo">
+    Cuando el pase se use en un punto de venta o acceso, registra el evento.
+
+    ```bash
+    curl -X POST "https://api.alaramx.com/v1/scans" \
+      -H "Authorization: Bearer $ALARA_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "pass_id": "cliente-001",
+        "reader_id": "sucursal-centro-01"
+      }'
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Qué puedes hacer
+
+| Recurso | Para qué sirve |
+| --- | --- |
+| [Pases](/api/pases) | Emitir, consultar, actualizar y desactivar pases; mover saldos de lealtad. |
+| [Plantillas de pases](/api/plantillas-de-pases) | Descubrir qué campos acepta cada plantilla. |
+| [Escaneos](/api/escaneos) | Registrar validaciones y consultar el historial. |
+| [Tarjetas físicas](/api/tarjetas-fisicas) | Vincular tarjetas NFC/RFID a un pase digital. |
+| [Notificaciones](/api/notificaciones) | Enviar y programar notificaciones push. |
+| [Reglas de activación](/api/reglas-de-activacion) | Automatizar acciones a partir de escaneos, fechas o sellos. |
+| [Recompensas](/api/recompensas) | Publicar un catálogo de beneficios, asignarlos y canjearlos. |
+| [Webhooks](/api/webhooks/introduccion) | Recibir eventos en tu servidor cuando algo cambia. |
+
+<Note>
+  Algunas funciones —tarjetas físicas, recompensas y webhooks— deben estar habilitadas en tu cuenta. Si recibes un error `403`, escríbenos a [dev@alaramx.com](mailto:dev@alaramx.com) para activarlas.
+</Note>
+
+---
+
+## Lo que debes saber antes de empezar
+
+<AccordionGroup>
+  <Accordion title="No hay ambiente de pruebas separado">
+    Cada cuenta tiene una sola API key y un solo ambiente. Si necesitas probar sin afectar tu operación, pídenos una cuenta de prueba aparte.
+  </Accordion>
+
+  <Accordion title="No hay límite de peticiones por minuto">
+    La API no aplica actualmente un límite de tasa (*rate limit*) ni devuelve respuestas `429`. Aun así, te recomendamos espaciar tus cargas masivas y reintentar con retroceso exponencial ante errores `5xx`.
+  </Accordion>
+
+  <Accordion title="No hay llaves de idempotencia">
+    La API no lee el encabezado `Idempotency-Key`. Para crear pases, el propio `pass_id` cumple esa función: reintentar una creación con el mismo `pass_id` devuelve `409 RESOURCE_CONFLICT` en lugar de duplicar el pase.
+  </Accordion>
+
+  <Accordion title="Algunas operaciones son asíncronas">
+    Crear un pase y enviar notificaciones son procesos en segundo plano. La API te responde con el estado inicial (`202 Accepted` o un `status` intermedio) y tú consultas el recurso o escuchas un [webhook](/api/webhooks/introduccion) para conocer el desenlace.
+  </Accordion>
+</AccordionGroup>

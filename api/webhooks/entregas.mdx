@@ -1,0 +1,182 @@
+---
+title: "Entregas y reintentos"
+description: "Cómo entrega Alara los webhooks, qué pasa cuando tu servidor falla y cómo recuperarte."
+---
+
+# Entregas y reintentos
+
+Conocer las reglas de entrega te ayuda a diseñar un receptor que no pierda eventos ni los procese dos veces.
+
+---
+
+## Cómo es la entrega
+
+| Aspecto | Valor |
+| --- | --- |
+| Método | `POST` |
+| `Content-Type` | `application/json` |
+| Tiempo límite | **10 segundos** por intento, incluyendo conexión y respuesta |
+| Éxito | Cualquier código entre `200` y `299` |
+| Fallo | Cualquier otro código, o un error de red o de tiempo agotado |
+| Garantía | **Al menos una vez** |
+| Orden | **No garantizado** |
+
+<Note>
+  Alara ignora por completo el cuerpo de tu respuesta. Solo importa el código de estado. No necesitas devolver nada.
+</Note>
+
+---
+
+## Latencia
+
+Los webhooks se entregan de forma asíncrona: la operación original (crear un pase, registrar un escaneo) responde sin esperar a tu servidor.
+
+En condiciones normales, un evento llega a tu endpoint **entre 5 y 35 segundos** después del hecho que lo originó. No diseñes flujos que dependan de recibirlo al instante.
+
+---
+
+## Reintentos
+
+Si tu servidor no responde `2xx`, Alara reintenta hasta **7 veces en total** (el intento original más 6 reintentos), con este calendario:
+
+| Intento | Espera desde el intento anterior | Tiempo acumulado |
+| --- | --- | --- |
+| 1 | — | inmediato |
+| 2 | 30 segundos | 30 s |
+| 3 | 5 minutos | ~5.5 min |
+| 4 | 30 minutos | ~36 min |
+| 5 | 2 horas | ~2.6 h |
+| 6 | 8 horas | ~10.6 h |
+| 7 | 24 horas | **~34.5 h** |
+
+Después del séptimo intento fallido, la entrega se marca como fallida definitivamente y **no se vuelve a intentar**.
+
+<Warning>
+  El calendario de reintentos es el mismo para todos los fallos. Un `400` de tu endpoint se reintenta igual que un `503`: si vas a rechazar un evento a propósito, respóndele `2xx` para que Alara no lo reintente durante 34 horas.
+</Warning>
+
+---
+
+## Entregas independientes por endpoint
+
+Cada suscripción recibe su propia entrega del mismo evento, y cada una reintenta por separado.
+
+Si tienes dos endpoints y uno está caído, el otro sigue recibiendo con normalidad: la falla de uno nunca provoca reenvíos al otro.
+
+---
+
+## Entregas descartadas
+
+Algunas entregas pendientes se descartan sin reintentarse:
+
+| Situación | Qué ocurre |
+| --- | --- |
+| Eliminaste la suscripción | Sus entregas pendientes se descartan. |
+| Desactivaste la suscripción | Sus entregas pendientes se descartan; no quedan en espera. |
+| El pase ya no existe | El evento se descarta. |
+| El escaneo ya no existe | El evento se descarta. |
+
+<Warning>
+  Desactivar una suscripción **no pausa** sus entregas: las descarta. Si vas a hacer mantenimiento en tu endpoint, es preferible dejarlo activo y devolver un `503`, para que Alara reintente cuando vuelvas.
+</Warning>
+
+---
+
+## No hay reenvío manual
+
+Alara **no ofrece** por el momento un historial de entregas consultable ni un botón para reenviar un evento.
+
+Esto tiene dos consecuencias prácticas:
+
+<AccordionGroup>
+  <Accordion title="Si tu servidor estuvo caído más de 34 horas, esos eventos se perdieron">
+    Reconcilia consultando la API: [`GET /v1/passes`](/api/pases#listar-pases) y [`GET /v1/scans`](/api/escaneos#listar-escaneos) aceptan filtros `created_from` y `updated_from` para recuperar exactamente lo ocurrido durante la caída.
+
+    ```bash
+    curl "https://api.alaramx.com/v1/scans?created_from=2026-07-22T00:00:00Z&limit=100" \
+      -H "Authorization: Bearer $ALARA_API_KEY"
+    ```
+  </Accordion>
+
+  <Accordion title="Si necesitas saber si un evento se envió, escríbenos">
+    El equipo de [dev@alaramx.com](mailto:dev@alaramx.com) puede revisar el estado de las entregas. Ten a la mano el `Alara-Webhook-Id`, o bien el pase y la fecha aproximada.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Cómo construir un receptor robusto
+
+<Steps>
+  <Step title="Verifica la firma">
+    Antes que nada. Consulta [Verificar firmas](/api/webhooks/verificar-firmas).
+  </Step>
+
+  <Step title="Descarta duplicados por `Alara-Webhook-Id`">
+    Guarda los identificadores ya procesados. Si el evento ya se procesó, responde `200` y termina.
+  </Step>
+
+  <Step title="Encola y responde de inmediato">
+    Persiste el evento en tu cola o base de datos y devuelve `2xx` sin esperar. Nunca hagas trabajo pesado, ni llames a otras APIs, dentro de la petición del webhook: excederás los 10 segundos.
+  </Step>
+
+  <Step title="Procesa fuera de la petición">
+    Un worker toma el evento de la cola y lo procesa con sus propios reintentos, ya independiente de Alara.
+  </Step>
+
+  <Step title="Monitorea">
+    Alerta si dejas de recibir eventos durante un periodo inusual: puede indicar que tu endpoint está devolviendo errores y agotando reintentos.
+  </Step>
+</Steps>
+
+```javascript Ejemplo con Express
+import express from "express";
+import { verificarFirma } from "./firmas.js";
+
+const app = express();
+
+app.post(
+  "/webhooks/alara",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    // 1. Verifica la firma sobre el cuerpo crudo
+    if (!verificarFirma(req.body, req.headers, process.env.ALARA_WEBHOOK_SECRET)) {
+      return res.status(401).end();
+    }
+
+    const evento = JSON.parse(req.body.toString("utf8"));
+    const idEvento = req.headers["alara-webhook-id"];
+
+    // 2. Descarta duplicados
+    if (await yaProcesado(idEvento)) {
+      return res.status(200).end();
+    }
+
+    // 3. Encola y responde de inmediato
+    await encolar(idEvento, evento);
+    res.status(200).end();
+
+    // 4. El procesamiento ocurre en un worker aparte
+  },
+);
+```
+
+---
+
+## Cambios de estado poco intuitivos
+
+<AccordionGroup>
+  <Accordion title="El estado que recibes es el del momento de la entrega">
+    La carga útil es una fotografía tomada al enviarse, no al ocurrir el hecho. Si un pase cambió dos veces muy rápido, las dos entregas pueden mostrar el mismo estado final.
+
+    Para saber **qué** cambió, compara contra el estado que tengas guardado.
+  </Accordion>
+
+  <Accordion title="Un reintento trae el estado actualizado">
+    Si el primer intento falló y el pase cambió mientras tanto, el reintento entregará el estado nuevo, no el que existía en el momento original.
+  </Accordion>
+
+  <Accordion title="Los escaneos rechazados también se entregan">
+    Un `scan.created` no significa que se haya concedido el acceso. Revisa siempre `data.status`.
+  </Accordion>
+</AccordionGroup>

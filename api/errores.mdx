@@ -1,0 +1,212 @@
+---
+title: "Errores"
+description: "Formato de los errores de la API de Alara y catálogo completo de códigos."
+---
+
+# Errores
+
+Alara usa códigos de estado HTTP convencionales y, además, devuelve un `code` legible por máquina para que tu integración pueda reaccionar sin depender del texto del mensaje.
+
+---
+
+## Formato
+
+Todos los errores comparten la misma estructura:
+
+```json
+{
+  "error": "Create pass failed",
+  "code": "RESOURCE_CONFLICT",
+  "message": "A pass with this pass_id already exists"
+}
+```
+
+<ResponseField name="error" type="string">
+  Título corto de la operación que falló.
+</ResponseField>
+
+<ResponseField name="code" type="string">
+  Identificador estable en mayúsculas. **Es el campo del que debe depender tu código.**
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Descripción legible para personas. Puede cambiar de redacción entre versiones; no lo uses para bifurcar lógica.
+</ResponseField>
+
+---
+
+## Códigos de estado
+
+| Código | Significado | Cómo reaccionar |
+| --- | --- | --- |
+| `200` `201` `202` `204` | Éxito. | — |
+| `400` | La petición está mal formada o un valor es inválido. | Corrige la petición. No reintentes igual. |
+| `401` | Credencial ausente, mal formada o inválida. | Revisa tu API key. |
+| `402` | La cuenta tiene el servicio suspendido por facturación. | Regulariza el pago. Las lecturas siguen funcionando. |
+| `403` | La operación no está permitida para tu cuenta. | Puede ser una función no habilitada. Escríbenos a `dev@alaramx.com`. |
+| `404` | El recurso no existe, o pertenece a otra cuenta. | Verifica el identificador. |
+| `409` | Conflicto con el estado actual del recurso. | Resuelve el conflicto; reintentar igual dará el mismo error. |
+| `417` | El pase se creó, pero el envío del correo falló. | El pase existe. Reenvía el correo si lo necesitas. |
+| `422` | La plantilla o los datos del pase no permiten emitirlo. | Revisa la configuración de tu plantilla. |
+| `500` | Error interno de Alara. | Reintenta con retroceso exponencial. |
+| `502` | El servicio de emisión de pases no está disponible. | Reintenta más tarde. |
+| `503` | Servicio de facturación no disponible. | Reintenta más tarde. |
+
+<Note>
+  La API no devuelve `429`: actualmente no hay límite de peticiones por minuto.
+</Note>
+
+---
+
+## Catálogo de códigos
+
+### Generales
+
+| `code` | HTTP | Cuándo ocurre |
+| --- | --- | --- |
+| `INVALID_REQUEST` | 400 | El cuerpo no es JSON válido o falta un campo obligatorio. |
+| `INVALID_INPUT` | 400 | Un valor no es válido: enum desconocido, UUID mal formado, rango de fechas invertido. |
+| `MISSING_ID` | 400 | El identificador en la ruta viene vacío. |
+| `UNAUTHENTICATED` | 401 | No se pudo identificar la credencial. |
+| `UNAUTHORIZED` | 403 | El recurso pertenece a otra cuenta. |
+| `FEATURE_DISABLED` | 403 | La función no está habilitada para tu cuenta. |
+| `BILLING_SUSPENDED` | 402 | Servicio suspendido por facturación. |
+| `RESOURCE_NOT_FOUND` | 404 | El recurso no existe. |
+| `RESOURCE_CONFLICT` | 409 | Conflicto con el estado actual del recurso. |
+| `INTERNAL_ERROR` | 500 | Error inesperado del servidor. |
+
+### Autenticación
+
+| `code` | HTTP |
+| --- | --- |
+| `MISSING_API_KEY` | 401 |
+| `INVALID_AUTH_HEADER` | 401 |
+| `INVALID_API_KEY` | 401 |
+| `API_KEY_REVOKED` | 401 |
+| `API_AUTH_ERROR` | 401 |
+| `CUSTOMER_INACTIVE` | 403 |
+
+### Pases
+
+| `code` | HTTP | Cuándo ocurre |
+| --- | --- | --- |
+| `PASS_TEMPLATE_NOT_FOUND` | 422 | La plantilla indicada no existe. |
+| `PASS_TEMPLATE_CONFIGURATION_INVALID` | 422 | La plantilla no está bien configurada para emitir. |
+| `PASS_TEMPLATE_DATA_INVALID` | 422 | Los datos enviados no son válidos para esa plantilla. |
+| `PASS_PROVIDER_UNAVAILABLE` | 502 | El servicio de emisión no respondió. |
+| `PASS_CREATION_INTERNAL_ERROR` | 500 | Falla interna al emitir. |
+| `PASS_NOT_ACTIVE` | 409 | El pase no está instalado; no se le puede enviar push. |
+| `PASS_NOT_DELETED` | 409 | Se intentó restaurar un pase que no estaba eliminado. |
+| `NO_LOYALTY_PROGRAM` | 400 | El pase no tiene programa de lealtad. |
+| `LOYALTY_PROGRAM_NOT_SUPPORTED` | 500 | El tipo de lealtad no está soportado. |
+| `DEMO_LIMIT_REACHED` | 403 | Se alcanzó el límite de pases de una cuenta demo. |
+| `CREATED_PASS_EMAIL_FAILED` | 417 | El pase se creó pero el correo no se envió. |
+
+### Tarjetas físicas
+
+| `code` | HTTP | Cuándo ocurre |
+| --- | --- | --- |
+| `PHYSICAL_CARDS_DISABLED` | 403 | La función no está habilitada. |
+| `INVALID_CARD_UID` | 400 | El `card_uid` no cumple el formato. |
+| `CARD_ALREADY_LINKED` | 409 | Esa tarjeta ya está vinculada a un pase. |
+| `CARD_NOT_FOUND` | 404 | La tarjeta no existe en tu cuenta. |
+
+### Notificaciones
+
+| `code` | HTTP | Cuándo ocurre |
+| --- | --- | --- |
+| `NOTIFICATION_SCHEDULED_AT_IN_PAST` | 400 | La fecha programada ya pasó. |
+| `NOTIFICATION_SCHEDULED_AT_TOO_SOON` | 400 | La fecha está a menos de 2 minutos. |
+| `NOTIFICATION_RECIPIENTS_OR_AUDIENCE_REQUIRED` | 400 | No indicaste destinatarios. |
+| `NOTIFICATION_TARGETING_CONFLICT` | 400 | Indicaste más de un tipo de destinatario. |
+
+### Reglas de activación
+
+| `code` | HTTP | Cuándo ocurre |
+| --- | --- | --- |
+| `RULE_NAME_REQUIRED` | 400 | Falta `name`. |
+| `RULE_TYPE_REQUIRED` | 400 | Falta `type`. |
+| `RULE_CONFIG_REQUIRED` | 400 | Falta `config`. |
+| `RULE_ACTIONS_REQUIRED` | 400 | Falta `actions` o viene vacío. |
+| `INVALID_RULE_TYPE` | 400 | El `type` no es uno de los soportados. |
+| `INVALID_RULE_ID` | 400 | El identificador de la regla no es un UUID. |
+| `RULE_ACTION_UNKNOWN_TYPE` | 400 | `action_name` desconocido. |
+| `RULE_ACTION_DUPLICATE_TYPE` | 400 | Dos acciones del mismo tipo en una regla. |
+| `RULE_ACTION_PUSH_MESSAGE_REQUIRED` | 400 | Falta `message` en la acción de push. |
+| `RULE_ACTION_SET_LOYALTY_INVALID_VALUE` | 400 | El valor de lealtad es negativo. |
+| `RULE_ACTION_ASSIGN_REWARD_SLUG_REQUIRED` | 400 | Falta `slug` en la acción de recompensa. |
+| `ACTION_ASSIGN_REWARD_SLUG_UNKNOWN` | 400 | El `slug` no corresponde a una recompensa activa. |
+| `RULE_PREVIEW_UNSUPPORTED` | 400 | Ese tipo de regla no admite previsualización. |
+
+### Recompensas
+
+| `code` | HTTP | Cuándo ocurre |
+| --- | --- | --- |
+| `REWARDS_DISABLED` | 403 | La función no está habilitada. |
+| `REWARD_NAME_REQUIRED` | 400 | Falta `name`. |
+| `REWARD_SLUG_INVALID` | 400 | El `slug` no cumple el formato. |
+| `REWARD_INVALID_KIND` | 400 | `kind` no es `gift`, `discount` ni `custom`. |
+| `REWARD_INVALID_EXPIRATION_POLICY` | 400 | La política de expiración es inconsistente. |
+| `REWARD_INVALID_REDEMPTION_ALLOWANCE` | 400 | `redemption_allowance` debe ser ≥ 1. |
+| `REWARD_INVALID_ASSIGNMENT_LIMIT` | 400 | `assignment_limit` debe ser ≥ 1. |
+| `REWARD_DESCRIPTION_TOO_LONG` | 400 | La descripción supera 2 000 caracteres. |
+| `REWARD_NOT_ASSIGNABLE` | 409 | La recompensa está archivada o el pase ya la tiene. |
+| `REWARD_ASSIGNMENT_LIMIT_REACHED` | 409 | Se agotaron las asignaciones disponibles. |
+| `REWARD_FIXED_END_PASSED` | 409 | La fecha fija de expiración ya pasó. |
+| `REWARD_NOT_REDEEMABLE` | 409 | El derecho está canjeado o expirado. |
+| `REWARD_INSUFFICIENT_REDEMPTIONS` | 409 | El monto pedido supera los canjes restantes. |
+
+### Webhooks
+
+| `code` | HTTP | Cuándo ocurre |
+| --- | --- | --- |
+| `INVALID_WEBHOOK_URL` | 400 | La URL no es un endpoint HTTPS público. |
+| `INVALID_WEBHOOK_EVENT_TYPE` | 400 | Un tipo de evento no está soportado. |
+| `WEBHOOK_SUBSCRIPTION_NOT_FOUND` | 404 | La suscripción no existe. |
+| `WEBHOOK_SUBSCRIPTION_LIMIT_REACHED` | 409 | Ya tienes 5 suscripciones activas. |
+| `WEBHOOK_SUBSCRIPTION_DUPLICATE_URL` | 409 | Ya existe una suscripción activa con esa URL. |
+
+---
+
+## Reintentos
+
+<AccordionGroup>
+  <Accordion title="Reintenta: 500, 502, 503 y errores de red">
+    Son fallas transitorias. Usa retroceso exponencial con *jitter*, empezando en 1 segundo y con un máximo razonable de intentos.
+  </Accordion>
+
+  <Accordion title="No reintentes: 400, 401, 403, 404, 409, 422">
+    Reintentar la misma petición producirá exactamente el mismo error. Corrige la petición o el estado del recurso primero.
+  </Accordion>
+
+  <Accordion title="Caso especial: 402 BILLING_SUSPENDED">
+    Las operaciones de escritura están bloqueadas hasta regularizar el pago, pero las lecturas y el borrado de pases siguen funcionando. Reintenta cuando se resuelva la facturación.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Depuración
+
+Cada respuesta incluye el encabezado `X-Request-ID`. Si nos escribes a [dev@alaramx.com](mailto:dev@alaramx.com), incluye ese valor: nos permite ubicar la petición exacta en nuestros registros.
+
+También puedes enviarlo tú en la petición para correlacionarlo con tus propios logs. Si envías el encabezado, Alara reutiliza ese mismo valor y te lo devuelve tal cual; si lo omites, genera uno automáticamente.
+
+```javascript
+const requestId = crypto.randomUUID();
+
+const res = await fetch("https://api.alaramx.com/v1/passes", {
+  headers: {
+    Authorization: `Bearer ${process.env.ALARA_API_KEY}`,
+    "X-Request-ID": requestId,
+  },
+});
+
+// Alara devuelve el mismo identificador que enviaste
+console.log(res.headers.get("X-Request-ID")); // → requestId
+
+if (!res.ok) {
+  const { code, message } = await res.json();
+  console.error(`Alara respondió ${res.status} ${code}: ${message}`, { requestId });
+}
+```
