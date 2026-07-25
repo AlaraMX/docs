@@ -1,0 +1,167 @@
+---
+title: "Tarjetas físicas"
+description: "Vincula tarjetas NFC o RFID a un pase digital."
+---
+
+# Tarjetas físicas
+
+Vincula una tarjeta de plástico NFC o RFID a un pase digital. Al leerse la tarjeta, el sistema resuelve el pase correspondiente: la tarjeta y el teléfono representan al mismo portador y comparten saldo, historial y recompensas.
+
+<Note>
+  Esta función debe estar habilitada en tu cuenta. Si recibes `403 PHYSICAL_CARDS_DISABLED`, escríbenos a [dev@alaramx.com](mailto:dev@alaramx.com).
+</Note>
+
+---
+
+## El objeto tarjeta
+
+<ResponseField name="id" type="string">Identificador de la vinculación.</ResponseField>
+<ResponseField name="card_uid" type="string">UID de la tarjeta, ya normalizado.</ResponseField>
+<ResponseField name="pass_id" type="string">Pase al que está vinculada.</ResponseField>
+<ResponseField name="label" type="string">Etiqueta que le asignaste.</ResponseField>
+<ResponseField name="created_at" type="string">Fecha de vinculación, RFC 3339.</ResponseField>
+<ResponseField name="updated_at" type="string">Última modificación, RFC 3339.</ResponseField>
+
+---
+
+## Formato del `card_uid`
+
+Alara normaliza el UID antes de guardarlo:
+
+- Se eliminan espacios, dos puntos (`:`) y guiones (`-`).
+- Se convierte a mayúsculas.
+- El resultado debe medir entre **4 y 128** caracteres.
+- Los guiones bajos (`_`) **no** están permitidos y provocan `400 INVALID_CARD_UID`.
+
+Por eso `04:a2:24:9b`, `04-A2-24-9B` y `04a2249b` son la misma tarjeta: todas se guardan como `04A2249B`.
+
+---
+
+## Vincular una tarjeta
+
+```http
+POST /v1/cards
+```
+
+<ParamField body="card_uid" type="string" required>
+  UID de la tarjeta. Se normaliza según las reglas anteriores.
+</ParamField>
+
+<ParamField body="pass_id" type="string" required>
+  Pase al que se vincula.
+</ParamField>
+
+<ParamField body="label" type="string">
+  Etiqueta libre para identificarla, por ejemplo `Tarjeta titular`.
+</ParamField>
+
+Devuelve `201 Created` con la tarjeta.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/cards" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "card_uid": "04:A2:24:9B:5C:1D:80",
+    "pass_id": "cliente-001",
+    "label": "Tarjeta titular"
+  }'
+```
+
+```json Respuesta 201
+{
+  "id": "b7e1c2d3-4f5a-4b6c-8d9e-0f1a2b3c4d5e",
+  "card_uid": "04A2249B5C1D80",
+  "pass_id": "cliente-001",
+  "label": "Tarjeta titular",
+  "created_at": "2026-07-24T15:02:11Z",
+  "updated_at": "2026-07-24T15:02:11Z"
+}
+```
+</CodeGroup>
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `400` | `INVALID_CARD_UID` | El UID no cumple el formato o la longitud. |
+| `409` | `CARD_ALREADY_LINKED` | Esa tarjeta ya está vinculada a un pase. |
+| `404` | `RESOURCE_NOT_FOUND` | El pase no existe o fue eliminado. |
+| `403` | `PHYSICAL_CARDS_DISABLED` | La función no está habilitada. |
+
+---
+
+## Consultar una tarjeta
+
+```http
+GET /v1/cards/{card_uid}
+```
+
+<ParamField path="card_uid" type="string" required>
+  UID de la tarjeta. Puedes enviarlo con o sin separadores.
+</ParamField>
+
+Devuelve `200 OK` con la tarjeta, o `404 CARD_NOT_FOUND`.
+
+```bash
+curl "https://api.alaramx.com/v1/cards/04A2249B5C1D80" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+<Tip>
+  Este es el endpoint que usa tu punto de venta cuando lee una tarjeta y necesita saber a qué pase corresponde antes de registrar el escaneo.
+</Tip>
+
+---
+
+## Desvincular una tarjeta
+
+```http
+DELETE /v1/cards/{card_uid}
+```
+
+Rompe la relación entre la tarjeta y el pase. El pase digital no se ve afectado.
+
+Devuelve `204 No Content`, o `404 CARD_NOT_FOUND`.
+
+```bash
+curl -X DELETE "https://api.alaramx.com/v1/cards/04A2249B5C1D80" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Listar las tarjetas de un pase
+
+```http
+GET /v1/passes/{id}/cards
+```
+
+Un pase puede tener varias tarjetas vinculadas, por ejemplo la del titular y la de un familiar.
+
+<ParamField path="id" type="string" required>
+  El `pass_id` del pase.
+</ParamField>
+
+Devuelve `200 OK` con un **arreglo** de tarjetas. Este listado no está paginado.
+
+<CodeGroup>
+```bash cURL
+curl "https://api.alaramx.com/v1/passes/cliente-001/cards" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+```json Respuesta
+[
+  {
+    "id": "b7e1c2d3-4f5a-4b6c-8d9e-0f1a2b3c4d5e",
+    "card_uid": "04A2249B5C1D80",
+    "pass_id": "cliente-001",
+    "label": "Tarjeta titular",
+    "created_at": "2026-07-24T15:02:11Z",
+    "updated_at": "2026-07-24T15:02:11Z"
+  }
+]
+```
+</CodeGroup>

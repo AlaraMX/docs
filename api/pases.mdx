@@ -1,0 +1,365 @@
+---
+title: "Pases"
+description: "Emite, consulta, actualiza y desactiva pases digitales, y ajusta su saldo de lealtad."
+---
+
+# Pases
+
+El pase es el objeto central de Alara. Estos endpoints te permiten emitirlos, mantenerlos actualizados y mover su saldo de lealtad.
+
+---
+
+## El objeto pase
+
+<ResponseField name="id" type="string">
+  El identificador que tú definiste al crear el pase.
+</ResponseField>
+
+<ResponseField name="visible" type="object">
+  Pares llave/valor mostrados en el pase. Las llaves están limitadas a los campos de la plantilla.
+</ResponseField>
+
+<ResponseField name="hidden" type="object">
+  Datos libres asociados al pase, nunca visibles para el portador.
+</ResponseField>
+
+<ResponseField name="appearance" type="object | null">
+  Personalización visual de este pase en particular.
+
+  <Expandable title="propiedades">
+    <ResponseField name="background_color" type="string">Color de fondo en hexadecimal, por ejemplo `#1a2b3c`.</ResponseField>
+    <ResponseField name="logo" type="string">URL pública de una imagen PNG.</ResponseField>
+    <ResponseField name="banner" type="string">URL pública de una imagen PNG.</ResponseField>
+    <ResponseField name="title" type="string">Título mostrado en el pase.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="qr_value" type="string | null">
+  El valor codificado en el código QR del pase. Sólo aplica en pases QR. Consulta con el equipo de soporte el uso de este campo ya que generalmente se utiliza para identificar el pase.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Estado del pase: `creating`, `creation_failed`, `issued`, `active`, `removed` o `deactivated`. Consulta [Conceptos](/api/conceptos#ciclo-de-vida).
+</ResponseField>
+
+<ResponseField name="creation_error" type="string | null">
+  Presente solo cuando `status` es `creation_failed`. Indica por qué falló la emisión.
+</ResponseField>
+
+<ResponseField name="download_url" type="string">
+  Enlace que compartes con la persona para que instale el pase en su wallet.
+</ResponseField>
+
+<ResponseField name="reinstall_blocked" type="boolean">
+  `true` cuando el pase fue desinstalado y está bloqueado para volver a instalarse.
+</ResponseField>
+
+<ResponseField name="loyalty_type" type="string">
+  `none`, `balance` o `stamps`.
+</ResponseField>
+
+<ResponseField name="balance" type="integer | null">
+  Saldo o número de sellos actual. Ausente en pases sin lealtad.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">Fecha de creación, RFC 3339.</ResponseField>
+
+<ResponseField name="updated_at" type="string">Última modificación, RFC 3339.</ResponseField>
+
+<ResponseField name="deleted_at" type="string | null">
+  Presente solo si el pase fue eliminado.
+</ResponseField>
+
+```json Ejemplo
+{
+  "id": "cliente-001",
+  "visible": {
+    "nombre": "Ada Lovelace",
+    "puntos": "42"
+  },
+  "hidden": {
+    "crm_id": "9f3c1a"
+  },
+  "qr_value": "ALARA:cliente-001",
+  "status": "active",
+  "download_url": "https://.../download/8f2c…",
+  "reinstall_blocked": false,
+  "loyalty_type": "balance",
+  "balance": 42,
+  "created_at": "2026-07-01T08:30:00Z",
+  "updated_at": "2026-07-24T14:41:59Z"
+}
+```
+
+---
+
+## Crear un pase
+
+```http
+POST /v1/passes
+```
+
+Emite un pase nuevo.
+
+### Cuerpo
+
+<ParamField body="pass_id" type="string" required>
+  El identificador que usarás para este pase en toda la API. Debe ser único dentro de tu cuenta.
+</ParamField>
+
+<ParamField body="pass_template_id" type="string">
+  Plantilla con la que se emite. Si lo omites, se usa la primera plantilla de tu cuenta.
+</ParamField>
+
+<ParamField body="visible" type="object">
+  Campos mostrados en el pase. Cada llave debe existir en la lista de campos aceptados de la plantilla; los campos marcados como `locked` (contadores de lealtad) no se pueden escribir aquí.
+</ParamField>
+
+<ParamField body="hidden" type="object">
+  Datos libres asociados al pase.
+</ParamField>
+
+<ParamField body="appearance" type="object">
+  Personalización visual. Debe traer al menos una propiedad.
+
+  <Expandable title="propiedades">
+    <ParamField body="background_color" type="string">Hexadecimal, por ejemplo `#1a2b3c`.</ParamField>
+    <ParamField body="logo" type="string">URL pública de un PNG.</ParamField>
+    <ParamField body="banner" type="string">URL pública de un PNG.</ParamField>
+    <ParamField body="title" type="string">Título del pase.</ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="initial_platform" type="string">
+  Opcional. Pista sobre la plataforma del portador para preparar el pase desde el inicio. Solo acepta `ios` o `android`; cualquier otro valor devuelve `400 INVALID_REQUEST`.
+
+  Si lo omites, el pase queda listo para ambas plataformas. Es un dato de apoyo al momento de emitir: no se guarda ni se devuelve en la respuesta.
+</ParamField>
+
+### Respuesta
+
+La emisión es asíncrona. Alara espera hasta **10 segundos** a que el pase quede emitido:
+
+- **`201 Created`** — el pase alcanzó el estado `issued`. La respuesta trae el pase completo.
+- **`202 Accepted`** — la emisión sigue en curso. La respuesta trae el pase con `status: "creating"`; consúltalo después o escucha el webhook `pass.created`.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/passes" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pass_id": "cliente-001",
+    "pass_template_id": "lealtad_oro",
+    "visible": {
+      "nombre": "Ada Lovelace",
+      "miembro_desde": "2026-07-24"
+    },
+    "hidden": {
+      "crm_id": "9f3c1a"
+    }
+  }'
+```
+
+```json Respuesta 201
+{
+  "id": "cliente-001",
+  "visible": {
+    "nombre": "Ada Lovelace",
+    "miembro_desde": "2026-07-24",
+    "puntos": "0"
+  },
+  "hidden": { "crm_id": "9f3c1a" },
+  "qr_value": "ALARA:cliente-001",
+  "status": "issued",
+  "download_url": "https://.../download/8f2c…",
+  "reinstall_blocked": false,
+  "loyalty_type": "balance",
+  "balance": 0,
+  "created_at": "2026-07-24T09:14:22Z",
+  "updated_at": "2026-07-24T09:14:23Z"
+}
+```
+</CodeGroup>
+
+### Errores frecuentes
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `409` | `RESOURCE_CONFLICT` | Ya existe un pase activo con ese `pass_id`. |
+| `403` | `UNAUTHORIZED` | La plantilla pertenece a otra cuenta. |
+| `422` | `PASS_TEMPLATE_NOT_FOUND` | La plantilla no existe. |
+| `422` | `PASS_TEMPLATE_DATA_INVALID` | Los datos no son válidos para esa plantilla. |
+| `400` | `INVALID_INPUT` | Una llave de `visible` no existe en la plantilla o está bloqueada. |
+| `502` | `PASS_PROVIDER_UNAVAILABLE` | El servicio de emisión no respondió. |
+
+<Tip>
+  Si reintentas una creación que quizá ya funcionó, un `409 RESOURCE_CONFLICT` significa que el pase ya existe: consúltalo con `GET /v1/passes/{id}` en lugar de tratarlo como un fallo.
+</Tip>
+
+---
+
+## Listar pases
+
+```http
+GET /v1/passes
+```
+
+### Parámetros
+
+<ParamField query="limit" type="integer" default="25">Máximo `100`.</ParamField>
+<ParamField query="offset" type="integer" default="0" />
+<ParamField query="q" type="string">
+  Busca en el identificador del pase y en los valores de sus campos visibles.
+</ParamField>
+<ParamField query="status" type="string">
+  Repetible. Valores: `creating`, `creation_failed`, `issued`, `active`, `removed`, `deactivated`.
+</ParamField>
+<ParamField query="sort_by" type="string" default="created_at">
+  `id`, `name`, `created_at` o `updated_at`.
+</ParamField>
+<ParamField query="sort_dir" type="string" default="desc">`asc` o `desc`.</ParamField>
+<ParamField query="created_from" type="string">RFC 3339, inclusivo.</ParamField>
+<ParamField query="created_to" type="string">RFC 3339, exclusivo.</ParamField>
+<ParamField query="updated_from" type="string">RFC 3339, inclusivo.</ParamField>
+<ParamField query="updated_to" type="string">RFC 3339, exclusivo.</ParamField>
+<ParamField query="include_deleted" type="boolean" default="false">
+  Incluye también los pases eliminados.
+</ParamField>
+
+Devuelve `200 OK` con un **arreglo** de pases, más los encabezados `X-Total-Count` y `X-Has-More`.
+
+```bash
+curl "https://api.alaramx.com/v1/passes?status=active&limit=50&sort_dir=asc" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Consultar un pase
+
+```http
+GET /v1/passes/{id}
+```
+
+<ParamField path="id" type="string" required>
+  El `pass_id` del pase.
+</ParamField>
+
+<ParamField query="include_deleted" type="boolean" default="false">
+  Permite recuperar un pase eliminado.
+</ParamField>
+
+Devuelve `200 OK` con el pase, o `404 RESOURCE_NOT_FOUND`.
+
+```bash
+curl "https://api.alaramx.com/v1/passes/cliente-001" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Actualizar un pase
+
+```http
+PATCH /v1/passes/{id}
+```
+
+Actualización parcial: los campos que no envíes quedan intactos.
+
+<ParamField body="visible" type="object">
+  Se **fusiona** con los campos actuales. No puedes escribir campos bloqueados de lealtad.
+</ParamField>
+
+<ParamField body="hidden" type="object">
+  Se fusiona con los datos ocultos actuales.
+</ParamField>
+
+<ParamField body="appearance" type="object | null">
+  Envía un objeto para cambiar la apariencia, o `null` explícito para limpiarla. Si omites la llave, la apariencia no cambia.
+</ParamField>
+
+Devuelve `204 No Content`.
+
+```bash
+curl -X PATCH "https://api.alaramx.com/v1/passes/cliente-001" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "visible": { "nivel": "Oro" } }'
+```
+
+<Warning>
+  Para mover puntos o sellos **no uses este endpoint**. Usa [`POST /v1/passes/{id}/loyalty`](#ajustar-saldo-de-lealtad): es la única vía que mantiene sincronizado el contador que ve el portador.
+</Warning>
+
+---
+
+## Eliminar un pase
+
+```http
+DELETE /v1/passes/{id}
+```
+
+Eliminación lógica: el pase deja de estar disponible pero su historial se conserva.
+
+Devuelve `204 No Content`.
+
+```bash
+curl -X DELETE "https://api.alaramx.com/v1/passes/cliente-001" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+<Note>
+  Este endpoint sigue disponible aunque la cuenta esté suspendida por facturación, ya que solo reduce el consumo.
+</Note>
+
+---
+
+## Ajustar saldo de lealtad
+
+```http
+POST /v1/passes/{id}/loyalty
+```
+
+Suma o resta puntos o sellos y actualiza el pase en el wallet del portador.
+
+<ParamField body="balance_to_add" type="integer" required>
+  Cantidad a sumar. Usa un valor negativo para restar.
+</ParamField>
+
+<ParamField body="message" type="string">
+  Mensaje push opcional que acompaña al cambio.
+</ParamField>
+
+Devuelve `202 Accepted` con cuerpo vacío: la actualización se aplica de forma asíncrona.
+
+<CodeGroup>
+```bash Sumar puntos
+curl -X POST "https://api.alaramx.com/v1/passes/cliente-001/loyalty" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "balance_to_add": 5,
+    "message": "¡Sumaste 5 puntos!"
+  }'
+```
+
+```bash Canjear puntos
+curl -X POST "https://api.alaramx.com/v1/passes/cliente-001/loyalty" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "balance_to_add": -50,
+    "message": "Canjeaste 50 puntos por un café"
+  }'
+```
+</CodeGroup>
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `400` | `NO_LOYALTY_PROGRAM` | El pase no tiene programa de lealtad. |
+| `404` | `RESOURCE_NOT_FOUND` | El pase no existe. |
+
+Para confirmar el saldo resultante, consulta el pase o escucha el webhook [`pass.balanceUpdate`](/api/webhooks/eventos#pass-balanceupdate).

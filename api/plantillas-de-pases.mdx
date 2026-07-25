@@ -1,0 +1,134 @@
+---
+title: "Plantillas de pases"
+description: "Descubre qué campos acepta cada plantilla antes de emitir un pase."
+---
+
+# Plantillas de pases
+
+Una plantilla define el diseño de tus pases y, sobre todo, **qué campos puedes escribir en ellos**. Antes de emitir tu primer pase, consulta los campos aceptados.
+
+---
+
+## Campos aceptados
+
+```http
+GET /v1/pass-templates/accepted-fields
+```
+
+Devuelve la lista blanca de campos que puedes usar como llaves del objeto `visible` al crear o actualizar un pase.
+
+<ParamField query="pass_template_id" type="string">
+  Plantilla a consultar. Si lo omites, se usa la primera plantilla de tu cuenta.
+</ParamField>
+
+### Respuesta
+
+<ResponseField name="template_id" type="string">
+  Identificador de la plantilla consultada.
+</ResponseField>
+
+<ResponseField name="fields" type="array">
+  Campos disponibles.
+
+  <Expandable title="propiedades">
+    <ResponseField name="id" type="string">
+      La llave que debes usar dentro de `visible`.
+    </ResponseField>
+    <ResponseField name="label" type="string">
+      Etiqueta legible del campo, tal como se muestra en el pase.
+    </ResponseField>
+    <ResponseField name="locked" type="boolean">
+      Si es `true`, el campo lo administra Alara y **no puedes escribirlo**. Es el caso de los contadores de lealtad.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl "https://api.alaramx.com/v1/pass-templates/accepted-fields?pass_template_id=lealtad_oro" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+```json Respuesta
+{
+  "template_id": "lealtad_oro",
+  "fields": [
+    { "id": "nombre",        "label": "Nombre",        "locked": false },
+    { "id": "miembro_desde", "label": "Miembro desde", "locked": false },
+    { "id": "nivel",         "label": "Nivel",         "locked": false },
+    { "id": "puntos",        "label": "Puntos",        "locked": true  }
+  ]
+}
+```
+</CodeGroup>
+
+<Warning>
+  Enviar en `visible` una llave que no aparezca en esta lista, o una marcada con `locked: true`, devuelve `400 INVALID_INPUT`. Para mover el valor de un campo bloqueado usa [`POST /v1/passes/{id}/loyalty`](/api/pases#ajustar-saldo-de-lealtad).
+</Warning>
+
+---
+
+## Sugerencias de campos ocultos
+
+```http
+GET /v1/pass-templates/hidden-field-suggestions
+```
+
+A diferencia de `visible`, el objeto `hidden` no está limitado por la plantilla: puedes guardar las llaves que quieras. Este endpoint te dice cuáles estás usando ya y con qué frecuencia, lo cual es útil para mantener nombres consistentes entre integraciones.
+
+<ParamField query="pass_template_id" type="string">
+  Plantilla a consultar. Si lo omites, se usa la primera plantilla de tu cuenta.
+</ParamField>
+
+### Respuesta
+
+<ResponseField name="template_id" type="string">
+  Identificador de la plantilla consultada.
+</ResponseField>
+
+<ResponseField name="suggestions" type="array">
+  Llaves ocultas ya utilizadas.
+
+  <Expandable title="propiedades">
+    <ResponseField name="key" type="string">Nombre de la llave.</ResponseField>
+    <ResponseField name="usage_count" type="integer">En cuántos pases aparece.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl "https://api.alaramx.com/v1/pass-templates/hidden-field-suggestions" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+```json Respuesta
+{
+  "template_id": "lealtad_oro",
+  "suggestions": [
+    { "key": "crm_id",   "usage_count": 1284 },
+    { "key": "sucursal", "usage_count": 977 },
+    { "key": "origen",   "usage_count": 310 }
+  ]
+}
+```
+</CodeGroup>
+
+---
+
+## Crear y editar plantillas
+
+Las plantillas no se crean ni se modifican por API. Su diseño —colores, imágenes, tipo de programa y la lista de campos visibles— se configura junto con el equipo de Alara.
+
+Vas a necesitar una plantilla nueva o un ajuste a la actual cuando:
+
+- Quieras escribir una llave en `visible` que hoy devuelve `400 INVALID_INPUT`. Antes hay que agregar ese campo a la plantilla.
+- Lances un programa distinto —lealtad, tickets, IDs digitales— que requiera otro diseño.
+- Cambie la imagen de marca del pase.
+
+Escríbenos a [soporte](/soporte) indicando el `template_id` que quieres modificar y los campos que necesitas agregar. Si se trata de una plantilla nueva, cuéntanos qué tipo de programa vas a operar.
+
+<Tip>
+  Cuando el cambio quede aplicado, confírmalo llamando a [`GET /v1/pass-templates/accepted-fields`](#campos-aceptados): los campos nuevos aparecerán en la respuesta y podrás usarlos de inmediato en `visible`.
+</Tip>
+
+Para conocer las opciones de diseño disponibles antes de pedir un cambio, revisa las guías de [pases de lealtad](/pases-de-lealtad), [pases de tickets](/pases-de-tickets) y [pases de IDs digitales](/pases-de-ids-digitales).

@@ -1,0 +1,94 @@
+---
+title: "Autenticación"
+description: "Firma tus peticiones a la API de Alara con tu API key."
+---
+
+# Autenticación
+
+Todas las peticiones a `/v1` se autentican con tu **API key** en el encabezado `Authorization`, usando el esquema `Bearer`.
+
+```bash
+curl "https://api.alaramx.com/v1/passes" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+<Warning>
+  Tu API key da acceso completo a los datos de tu cuenta. Úsala **solo desde tu servidor**. Nunca la incluyas en aplicaciones móviles, en código de navegador ni en repositorios públicos.
+</Warning>
+
+---
+
+## Tu API key
+
+Alara genera y te entrega la API key de tu cuenta. Tiene esta forma:
+
+```
+Ab3xZ_k_9f2c4d6e8a0b2c4d6e8a0b2c4d6e8a0b
+```
+
+Puntos importantes:
+
+- **Se muestra una sola vez.** Alara guarda únicamente un hash de la llave, por lo que no es posible recuperarla después. Si la pierdes, hay que generar una nueva.
+- **Una llave activa por cuenta.** Generar una llave nueva reemplaza a la anterior de inmediato.
+- **Alcance de cuenta.** La llave identifica a tu organización y a nada más: cada consulta se filtra automáticamente a tus propios datos. No existen permisos ni alcances configurables por llave.
+
+<Tip>
+  Para rotar tu llave, coordina el cambio con nosotros y despliega la nueva credencial en tus servidores en la misma ventana: al generarse la nueva, la anterior deja de funcionar.
+</Tip>
+
+---
+
+## Errores de autenticación
+
+Cuando la autenticación falla, la API responde con `401` o `403` y un `code` que indica la causa exacta.
+
+| Código HTTP | `code` | Qué significa |
+| --- | --- | --- |
+| `401` | `MISSING_API_KEY` | No enviaste el encabezado `Authorization`. |
+| `401` | `INVALID_AUTH_HEADER` | El encabezado no tiene el formato `Bearer <api_key>`. |
+| `401` | `INVALID_API_KEY` | La llave no corresponde a ninguna cuenta. |
+| `401` | `API_KEY_REVOKED` | La llave fue revocada. |
+| `401` | `API_AUTH_ERROR` | Falla general al validar la credencial. |
+| `403` | `CUSTOMER_INACTIVE` | La cuenta está desactivada. Escríbenos a `dev@alaramx.com`. |
+
+Ejemplo de respuesta:
+
+```json
+{
+  "error": "Authentication failed",
+  "code": "INVALID_API_KEY",
+  "message": "The provided API key is not valid"
+}
+```
+
+Consulta [Errores](/api/errores) para el catálogo completo.
+
+---
+
+## Otros accesos no cubiertos aquí
+
+El acceso al **Dashboard web** usa un mecanismo distinto (usuario, contraseña y roles). Esa autenticación es interna del Dashboard y no forma parte de la API pública: si te integras por API, la API key es el único mecanismo que necesitas.
+
+Por lo mismo, los roles y permisos de equipo (propietario, administrador, editor, lector, escáner) aplican a las personas que entran al Dashboard, no a tu API key. Una integración por API siempre opera con acceso completo a la cuenta.
+
+---
+
+## Buenas prácticas
+
+<CardGroup cols={2}>
+  <Card title="Guárdala como secreto" icon="lock">
+    Usa el gestor de secretos de tu plataforma o variables de entorno, nunca el control de versiones.
+  </Card>
+
+  <Card title="Llama desde el backend" icon="server">
+    Tu servidor debe ser el único que hable con la API de Alara; tu app o tu web hablan con tu servidor.
+  </Card>
+
+  <Card title="Registra el `X-Request-ID`" icon="fingerprint">
+    Guarda ese encabezado de cada respuesta: nos permite rastrear una petición específica si necesitas soporte.
+  </Card>
+
+  <Card title="Rota si hay sospecha" icon="rotate">
+    Ante cualquier exposición de la llave, pídenos una nueva de inmediato.
+  </Card>
+</CardGroup>

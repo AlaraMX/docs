@@ -1,0 +1,354 @@
+---
+title: "Reglas de activación"
+description: "Automatiza acciones en tus pases a partir de escaneos, fechas o sellos acumulados."
+---
+
+# Reglas de activación
+
+Una regla de activación automatiza a Alara: define **una condición** y **una o más acciones**. Cuando la condición se cumple para un pase, Alara ejecuta las acciones sobre ese pase sin que tú tengas que intervenir.
+
+Ejemplos típicos:
+
+- Si alguien no ha venido en 30 días, envíale un push con una promoción.
+- Si visita 5 días seguidos, asígnale una recompensa.
+- Tres días antes del vencimiento de su membresía, recuérdaselo.
+- Al completar 10 sellos, otórgale un café gratis y reinicia el contador.
+
+<Note>
+  Una regla se ejecuta **como máximo una vez** por cada combinación de regla, pase y ocasión. No recibirás acciones duplicadas por el mismo hecho.
+</Note>
+
+---
+
+## El objeto regla
+
+<ResponseField name="id" type="string">Identificador (UUID) de la regla.</ResponseField>
+<ResponseField name="name" type="string">Nombre descriptivo.</ResponseField>
+<ResponseField name="type" type="string">Tipo de condición.</ResponseField>
+<ResponseField name="config" type="object">Configuración de la condición, según el tipo.</ResponseField>
+<ResponseField name="actions" type="array">
+  Acciones a ejecutar.
+
+  <Expandable title="propiedades">
+    <ResponseField name="action_name" type="string">Tipo de acción.</ResponseField>
+    <ResponseField name="config" type="object">Configuración de la acción.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="enabled" type="boolean">Si la regla está activa.</ResponseField>
+<ResponseField name="created_at" type="string">Fecha de creación.</ResponseField>
+<ResponseField name="updated_at" type="string">Última modificación.</ResponseField>
+
+<Warning>
+  En este recurso, `created_at` y `updated_at` usan el formato `2026-07-24 14:41:58.842 +0000 UTC`, no RFC 3339.
+</Warning>
+
+---
+
+## Tipos de condición
+
+<AccordionGroup>
+  <Accordion title="scan_inactivity — no ha escaneado en N días">
+    Se dispara cuando un pase lleva cierto número de días sin registrar escaneos.
+
+    <ParamField body="inactive_days" type="integer" required>
+      Días de inactividad. Mínimo `1`.
+    </ParamField>
+
+    <ParamField body="reader_scope" type="string" required>
+      A qué lectores aplica: `any` (cualquiera), `per_reader` (se evalúa por lector de forma independiente) o `specific` (un lector concreto).
+    </ParamField>
+
+    <ParamField body="reader" type="string">
+      Identificador del lector. **Obligatorio si** `reader_scope` es `specific`; **prohibido** en los otros casos.
+    </ParamField>
+
+    ```json
+    {
+      "inactive_days": 30,
+      "reader_scope": "any"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="scan_consecutive — ha escaneado N días seguidos">
+    Se dispara cuando un pase acumula una racha de días consecutivos con escaneo.
+
+    <ParamField body="consecutive_days" type="integer" required>
+      Días consecutivos requeridos. Mínimo `1`.
+    </ParamField>
+
+    <ParamField body="reader_scope" type="string" required>
+      `any`, `per_reader` o `specific`.
+    </ParamField>
+
+    <ParamField body="reader" type="string">
+      Obligatorio solo con `reader_scope: "specific"`.
+    </ParamField>
+
+    ```json
+    {
+      "consecutive_days": 5,
+      "reader_scope": "specific",
+      "reader": "sucursal-centro-01"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="date_field — en la fecha de un campo del pase">
+    Se dispara según una fecha guardada en un campo del pase, por ejemplo un cumpleaños o el vencimiento de una membresía.
+
+    <ParamField body="field_name" type="string" required>
+      Nombre del campo del pase que contiene la fecha.
+    </ParamField>
+
+    <ParamField body="recurrence" type="string" required>
+      Cada cuánto se repite: `daily`, `weekly`, `monthly`, `yearly` u `once`.
+    </ParamField>
+
+    ```json
+    {
+      "field_name": "cumpleanos",
+      "recurrence": "yearly"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="datetime_field — a X minutos de una fecha y hora">
+    Se dispara con un desfase respecto a una fecha y hora guardada en el pase. Útil para recordatorios previos a una cita o reservación.
+
+    <ParamField body="field_name" type="string" required>
+      Campo del pase que contiene la fecha y hora.
+    </ParamField>
+
+    <ParamField body="offset_minutes" type="integer" required>
+      Minutos de desfase. Debe ser un entero mayor o igual a `0`.
+    </ParamField>
+
+    ```json
+    {
+      "field_name": "proxima_cita",
+      "offset_minutes": 60
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="stamp_threshold — al alcanzar N sellos">
+    Se dispara cuando el contador de sellos de un pase alcanza cierto valor.
+
+    <ParamField body="threshold" type="integer | string" required>
+      Número de sellos (entero mayor o igual a `1`), o la cadena literal `"card_full"` para dispararse cuando la tarjeta se completa según su plantilla.
+    </ParamField>
+
+    ```json
+    { "threshold": "card_full" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Tipos de acción
+
+Una regla admite **como máximo una acción de cada tipo**. Repetir un `action_name` devuelve `400 RULE_ACTION_DUPLICATE_TYPE`.
+
+<AccordionGroup>
+  <Accordion title="push_notification — enviar una notificación">
+    <ParamField body="message" type="string" required>
+      Texto del push. No puede estar vacío.
+    </ParamField>
+
+    ```json
+    {
+      "action_name": "push_notification",
+      "config": { "message": "¡Te extrañamos! Tienes 15% de descuento esta semana." }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="set_field — escribir campos del pase">
+    <ParamField body="fields" type="array" required>
+      Lista no vacía de campos a escribir.
+
+      <Expandable title="propiedades de cada elemento">
+        <ParamField body="target" type="string" required>
+          `visible` (se muestra en el pase) o `hidden` (uso interno).
+        </ParamField>
+        <ParamField body="field" type="string" required>
+          Nombre del campo.
+        </ParamField>
+        <ParamField body="value" type="any" required>
+          Valor a escribir. Los campos `visible` se guardan como texto.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    ```json
+    {
+      "action_name": "set_field",
+      "config": {
+        "fields": [
+          { "target": "visible", "field": "nivel",         "value": "Oro" },
+          { "target": "hidden",  "field": "ultimo_ascenso", "value": "2026-07-24" }
+        ]
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="set_loyalty — fijar el saldo de lealtad">
+    Fija el contador a un valor absoluto. A diferencia de [`POST /v1/passes/{id}/loyalty`](/api/pases#ajustar-saldo-de-lealtad), que suma un delta, esta acción **establece** el valor: es la forma habitual de reiniciar una tarjeta de sellos completada.
+
+    <ParamField body="value" type="integer" required>
+      Nuevo valor. Debe ser mayor o igual a `0`.
+    </ParamField>
+
+    ```json
+    {
+      "action_name": "set_loyalty",
+      "config": { "value": 0 }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="assign_reward — otorgar una recompensa">
+    <ParamField body="slug" type="string" required>
+      `slug` de una recompensa **activa** de tu catálogo. Un slug desconocido devuelve `400 ACTION_ASSIGN_REWARD_SLUG_UNKNOWN`.
+    </ParamField>
+
+    ```json
+    {
+      "action_name": "assign_reward",
+      "config": { "slug": "cafe_gratis" }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Crear una regla
+
+```http
+POST /v1/trigger-rules
+```
+
+<ParamField body="name" type="string" required>Nombre descriptivo de la regla.</ParamField>
+<ParamField body="type" type="string" required>Uno de los tipos de condición.</ParamField>
+<ParamField body="config" type="object" required>Configuración de la condición.</ParamField>
+<ParamField body="actions" type="array" required>Al menos una acción.</ParamField>
+<ParamField body="enabled" type="boolean">Si la regla queda activa al crearse.</ParamField>
+
+Devuelve `201 Created` con un mensaje de confirmación. **No devuelve el objeto de la regla**: consúltalo con `GET /v1/trigger-rules` si necesitas su `id`.
+
+<CodeGroup>
+```bash Tarjeta de sellos completa
+curl -X POST "https://api.alaramx.com/v1/trigger-rules" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Tarjeta completa: café gratis",
+    "type": "stamp_threshold",
+    "config": { "threshold": "card_full" },
+    "actions": [
+      {
+        "action_name": "assign_reward",
+        "config": { "slug": "cafe_gratis" }
+      },
+      {
+        "action_name": "push_notification",
+        "config": { "message": "¡Completaste tu tarjeta! Tu café va por nuestra cuenta." }
+      },
+      {
+        "action_name": "set_loyalty",
+        "config": { "value": 0 }
+      }
+    ],
+    "enabled": true
+  }'
+```
+
+```bash Reactivación por inactividad
+curl -X POST "https://api.alaramx.com/v1/trigger-rules" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Sin visitas en 30 días",
+    "type": "scan_inactivity",
+    "config": { "inactive_days": 30, "reader_scope": "any" },
+    "actions": [
+      {
+        "action_name": "push_notification",
+        "config": { "message": "¡Te extrañamos! 15% de descuento esta semana." }
+      }
+    ],
+    "enabled": true
+  }'
+```
+
+```json Respuesta 201
+{ "message": "Trigger rule created successfully" }
+```
+</CodeGroup>
+
+---
+
+## Listar reglas
+
+```http
+GET /v1/trigger-rules
+```
+
+Devuelve `200 OK` con un **arreglo** de reglas. Este listado no está paginado.
+
+```bash
+curl "https://api.alaramx.com/v1/trigger-rules" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Consultar una regla
+
+```http
+GET /v1/trigger-rules/{rule_id}
+```
+
+<ParamField path="rule_id" type="string" required>
+  UUID de la regla. Un valor que no sea UUID devuelve `400 INVALID_RULE_ID`.
+</ParamField>
+
+Devuelve `200 OK` con la regla.
+
+---
+
+## Actualizar una regla
+
+```http
+PUT /v1/trigger-rules/{rule_id}
+```
+
+Todos los campos son opcionales, pero `config` y `actions` se **reemplazan por completo**, no se fusionan: si envías `actions`, la nueva lista sustituye a la anterior.
+
+<ParamField body="name" type="string">Nuevo nombre.</ParamField>
+<ParamField body="config" type="object">Nueva configuración, reemplaza la anterior.</ParamField>
+<ParamField body="actions" type="array">Nuevas acciones, reemplazan las anteriores.</ParamField>
+<ParamField body="enabled" type="boolean">Activa o desactiva la regla. Si lo omites, no cambia.</ParamField>
+
+Devuelve `200 OK` con un mensaje de confirmación.
+
+```bash
+curl -X PUT "https://api.alaramx.com/v1/trigger-rules/8f7e6d5c-4b3a-4291-8807-6f5e4d3c2b1a" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "enabled": false }'
+```
+
+---
+
+## Eliminar una regla
+
+```http
+DELETE /v1/trigger-rules/{rule_id}
+```
+
+Devuelve `204 No Content`.

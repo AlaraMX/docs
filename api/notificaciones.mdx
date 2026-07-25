@@ -1,0 +1,285 @@
+---
+title: "Notificaciones"
+description: "Envía notificaciones push inmediatas o programadas a los pases instalados."
+---
+
+# Notificaciones
+
+Envía mensajes push a los pases instalados en el wallet del portador. Puedes enviarlos de inmediato a un pase concreto o programarlos hacia el futuro para una lista de pases, una audiencia guardada o toda tu base.
+
+<Note>
+  Las notificaciones llegan únicamente a pases **instalados** (`status: "active"`). Un pase emitido pero nunca instalado no puede recibir push.
+</Note>
+
+---
+
+## Enviar a un pase de inmediato
+
+```http
+POST /v1/notifications/passes/{passID}
+```
+
+Envía un push en el momento a un solo pase.
+
+<ParamField path="passID" type="string" required>
+  El `pass_id` del destinatario.
+</ParamField>
+
+<ParamField body="message" type="string" required>
+  Texto de la notificación.
+</ParamField>
+
+Devuelve `200 OK` **con cuerpo vacío**.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/notifications/passes/cliente-001" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "message": "Tu café de cortesía te espera hoy." }'
+```
+</CodeGroup>
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `409` | `PASS_NOT_ACTIVE` | El pase no está instalado en un wallet. |
+| `404` | `RESOURCE_NOT_FOUND` | El pase no existe. |
+| `400` | `INVALID_INPUT` | Falta el mensaje o viene vacío. |
+
+---
+
+## El objeto notificación
+
+<ResponseField name="id" type="string">Identificador (UUID) de la notificación.</ResponseField>
+<ResponseField name="message" type="string">Texto enviado.</ResponseField>
+<ResponseField name="status" type="string">
+  Estado actual. Consulta la tabla de estados más abajo.
+</ResponseField>
+<ResponseField name="scheduled_at" type="string">
+  Fecha y hora programadas, en zona **America/Mexico_City**.
+</ResponseField>
+<ResponseField name="audience_id" type="string | null">
+  Audiencia destinataria, si se usó una.
+</ResponseField>
+<ResponseField name="target_all_passes" type="boolean">
+  `true` si va dirigida a todos tus pases.
+</ResponseField>
+<ResponseField name="recipients_resolved_at" type="string | null">
+  Momento en que se calculó la lista final de destinatarios.
+</ResponseField>
+<ResponseField name="completed_at" type="string | null">
+  Momento en que terminó el envío.
+</ResponseField>
+<ResponseField name="total_recipients" type="integer">Destinatarios calculados.</ResponseField>
+<ResponseField name="accepted_recipients" type="integer">Envíos aceptados.</ResponseField>
+<ResponseField name="failed_recipients" type="integer">Envíos fallidos.</ResponseField>
+<ResponseField name="cancelled_recipients" type="integer">Envíos cancelados.</ResponseField>
+<ResponseField name="skipped_recipients" type="integer">
+  Destinatarios omitidos, por ejemplo pases que ya no estaban instalados.
+</ResponseField>
+
+### Estados
+
+| `status` | Significado |
+| --- | --- |
+| `creating` | Se está registrando la notificación. |
+| `creationFailed` | No se pudo registrar. |
+| `validating` | Se están resolviendo los destinatarios. |
+| `scheduled` | Lista y esperando su hora. |
+| `sending` | En proceso de envío. |
+| `successful` | Se envió a todos los destinatarios. |
+| `completedWithErrors` | Terminó, pero algunos envíos fallaron. |
+| `failed` | El envío falló por completo. |
+| `cancelled` | Se canceló antes de enviarse. |
+
+---
+
+## Programar una notificación
+
+```http
+POST /v1/notifications
+```
+
+<ParamField body="message" type="string" required>
+  Texto de la notificación.
+</ParamField>
+
+<ParamField body="timestamp" type="string" required>
+  Cuándo enviarla. Acepta RFC 3339 (`2026-08-01T18:00:00Z`) o los formatos locales `2026-08-01T18:00:00` y `2026-08-01T18:00`, que se interpretan en zona **America/Mexico_City**.
+
+  Debe estar al menos **2 minutos** en el futuro.
+</ParamField>
+
+<ParamField body="recipients" type="array">
+  Lista explícita de `pass_id`.
+</ParamField>
+
+<ParamField body="audience_id" type="string">
+  UUID de una audiencia guardada en el Dashboard.
+</ParamField>
+
+<ParamField body="target_all_passes" type="boolean">
+  Envía a todos los pases de tu cuenta.
+</ParamField>
+
+<Warning>
+  Debes indicar **exactamente uno** de `recipients`, `audience_id` o `target_all_passes`. Ninguno devuelve `NOTIFICATION_RECIPIENTS_OR_AUDIENCE_REQUIRED`; más de uno devuelve `NOTIFICATION_TARGETING_CONFLICT`.
+</Warning>
+
+Devuelve `201 Created` con la notificación.
+
+<CodeGroup>
+```bash Lista de pases
+curl -X POST "https://api.alaramx.com/v1/notifications" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Este sábado: 2x1 en toda la tienda.",
+    "timestamp": "2026-08-01T10:00:00Z",
+    "recipients": ["cliente-001", "cliente-002"]
+  }'
+```
+
+```bash Audiencia
+curl -X POST "https://api.alaramx.com/v1/notifications" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Beneficio exclusivo para nivel Oro.",
+    "timestamp": "2026-08-01T10:00:00Z",
+    "audience_id": "3f2b1c0d-4e5f-4a6b-8c9d-0e1f2a3b4c5d"
+  }'
+```
+
+```bash Todos los pases
+curl -X POST "https://api.alaramx.com/v1/notifications" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Nuevo horario: abrimos hasta las 10 pm.",
+    "timestamp": "2026-08-01T10:00:00Z",
+    "target_all_passes": true
+  }'
+```
+
+```json Respuesta 201
+{
+  "id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f",
+  "message": "Este sábado: 2x1 en toda la tienda.",
+  "status": "scheduled",
+  "scheduled_at": "2026-08-01T04:00:00-06:00",
+  "target_all_passes": false,
+  "completed_at": null,
+  "total_recipients": 2,
+  "accepted_recipients": 0,
+  "failed_recipients": 0,
+  "cancelled_recipients": 0,
+  "skipped_recipients": 0
+}
+```
+</CodeGroup>
+
+<Tip>
+  Cuando usas `audience_id` o `target_all_passes`, la lista de destinatarios se calcula **en el momento del envío**, no al programar. Una audiencia que crezca entre ambos instantes incluirá a los pases nuevos.
+</Tip>
+
+---
+
+## Consultar una notificación
+
+```http
+GET /v1/notifications/{id}
+```
+
+<ParamField path="id" type="string" required>
+  UUID de la notificación. Un valor que no sea UUID devuelve `400 INVALID_INPUT`.
+</ParamField>
+
+Devuelve `200 OK` con la notificación y sus contadores de envío.
+
+```bash
+curl "https://api.alaramx.com/v1/notifications/5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Listar notificaciones
+
+```http
+GET /v1/notifications
+```
+
+<ParamField query="limit" type="integer" default="100">
+  Máximo `100`. Nota que aquí el valor por omisión es `100`, no `25`.
+</ParamField>
+<ParamField query="offset" type="integer" default="0" />
+<ParamField query="q" type="string">
+  Busca en el identificador y en el texto del mensaje.
+</ParamField>
+<ParamField query="status" type="string">
+  Repetible. Cualquiera de los estados de la tabla anterior.
+</ParamField>
+<ParamField query="audience_id" type="string">
+  UUID de audiencia. Un valor inválido devuelve `400`.
+</ParamField>
+<ParamField query="sort_by" type="string" default="scheduled_at">
+  `id`, `scheduled_at`, `created_at` o `updated_at`.
+</ParamField>
+<ParamField query="sort_dir" type="string" default="desc">`asc` o `desc`.</ParamField>
+<ParamField query="scheduled_from" type="string">RFC 3339, inclusivo.</ParamField>
+<ParamField query="scheduled_to" type="string">RFC 3339, exclusivo.</ParamField>
+
+Devuelve `200 OK` con un **arreglo** de notificaciones, más `X-Total-Count` y `X-Has-More`.
+
+```bash
+curl "https://api.alaramx.com/v1/notifications?status=scheduled&sort_dir=asc" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Cancelar una notificación programada
+
+```http
+POST /v1/notifications/{id}/cancel
+```
+
+Cancela una notificación que aún no se ha enviado.
+
+<ParamField path="id" type="string" required>
+  UUID de la notificación.
+</ParamField>
+
+Devuelve `204 No Content`.
+
+```bash
+curl -X POST "https://api.alaramx.com/v1/notifications/5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f/cancel" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+---
+
+## Buenas prácticas
+
+<CardGroup cols={2}>
+  <Card title="Sé oportuno, no insistente" icon="clock">
+    Un push de más es la razón más común por la que alguien desinstala un pase.
+  </Card>
+
+  <Card title="Segmenta" icon="filter">
+    Una audiencia relevante rinde más que un envío a toda la base.
+  </Card>
+
+  <Card title="Revisa los contadores" icon="chart-simple">
+    `skipped_recipients` alto suele indicar muchos pases desinstalados.
+  </Card>
+
+  <Card title="Cuida el horario" icon="moon">
+    Recuerda que `scheduled_at` se interpreta en horario del centro de México.
+  </Card>
+</CardGroup>
+
+Consulta también la guía de [buenas prácticas de notificaciones](/buenas-practicas) del Dashboard.
