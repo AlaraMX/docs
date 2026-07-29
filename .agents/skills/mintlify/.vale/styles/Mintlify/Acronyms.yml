@@ -1,0 +1,91 @@
+extends: conditional
+message: "Spell out '%s', if it's unfamiliar to the audience."
+level: suggestion
+ignorecase: false
+# Ensures that the existence of 'first' implies the existence of 'second'.
+first: '\b([A-Z]{3,5})\b'
+second: '(?:\b[A-Z][a-z]+ )+\(([A-Z]{3,5})\)'
+# ... with the exception of these:
+exceptions:
+  - AAA
+  - API
+  - ASCII
+  - ASP
+  - BETA
+  - CLI
+  - CPU
+  - CRM
+  - CSS
+  - CSV
+  - DEBUG
+  - DOM
+  - DPI
+  - FAQ
+  - GCC
+  - GDB
+  - GET
+  - GIF
+  - GPU
+  - GTK
+  - GUI
+  - HTML
+  - HTTP
+  - HTTPS
+  - ICO
+  - IDE
+  - JAR
+  - JIT
+  - JPEG
+  - JPG
+  - JSON
+  - JSX
+  - JWT
+  - LESS
+  - LLDB
+  - LLM
+  - llms
+  - LLMs
+  - LTS
+  - NET
+  - NEW
+  - NOT
+  - NOTE
+  - NVDA
+  - OSS
+  - PATH
+  - PDF
+  - PHP
+  - PNG
+  - POST
+  - PST
+  - RAG
+  - RAM
+  - REPL
+  - REST
+  - RSA
+  - SAML
+  - SCM
+  - SCSS
+  - SDK
+  - SKILL
+  - SLA
+  - SQL
+  - SSH
+  - SSL
+  - SSO
+  - SVG
+  - TBD
+  - TCP
+  - TODO
+  - TTF
+  - URI
+  - URL
+  - USB
+  - UTF
+  - UUID
+  - VPN
+  - WOFF
+  - XML
+  - XSS
+  - YAML
+  - ZIP

@@ -1,0 +1,527 @@
+---
+title: "SEO（搜索引擎优化）"
+description: "配置元标签、Open Graph 属性、规范 URL 和页面级 SEO 设置，提升文档在搜索引擎中的排名。"
+keywords: ["meta tags", "sitemap", "robots.txt", "SEO", "search engine optimization"]
+boost: 3
+---
+
+Mintlify 会自动处理许多 SEO 最佳实践，包括：
+
+* 元标签生成
+* 站点地图和 `robots.txt` 文件生成
+* 语义化 HTML 结构
+* 移动端优化
+
+你可以通过在 `docs.json` 或页面的 frontmatter 中添加 `metatags` 字段，完全自定义站点的元标签。
+
+<div id="automatically-generated-meta-tags">
+  ## 自动生成的元标签
+</div>
+
+Mintlify 会为每个页面生成以下元标签。你可以在 `docs.json` 或页面的 frontmatter 中指定它们来自定义并覆盖这些元标签。
+
+**基础元数据：**
+
+* `charset: utf-8` - 字符编码
+* `og:type: website` - Open Graph 类型
+* `og:site_name` - 文档站点名称
+* `twitter:card: summary_large_image` - Twitter 卡片类型
+
+**页面级元数据：**
+
+* `title` - 页面标题，格式为"Page Title - Site Name"
+* `og:title` - Open Graph 标题，默认使用页面标题
+* `twitter:title` - Twitter 标题，依次回退到 `og:title`，然后回退到页面标题
+* `description` - 页面说明
+* `og:description` - Open Graph 说明，回退到页面说明
+* `twitter:description` - Twitter 说明，依次回退到 `og:description`，然后回退到页面说明
+
+**URL 和 canonical：**
+
+* `canonical` - 基于页面 URL 自动生成
+* `og:url` - 设置为 canonical URL
+
+**SEO 和索引编入：**
+
+* `robots` - 根据页面 metadata 生成
+* `noindex` - 根据页面 metadata 生成
+* `keywords` - 根据页面 metadata 生成
+
+**图片：**
+
+* `og:image` - Open Graph 图片，`og:image:width` 设为 1200，`og:image:height` 设为 630
+* `twitter:image` - Twitter 图片，`twitter:image:width` 设为 1200，`twitter:image:height` 设为 630
+
+**浏览器和应用元数据：**
+
+* `applicationName` - 文档站点名称
+* `generator: Mintlify` - 标识站点生成器为 Mintlify
+* `apple-mobile-web-app-title` - iOS 主屏幕应用名称
+* `msapplication-TileColor` - Windows 磁贴颜色
+* 来自你配置中的 favicon 和 icon
+* Sitemap (站点地图) 引用链接
+
+`docs.json` 中 `seo.metatags` 配置里的任何元标签也会自动注入到每个页面，例如用于搜索控制台验证的 `google-site-verification`。
+
+<div id="structured-data">
+  ## 结构化数据
+</div>
+
+Mintlify 会以 JSON-LD 脚本的形式向每个可索引页面添加 [schema.org](https://schema.org) 结构化数据。这些结构化数据可帮助搜索引擎为你的页面显示富媒体结果。
+
+每个页面都会发出一个由具有稳定 `@id` 的实体组成的互相关联的 `@graph`：
+
+- `Organization`：你站点的发布者。来源于你的站点名称、logo 和站点 URL，或通过 [`seo.organization`](/zh/organize/settings-seo#seo) 显式配置。
+- `WebSite`：你的站点。
+- `WebPage`：当前页面，包括其描述和修改日期。
+- `BreadcrumbList`：页面在导航层级中的位置，根据 `docs.json` 中的导航生成。
+- 主内容实体：文档页面为 `TechArticle`，从 API 规范生成的页面（frontmatter 中带有 `api`、`openapi` 或 `asyncapi` 的页面）为 `APIReference`。
+
+Mintlify 根据页面 frontmatter 和 `docs.json` 配置生成结构化数据，包括页面标题、描述、关键词、规范 URL、最后更新日期、站点名称和 logo。结构化数据不会包含任何没有对应值的字段。带有 `noindex: true` 的页面不会包含结构化数据。
+
+要修改结构化数据，请更新相应的 frontmatter 字段或 `docs.json` 配置。要控制发布者实体，包括稳定的 `@id`、法定名称、规范 logo 和 `sameAs` 个人主页链接，请在 `docs.json` 中设置 [`seo.organization`](/zh/organize/settings-seo#seo)。
+
+<div id="og-images">
+  ## OG 图片
+</div>
+
+Mintlify 会自动为每个页面生成一张 Open Graph (OG) 图片。当你在社交媒体平台和消息应用中分享链接时，该图片会显示为社交预览。
+
+默认 OG 图片属性：
+
+- 宽度：1200px
+- 高度：630px
+- 来自 `docs.json` 中 `logo` 字段的站点 logo
+- 来自页面 `title` frontmatter 的页面标题
+- 来自页面 `description` frontmatter 的页面描述
+- 来自 `docs.json` 中 `colors` 字段的站点主色调
+
+<div id="custom-og-images">
+  ### 自定义 OG 图片
+</div>
+
+有三种方式可以自定义 OG 图片，具体取决于你需要的控制级别。
+
+**自定义背景图片**
+
+要使用自定义背景图片，同时保留自动生成的 logo、标题和描述叠加层，请在 `docs.json` 中设置 `thumbnails.background`。
+
+```json Example docs.json
+"thumbnails": {
+  "background": "/images/og-background.png"
+}
+```
+
+查看 [`thumbnails`](/zh/organize/settings-appearance#thumbnails) 了解完整的自定义选项列表。
+
+
+**为所有页面设置静态 OG 图片**
+
+要用一张静态图片完全替换所有页面上自动生成的图片，请在全局 meta 标签中设置 `og:image`。
+
+```json Example docs.json
+"seo": {
+  "metatags": {
+    "og:image": "https://example.com/og-image.png"
+  }
+}
+```
+
+**为特定页面设置静态 OG 图片**
+
+要覆盖单个页面的 OG 图片，请在该页面的 frontmatter 中设置 `og:image`。
+
+```yaml Example frontmatter
+---
+title: "Your page title"
+description: "Your page description"
+"og:image": "https://example.com/custom-og.png"
+---
+```
+
+<Note>
+  在 meta 标签中设置 `og:image`（无论是全局还是按页面），会用静态图片替换自动生成的社交预览。如果你希望 Mintlify 自动在自定义背景上叠加 logo、页面标题和描述，请使用 [`thumbnails.background`](/zh/organize/settings-appearance#param-thumbnails-background)。
+</Note>
+
+<div id="global-meta-tags">
+  ## 全局元标签
+</div>
+
+要为所有页面设置默认元标签，请在你的 `docs.json` 中添加 `metatags` 字段。
+
+```json
+"seo": {
+    "metatags": {
+        "og:image": "您的默认元标签图片链接"
+    }
+}
+```
+
+<div id="verify-site-ownership">
+  ### 验证站点所有权
+</div>
+
+要通过 Google Search Console、Bing Webmaster Tools 或其他搜索引擎等服务验证你的站点，请在 `docs.json` 的 `seo.metatags` 中添加验证 meta 标签。Mintlify 会将该标签注入到每个页面。
+
+```json
+"seo": {
+    "metatags": {
+        "google-site-verification": "your_verification_token"
+    }
+}
+```
+
+<div id="set-a-canonical-url">
+  ### 设置规范 URL (canonical URL) 
+</div>
+
+规范 URL 会告知搜索引擎你的文档哪个版本是主版本。当你的文档可通过多个 URL 访问时，这有助于提升 SEO (搜索引擎优化) ，并避免重复内容问题。
+
+**全局规范 URL**
+
+如果你使用自定义 domain，请在 `docs.json` 中设置 `canonical` 元标签，确保搜索引擎索引你首选的 domain。Mintlify 会将每个页面的路径追加到这个基础 URL。
+
+```json
+"seo": {
+    "metatags": {
+        "canonical": "https://www.your-custom-domain-here.com"
+    }
+}
+```
+
+**页面级规范 URL**
+
+要为特定页面设置规范 URL，请在该页面的 frontmatter 中添加 `canonical`。这会覆盖全局规范 URL 以及该页面自动生成的规范 URL。这对于版本化文档很有用——你可能希望旧版本页面指向最新版本中的对应页面。
+
+```yaml
+---
+title: "My Page"
+canonical: "https://docs.example.com/latest/my-page"
+---
+```
+
+<Note>
+  请务必在已部署的站点上验证规范 URL 的行为。本地构建会在 URL 中添加 `/src/_props`，这是构建产物，并不属于规范 URL。
+</Note>
+
+<div id="page-specific-meta-tags">
+  ## 页面级元标签
+</div>
+
+要为特定页面设置元标签，可将它们添加到页面的 frontmatter 中。
+
+页面级元标签包括：
+
+* `title` - 页面标题
+* `description` - 页面描述，会显示在页面标题下方以及部分搜索引擎结果中
+* `canonical` - 此页面的规范 URL，会覆盖自动生成的规范 URL
+* `keywords` - 以逗号分隔的关键词
+* `og:title` - 用于社交分享的 Open Graph 标题
+* `og:description` - Open Graph 描述，回退到 `description`
+* `og:image` - Open Graph 图片 URL
+* `og:url` - Open Graph URL
+* `og:type` - Open Graph 类型，例如 &quot;article&quot; 或 &quot;website&quot;
+* `og:image:width` - Open Graph 图片宽度
+* `og:image:height` - Open Graph 图片高度
+* `twitter:title` - Twitter 卡片标题，依次回退到 `og:title`，然后回退到 `title`
+* `twitter:description` - Twitter 卡片描述，依次回退到 `og:description`，然后回退到 `description`
+* `twitter:image` - Twitter 卡片图片
+* `twitter:card` - Twitter 卡片类型，例如 `summary` 或 `summary_large_image`
+* `twitter:site` - Twitter 站点账号 (handle) 
+* `twitter:image:width` - Twitter 图片宽度
+* `twitter:image:height` - Twitter 图片高度
+* `noindex` - 设为 `true` 以阻止搜索引擎收录
+* `robots` - Robots 元标签的取值
+
+<Tip>
+Twitter 元标签会自动继承其对应的 Open Graph 值。例如，如果你设置了 `og:title` 但未设置 `twitter:title`，Twitter 卡片会使用你的 `og:title` 值。仅当你希望 Twitter 上显示的文本与其他平台不同时，才需要显式设置 `twitter:title` 或 `twitter:description`。
+</Tip>
+
+```mdx
+---
+title: "您的示例页面标题"
+description: "页面特定描述"
+"og:title": "社交媒体标题"
+"og:description": "用于社交分享的自定义描述"
+"og:image": "链接到您的元标签图片"
+"twitter:title": "Twitter 专用标题"
+keywords: ["关键词1", "关键词2"]
+---
+```
+
+<Note>
+  带有冒号的元标签必须用引号括起来。例如：`og:title: "Social media title"`。
+
+  `keywords` 字段必须格式化为 YAML 数组。例如：`keywords: ["keyword1", "keyword2", "keyword3"]`。
+</Note>
+
+<div id="common-meta-tags-reference">
+  ## 常用 meta 标签参考
+</div>
+
+下面是可添加到你的 `docs.json` 中的 meta 标签完整列表。这些 meta 标签有助于提升站点的 SEO (搜索引擎优化) 、社交分享表现和浏览器兼容性。
+
+<Tip>
+  在 meta 标签中设置 `og:image` 会用静态图片替换自动生成的社交预览。如果你希望使用自定义**背景图片**，并由 Mintlify 自动在其上叠加 logo、页面标题和描述，请在 `docs.json` 中使用 [`thumbnails.background`](/zh/organize/settings-reference#thumbnails-background)。
+</Tip>
+
+你可以使用 [metatags.io](https://metatags.io/) 预览这些 meta 标签在不同平台上的呈现效果。
+
+```json expandable
+"seo": {
+    "metatags": {
+      "robots": "noindex",
+      "charset": "UTF-8",
+      "viewport": "width=device-width, initial-scale=1.0",
+      "description": "页面描述",
+      "keywords": "关键词1, 关键词2, 关键词3",
+      "author": "作者姓名",
+      "robots": "index, follow",
+      "googlebot": "index, follow",
+      "google": "notranslate",
+      "google-site-verification": "verification_token",
+      "generator": "Mintlify",
+      "theme-color": "#000000",
+      "color-scheme": "light dark",
+      "canonical": "https://your-custom-domain-here.com",
+      "format-detection": "telephone=no",
+      "referrer": "origin",
+      "refresh": "30",
+      "rating": "general",
+      "revisit-after": "7 days",
+      "language": "en",
+      "copyright": "版权所有 2024",
+      "reply-to": "email@example.com",
+      "distribution": "global",
+      "coverage": "全球",
+      "category": "技术",
+      "target": "全部",
+      "HandheldFriendly": "True",
+      "MobileOptimized": "320",
+      "apple-mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-status-bar-style": "black",
+      "apple-mobile-web-app-title": "应用标题",
+      "application-name": "应用名称",
+      "msapplication-TileColor": "#000000",
+      "msapplication-TileImage": "path/to/tile.png",
+      "msapplication-config": "path/to/browserconfig.xml",
+      "og:title": "Open Graph 标题",
+      "og:type": "website",
+      "og:url": "https://example.com",
+      "og:image": "https://example.com/image.jpg",
+      "og:description": "Open Graph 描述",
+      "og:site_name": "网站名称",
+      "og:locale": "en_US",
+      "og:video": "https://example.com/video.mp4",
+      "og:audio": "https://example.com/audio.mp3",
+      "twitter:card": "summary",
+      "twitter:site": "@username",
+      "twitter:creator": "@username",
+      "twitter:title": "Twitter 标题",
+      "twitter:description": "Twitter 描述",
+      "twitter:image": "https://example.com/image.jpg",
+      "twitter:image:alt": "图片描述",
+      "twitter:player": "https://example.com/player",
+      "twitter:player:width": "480",
+      "twitter:player:height": "480",
+      "twitter:app:name:iphone": "应用名称",
+      "twitter:app:id:iphone": "12345",
+      "twitter:app:url:iphone": "app://",
+      "article:published_time": "2024-01-01T00:00:00+00:00",
+      "article:modified_time": "2024-01-02T00:00:00+00:00",
+      "article:expiration_time": "2024-12-31T00:00:00+00:00",
+      "article:author": "作者姓名",
+      "article:section": "技术",
+      "article:tag": "标签1, 标签2, 标签3",
+      "book:author": "作者姓名",
+      "book:isbn": "1234567890",
+      "book:release_date": "2024-01-01",
+      "book:tag": "标签1, 标签2, 标签3",
+      "profile:first_name": "John",
+      "profile:last_name": "Doe",
+      "profile:username": "johndoe",
+      "profile:gender": "male",
+      "music:duration": "205",
+      "music:album": "专辑名称",
+      "music:album:disc": "1",
+      "music:album:track": "1",
+      "music:musician": "艺术家姓名",
+      "music:song": "歌曲名称",
+      "music:song:disc": "1",
+      "music:song:track": "1",
+      "video:actor": "演员姓名",
+      "video:actor:role": "角色名称",
+      "video:director": "导演姓名",
+      "video:writer": "编剧姓名",
+      "video:duration": "120",
+      "video:release_date": "2024-01-01",
+      "video:tag": "标签1, 标签2, 标签3",
+      "video:series": "系列名称"
+  }
+}
+```
+
+<div id="sitemaps-and-robotstxt-files">
+  ## 站点地图与 robots.txt 文件
+</div>
+
+Mintlify 会自动生成 `sitemap.xml` 和 `robots.txt` 文件。你可以在文档站点的 URL 后追加 `/sitemap.xml` 来查看站点地图。
+
+默认情况下，Mintlify 仅索引你在 `docs.json` 导航中包含的页面。它会将存在于你仓库中但未列入导航的[隐藏页面](/zh/organize/hidden-pages)排除在以下内容之外：
+  - 搜索引擎站点地图
+  - 内部文档搜索
+  - [AI 助手](/zh/assistant/index)上下文
+  - [MCP 服务器](/zh/ai/model-context-protocol)搜索结果
+
+若要将隐藏页面纳入搜索索引，请在 `docs.json` 中添加 `seo.indexing`：
+
+```json
+"seo": {
+    "indexing": "all"
+}
+```
+
+<Note>
+  对于需要认证的文档站点，站点地图和 `robots.txt` 文件也需要完成认证后才能访问。站点地图会排除属于 [用户分组](/zh/deploy/authentication-setup#control-access-with-groups) 的页面。
+</Note>
+
+<div id="trailing-slash-urls">
+  ### 带尾部斜杠的 URL
+</div>
+
+如果你的托管环境为每个页面都提供带尾部斜杠的 URL（例如 `/quickstart/` 而不是 `/quickstart`），请在 `docs.json` 中启用 `seo.trailingSlash`，让 Mintlify 用于 SEO 的 URL 与之保持一致：
+
+```json
+"seo": {
+    "trailingSlash": true
+}
+```
+
+启用后，Mintlify 会为以下位置添加尾部斜杠：
+
+- canonical 标签和 `og:url` 元标签
+- 自动生成的 `sitemap.xml` 中的 `<loc>` 条目
+- 页面之间的根相对内部链接，同时保留任何查询字符串或哈希片段
+
+启用 `trailingSlash` 只会影响 URL 的输出方式。它不会更改页面路由，不会重定向现有 URL，也不适用于你在[页面 frontmatter](/zh/organize/pages) 中显式设置的每页 `canonical` 值。如果你的站点不使用尾部斜杠，请将 `trailingSlash` 保持未设置或设为 `false`。
+
+<div id="content-signal-directives">
+  ### Content-Signal 指令
+</div>
+
+自动生成的 `robots.txt` 包含 [Content-Signal](https://contentsignals.org) 指令，用于告知 AI 爬虫如何使用你的文档。这些信号遵循 Cloudflare 的 Content Signals 政策，适用于所有用户代理：
+
+```txt
+User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+```
+
+默认信号会让你的文档启用以下用途：
+
+- `ai-train=yes`—训练 AI 模型。
+- `search=yes`—构建搜索索引。
+- `ai-input=yes`—生成 AI 回答，包括检索增强生成（RAG）和 AI 助手。
+
+这些默认值有助于 ChatGPT、Claude、Perplexity 等 AI 工具发现并引用你的文档。要更改这些信号，请在项目根目录[添加自定义 `robots.txt`](#custom-sitemaps-and-robotstxt-files)。Mintlify 会按原样提供自定义文件，不会包含默认的 Content-Signal 指令。
+
+<div id="custom-sitemaps-and-robotstxt-files">
+  ### 自定义 sitemap 和 robots.txt 文件
+</div>
+
+要添加自定义的 `sitemap.xml` 或 `robots.txt` 文件，请在项目根目录创建对应的 `sitemap.xml` 或 `robots.txt` 文件。添加自定义文件会覆盖同名的自动生成文件。删除自定义文件后，默认文件会自动重新生效。
+
+<Tip>
+  如果你的自定义 `robots.txt` 屏蔽了 `GPTBot`、`ClaudeBot` 或 `PerplexityBot` 等 AI 用户代理，AI 工具将无法抓取你的文档，也无法在回答中引用它。详见[在 robots.txt 中允许 AI 代理](/zh/guides/geo#allow-ai-agents-in-robotstxt)。
+</Tip>
+
+<div id="disable-indexing">
+  ## 禁用索引编入
+</div>
+
+要防止搜索引擎收录某个页面，请在该页面的 [frontmatter](/zh/organize/pages) 中添加 `noindex: true`。
+
+```yaml
+---
+noindex: true
+---
+```
+
+<Tip>
+  在 `frontmatter` 中带有 `hidden: true` 的页面会自动被视为 `noindex: true`。更多详情请参见[隐藏页面](/zh/organize/hidden-pages)。
+</Tip>
+
+你也可以在 `docs.json` 中将 `metatags.robots` 字段设置为 `"noindex"`，从而为文档内的所有页面指定 `noindex`：
+
+```json
+"seo": {
+    "metatags": {
+      "robots": "noindex"
+    }
+  }
+```
+
+<div id="disable-indexing-for-the-entire-project">
+  ### 为整个项目禁用索引编入
+</div>
+
+要在保持文档公开可访问的同时让搜索引擎不收录整个部署，请在仪表盘的 **Settings > Deployment > Add-ons > Visibility** 下启用 **Don't index project**。
+
+启用后，Mintlify 会：
+
+- 为每个页面渲染 `noindex, nofollow` 的 robots meta 标签。
+- 返回空的 `sitemap.xml`。
+- 对 `llms.txt` 和 `llms-full.txt` 返回 `404`。
+- 清空搜索索引，使页面不再出现在内部搜索、[AI 助手](/zh/assistant/index)或 [MCP 服务器](/zh/ai/model-context-protocol)中。
+- 提供一个对整个站点禁止访问的 `robots.txt`：
+
+  ```txt
+  User-agent: *
+  Content-Signal: ai-train=no, search=no, ai-input=no
+  Disallow: /
+  ```
+
+当你希望保持部署在线以便内部审阅、预演或有限分享，但不希望它出现在公开搜索结果中，或被 AI 工具用作训练或检索数据时，可以使用此选项。
+
+<Note>
+  切换此设置会触发站点重新部署。更改将在重新部署完成后生效。
+</Note>
+
+此设置与其他索引控制配合使用：
+
+- **按页 `noindex`**—当项目级设置关闭时，frontmatter 中的 `noindex: true` 仍然生效。项目级设置开启时会覆盖按页设置，所有页面都按 `noindex` 处理。
+- **自定义 `robots.txt`**—如果你在项目根目录提供了[自定义 `robots.txt`](#custom-sitemaps-and-robotstxt-files)，Mintlify 会原样提供该文件。项目级设置不会替换自定义 `robots.txt`，因此如果需要让爬虫规则保持一致，请单独更新或删除你的自定义文件。
+
+<div id="seo-best-practices">
+  ## SEO 最佳实践
+</div>
+
+<AccordionGroup>
+  <Accordion title="撰写具有描述性的标题和说明">
+    * 使用清晰、具有描述性的页面标题 (50–60 个字符) 
+    * 撰写有吸引力的说明 (150–160 个字符) 
+    * 包含相关关键词
+    * 确保每个页面的标题和说明都独一无二
+  </Accordion>
+
+  <Accordion title="优化内容结构">
+    * 使用正确的标题层级 (H1 → H2 → H3) 
+    * 先为人写，其次为搜索引擎写
+    * 在标题和正文中包含相关关键词
+    * 保持 URL 简短、清晰，并按层级组织
+    * 用小标题和列表拆分长内容
+  </Accordion>
+
+  <Accordion title="内部链接策略">
+    * 在文档中链接到相关页面
+    * 使用描述性的锚文本，而非“click here”
+    * 通过连接相关概念构建主题集群
+    * 使用自动交叉引用功能
+  </Accordion>
+
+  <Accordion title="图片 SEO">
+    * 为图片使用描述性的文件名
+    * 始终提供用于无障碍与 SEO 的 alt 文本
+    * 优化图片文件大小以加快加载速度
+    * 使用与内容相关、能起到支撑作用的图片
+  </Accordion>
+</AccordionGroup>

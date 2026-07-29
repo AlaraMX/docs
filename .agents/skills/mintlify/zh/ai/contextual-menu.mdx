@@ -1,0 +1,217 @@
+---
+title: "上下文菜单"
+description: "为你的文档添加上下文菜单，一键集成 ChatGPT、Claude、Perplexity、Google AI Studio、Devin、Devin Desktop 和 MCP 工具。"
+keywords: ["AI 工具", "ChatGPT", "Claude", "Perplexity", "MCP", "Grok", "cursor", "vscode", "vs code", "Google AI Studio", "aistudio", "Devin", "Windsurf", "Devin Desktop", "pdf", "复制页面", "复制按钮", "复制 markdown", "复制为 markdown", "以 markdown 查看", "上下文菜单", "页面菜单", "AI 菜单", "AI 操作", "打开于", "下载 pdf", "导出 pdf", "询问 AI", "openapi", "下载规范"]
+---
+
+import { PreviewButton } from "/snippets/previewbutton.jsx"
+import IconsRequired from "/snippets/zh/icons-required.mdx";
+
+上下文菜单可快速访问经 AI 优化的内容，以及与主流 AI 工具的直接集成。用户在任意页面打开上下文菜单时，可以将内容复制为 AI 工具的 context，或在 ChatGPT、Claude、Perplexity、Google AI Studio、Grok、Devin、Devin Desktop，或你自定义的工具中直接开启对话，并自动加载你的文档作为 context。
+
+<Tip>
+  将上下文菜单与你托管的 [`skill.md`](/zh/ai/skillmd) 文件以及 [MCP 服务器](/zh/ai/model-context-protocol)结合使用，让用户能将你产品的全部能力安装到他们的 AI 工具中，而不只是他们正在阅读的那一页。
+</Tip>
+
+<div id="menu-options">
+  ## 菜单选项
+</div>
+
+上下文菜单包含多个预构建选项，你可以通过将其标识符添加到配置中来启用。
+
+| Option | Identifier | Description |
+|:--------|:------------|:-------------|
+| **复制页面** | `copy` | 将当前页面复制为 Markdown，以便作为 context 粘贴到 AI 工具中 |
+| **以 Markdown 查看** | `view` | 以 Markdown 打开当前页面 |
+| **询问助手** | `assistant` | 使用当前页面作为 context 打开 [assistant](/zh/assistant/index) |
+| **在 ChatGPT 中打开** | `chatgpt` | 使用当前页面作为 context 创建一个 ChatGPT 对话 |
+| **在 Claude 中打开** | `claude` | 使用当前页面作为 context 创建一个 Claude 对话 |
+| **在 Perplexity 中打开** | `perplexity` | 使用当前页面作为 context 创建一个 Perplexity 对话 |
+| **在 Grok 中打开** | `grok` | 使用当前页面作为 context 创建一个 Grok 对话 |
+| **在 Google AI Studio 中打开** | `aistudio` | 使用当前页面作为 context 创建一个 Google AI Studio 对话 |
+| **在 Devin 中打开** | `devin` | 使用当前页面作为 context 创建一个 Devin 会话 |
+| **在 Devin Desktop 中打开** | `devin-desktop` | 使用当前页面作为 context 打开 Devin Desktop。需要安装 Devin Desktop。 |
+| **复制 MCP 服务器 URL** | `mcp` | 将你的 MCP 服务器 URL 复制到剪贴板 |
+| **复制 MCP 安装命令** | `add-mcp` | 复制用于安装 MCP 服务器的 `npx add-mcp` 命令 |
+| **连接到 Cursor** | `cursor` | 在 Cursor 中安装你托管的 MCP 服务器 |
+| **连接到 VS Code** | `vscode` | 在 VS Code 中安装你托管的 MCP 服务器 |
+| **连接到 Devin** | `devin-mcp` | 在 Devin 中安装你托管的 MCP 服务器 |
+| **下载 PDF** | `download-pdf` | 将当前页面下载为 PDF |
+| **自定义选项** | Object | 向上下文菜单添加自定义选项 |
+
+<Frame>
+  <img src="/images/contextual-menu/contextual-menu.png" alt="展开的上下文菜单，显示了“复制页面”“以 Markdown 查看”“在 ChatGPT 中打开”和“在 Claude 中打开”等菜单项。" />
+</Frame>
+
+<div id="enabling-the-contextual-menu">
+  ## 启用上下文菜单
+</div>
+
+在你的 `docs.json` 文件中添加 `contextual` 字段，并指定要包含的选项。 选项按你在数组中列出的顺序在菜单中显示。
+
+```json
+{
+ "contextual": {
+   "options": [
+     "copy",
+     "view",
+     "assistant",
+     "chatgpt",
+     "claude",
+     "perplexity",
+      "grok",
+       "aistudio",
+       "devin",
+       "devin-desktop",
+      "mcp",
+      "cursor",
+      "vscode",
+      "devin-mcp",
+      "download-pdf"
+    ]
+ }
+}
+```
+
+<div id="display-location">
+  ## 显示位置
+</div>
+
+默认情况下，上下文菜单显示在页面页眉中。你也可以使用 `display` 选项，将其配置为显示在目录侧边栏中。
+
+```json
+{
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude"],
+    "display": "toc"
+  }
+}
+```
+
+| 值        | 说明                     |
+| :------- | :--------------------- |
+| `header` | 在页面顶部的上下文菜单中显示选项 (默认)  |
+| `toc`    | 在目录侧边栏中显示选项            |
+
+<div id="adding-custom-options">
+  ## 添加自定义选项
+</div>
+
+通过向 `options` 数组添加一个对象，在上下文菜单中创建自定义选项。每个自定义选项需要包含以下属性：
+
+<ResponseField name="title" type="string" required>
+  选项的标题。
+</ResponseField>
+
+<ResponseField name="description" type="string" required>
+  选项的说明。当上下文菜单展开时显示于标题下方。
+</ResponseField>
+
+<IconsRequired />
+
+<ResponseField name="href" type="string | object" required>
+  选项的 href。简单链接使用字符串，带有 query 参数的动态链接使用对象。
+
+  <Expandable title="href object">
+    <ResponseField name="base" type="string" required>
+      选项的基础 URL。
+    </ResponseField>
+
+    <ResponseField name="query" type="object" required>
+      选项的 query 参数。
+
+      <Expandable title="query object">
+        <ResponseField name="key" type="string" required>
+          query 参数的 key。
+        </ResponseField>
+
+        <ResponseField name="value" type="string" required>
+          query 参数的值。Mintlify 会将以下占位符替换为对应的值：
+
+          * 使用 `$page` 插入当前页面内容 (Markdown 格式) 。
+          * 使用 `$path` 插入当前页面路径。
+          * 使用 `$mcp` 插入托管的 MCP 服务器 URL。
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+自定义选项示例：
+
+```json {9-14} wrap
+{
+    "contextual": {
+        "options": [
+            "copy",
+            "view",
+            "chatgpt",
+            "claude",
+            "perplexity",
+            {
+                "title": "功能请求",
+                "description": "在 GitHub 上参与讨论，请求新功能",
+                "icon": "plus",
+                "href": "https://github.com/orgs/mintlify/discussions/categories/feature-requests"
+            }
+        ]
+    }
+}
+```
+
+<div id="override-on-individual-pages">
+  ## 在单个页面上覆盖
+</div>
+
+通过在页面 frontmatter 中添加 `contextual` 字段，可在特定页面覆盖全局的上下文菜单。你可以用它在服务条款页面上呈现 `download-pdf` 等页面专属操作，或在着陆页上完全隐藏该菜单。
+
+页面级的 `contextual` 对象会替换该页面的全局配置。省略该字段即可继承 `docs.json` 的设置，将 `options: []` 设为空数组则可在该页面禁用上下文菜单。
+
+```mdx
+---
+title: "服务条款"
+contextual:
+  options:
+    - copy
+    - download-pdf
+  display: header
+---
+```
+
+`docs.json` 中相同的字段和校验规则同样适用，包括[自定义选项](#adding-custom-options)以及 `display` 设置。如果页面级的覆盖配置无效，Mintlify 将回退到全局的 `contextual` 配置。
+
+<div id="custom-option-examples">
+  ### 自定义选项示例
+</div>
+
+<AccordionGroup>
+  <Accordion title="简单链接">
+    ```json
+    {
+      "title": "请求新功能",
+      "description": "在 GitHub 上参与讨论",
+      "icon": "plus",
+      "href": "https://github.com/orgs/mintlify/discussions/categories/feature-requests"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="包含页面内容的动态链接">
+    ```json
+    {
+      "title": "在 X 上分享",
+      "description": "将此页面分享至 X",
+      "icon": "x",
+      "href": {
+        "base": "https://x.com/intent/tweet",
+        "query": [
+          {
+          "key": "text",
+          "value": "查看这份文档：$page"
+          }
+        ]
+      }
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

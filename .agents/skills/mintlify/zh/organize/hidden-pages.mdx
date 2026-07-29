@@ -1,0 +1,174 @@
+---
+title: "隐藏页面"
+description: "将文档页面从侧边栏导航中隐藏，同时仍可通过直接 URL、站内搜索或 AI 助手访问，适用于内部参考、AI 上下文等特殊场景。"
+keywords: ["从导航中隐藏", "未列出", "页面可见性"]
+---
+
+隐藏页面不会出现在站点的导航中，但任何知道该 URL 的人仍然可以访问它们。比如，如果你创建了一个像 `guides/hidden-page.mdx` 这样的隐藏页面，访问者依然可以通过 `docs.yoursite.com/guides/hidden-page` 打开它。
+
+当你希望用户能够访问某些内容，或将其作为 AI 工具的上下文引用，但又不希望这些内容出现在导航中时，可以使用隐藏页面。
+
+<Warning>
+  隐藏页面并非私密页面。任何知道 URL 的人都可以查看它们，外部分享的链接依然有效。隐藏页面只会将其从渲染的导航中移除。
+
+  如果你的内容需要严格的访问控制，必须配置[认证](/zh/deploy/authentication-setup)。要将页面限制为特定用户组访问，请设置[基于用户组的访问控制](/zh/deploy/authentication-setup#control-access-with-groups)。
+</Warning>
+
+参见[隐藏页面示例](/zh/organize/hidden-page-example)。
+
+<Note>
+  某些导航元素，如侧边栏、下拉菜单和选项卡，在隐藏页面上可能会显示为空或导致布局发生变化。
+</Note>
+
+<div id="hide-a-page">
+  ## 隐藏页面
+</div>
+
+要隐藏页面，请在页面的 [frontmatter](/zh/organize/pages) 中设置 `hidden: true`，或将其从 `docs.json` 的 navigation 中移除。
+
+<div id="set-hidden-true-in-frontmatter">
+  ### 在 frontmatter 中设置 `hidden: true`
+</div>
+
+在页面的 frontmatter 中添加 `hidden: true`，可以将该页面从渲染的导航中移除，同时仍然将其包含在 `docs.json` 配置中。
+
+```yaml
+---
+title: "My hidden page"
+hidden: true
+---
+```
+
+要使页面重新可见，请完全移除 `hidden` 字段。不要设置 `hidden: false`，因为这会导致未定义的行为。
+
+<Note>
+  默认情况下，`hidden: true` 会将页面从搜索引擎索引编入、站点地图和 AI 上下文中排除。
+
+  如需仍然包含该页面，请在 `docs.json` 中设置 `seo.indexing: "all"`。有关详细信息，请参阅[搜索、SEO 和 AI 索引编入](https://www.mintlify.com/docs/#search-seo-and-ai-indexing)。
+
+  注意：`noindex: true` 仅影响索引编入，不会将页面从导航中隐藏。有关更多信息，请参阅[禁用索引编入](https://www.mintlify.com/docs/optimize/seo#disable-indexing)。
+</Note>
+
+<div id="remove-the-page-from-navigation">
+  ### 从导航中移除页面
+</div>
+
+如果你没有在 `docs.json` 的 navigation 中包含某个页面，该页面就会被隐藏。这种方式非常适合那些你根本不希望出现在导航中的页面。
+
+<div id="hide-a-group-of-pages">
+  ## 隐藏一组页面
+</div>
+
+若要隐藏一组页面，请在你的 `docs.json` 文件中将该页面分组的 `hidden` 属性设为 `true`：
+
+```json highlight={4}
+"groups": [
+  {
+    "group": "快速开始",
+    "hidden": true,
+    "pages": [
+      "index",
+      "quickstart"
+    ]
+  },
+  {
+    "group": "Guides",
+    "pages": [
+      "guides/hidden-page.mdx",
+      "guides/hidden-groups.mdx"
+    ]
+  }
+]
+```
+
+在此示例中，`Getting started` 组保持隐藏，并且 `Guides` 组保持可见。
+
+<div id="hide-a-tab">
+  ### 隐藏标签页
+</div>
+
+要隐藏某个标签页，请在 `docs.json` 文件中为该标签页添加 `hidden` 属性：
+
+```json highlight={4}
+"tabs": [
+  {
+    "tab": "首页",
+    "hidden": true,
+    "pages": [
+      "index",
+      "quickstart"
+    ]
+  }
+]
+```
+
+<div id="search-seo-and-ai-indexing">
+  ## 搜索、SEO 与 AI 索引编入
+</div>
+
+默认情况下，隐藏页面不会被纳入搜索引擎的索引、文档站点的内部搜索，也不会作为 AI 助手的上下文使用。你可以通过两种方式将隐藏内容纳入搜索和索引。
+
+<div id="include-all-hidden-pages">
+  ### 包含所有隐藏页面
+</div>
+
+若要将站点上所有隐藏页面都纳入搜索、站点地图和 AI 上下文中，请在你的 `docs.json` 中添加 `seo` 属性：
+
+```json
+"seo": {
+    "indexing": "all"
+}
+```
+
+<div id="include-pages-under-specific-hidden-tabs-or-groups">
+  ### 仅包含特定隐藏标签页或分组下的页面
+</div>
+
+若只想包含某个隐藏标签页或分组下的页面，请在 `docs.json` 中对应的标签页或分组上设置 `searchable: true`。当你为了控制导航布局而隐藏标签页或分组，但仍希望其下的子页面可被发现时，请使用此选项。
+
+```json highlight={5}
+"tabs": [
+  {
+    "tab": "Storage",
+    "hidden": true,
+    "searchable": true,
+    "groups": [
+      {
+        "group": "Buckets",
+        "pages": ["products/storage/buckets/create-bucket"]
+      }
+    ]
+  }
+]
+```
+
+设置 `searchable: true` 后，子页面仍会保留在以下位置：
+
+- 文档站点搜索
+- `sitemap.xml`
+- AI 助手上下文
+- MCP 服务器搜索结果
+- 搜索引擎索引（不会应用 `noindex` meta 标签）
+
+但标签页或分组本身仍会在渲染后的导航中保持隐藏。
+
+页面自身的 `hidden: true` frontmatter 始终具有最高优先级。若要重新排除某个子分组，请在其上设置 `hidden: true` 且不设置 `searchable: true`。
+
+<div id="page-level-searchable">
+  ### 页面级 `searchable`
+</div>
+
+在页面 frontmatter 层级，`searchable` 仅接受 `false`。使用它可以让外部搜索引擎仍然可以索引该页面，同时将其从站内搜索和 AI 助手 context 中排除。示例请参阅[将页面从搜索中排除](/zh/optimize/search#exclude-a-page-from-search)。
+
+页面级 `searchable` 不会覆盖同一页面上的 `hidden: true`。若要使隐藏页面可被发现，请不要设置 `searchable`，并将其移至带有 `searchable: true` 的隐藏标签页或分组下，或在 `docs.json` 中设置 `seo.indexing: "all"`。
+
+<div id="understanding-hidden-versus-noindex">
+  ### 理解 `hidden` 与 `noindex` 的区别
+</div>
+
+`hidden` 和 `noindex` 之间的关系是单向的：
+
+* **`hidden: true` → 会自动应用 `noindex`**：隐藏页面会自动从搜索引擎、站点地图和 AI context 中排除在外。
+* **`noindex: true` → 不会应用 `hidden`**：带有 `noindex: true` 的页面在导航中仍然可见。它们不会出现在站点搜索、站点地图、搜索引擎索引或 AI context 中。
+
+如果想让某个页面从搜索引擎中排除，但仍在导航中可见，请在它的 frontmatter 中添加 `noindex: true`。如果想让页面同时从导航和搜索引擎中隐藏，请使用 `hidden: true`。如果只想将页面从站点内搜索和 AI 助手 context 中排除，但仍允许外部搜索引擎对其进行索引，请改用 [`searchable: false`](/zh/optimize/search#exclude-a-page-from-search)。

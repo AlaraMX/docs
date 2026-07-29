@@ -1,0 +1,139 @@
+---
+title: "Trabajar con branches"
+description: "Crea y gestiona branches de documentación para previsualizar cambios, colaborar con compañeros y fusionar actualizaciones antes de publicarlas en producción."
+keywords: ["Git","branches","branch workflow","creating branches","deployment branch"]
+---
+
+Las branches son una función del control de versiones que apuntan a confirmaciones específicas en tu repositorio. Tu rama de implementación, generalmente llamada `main`, representa el contenido que se usa para compilar tu sitio de documentación en producción. Todas las demás branches son independientes de tu sitio en producción a menos que decidas fusionarlas en tu rama de implementación.
+
+Las branches te permiten crear instancias separadas de tu documentación para realizar cambios, obtener revisiones y probar nuevos enfoques antes de publicar. Tu equipo puede trabajar en branches para actualizar diferentes partes de tu documentación al mismo tiempo, sin afectar lo que los usuarios ven en tu sitio en producción.
+
+El siguiente diagrama muestra un ejemplo de flujo de trabajo con branches en el que creas una branch de funcionalidad, realizas cambios y luego fusionas la branch de funcionalidad en la branch principal.
+
+```mermaid
+gitGraph
+    commit id: "Confirmación inicial"
+    commit id: "Branch creada"
+    branch feature-branch
+    checkout feature-branch
+    commit id: "Agregar cambios"
+    commit id: "Agregar más cambios"
+    checkout main
+    checkout feature-branch
+    commit id: "Agregar comentarios del revisor"
+    checkout main
+    merge feature-branch id: "Fusionar en main" type: HIGHLIGHT
+    commit id: "Documentación en producción"
+```
+
+Recomendamos trabajar siempre desde branches al actualizar la documentación para mantener estable tu sitio en producción y habilitar flujos de revisión.
+
+
+<div id="branch-naming-conventions">
+  ## Convenciones para nombrar branches
+</div>
+
+Usa nombres claros y descriptivos que indiquen el propósito de un branch.
+
+**Usa**:
+
+- `fix-broken-links`
+- `add-webhooks-guide`
+- `reorganize-getting-started`
+- `ticket-123-oauth-guide`
+
+**Evita**:
+
+- `temp`
+- `my-branch`
+- `updates`
+- `branch1`
+
+<div id="create-a-branch">
+  ## Crear una rama
+</div>
+
+<Tabs>
+  <Tab title="Usando el editor web">
+    1. Haz clic en el nombre de la rama en la barra de herramientas del editor.
+    1. Haz clic en **Create new branch**.
+    1. Escribe un nombre descriptivo.
+    1. Si tienes cambios sin guardar, elige si quieres llevarlos a la nueva rama o dejarlos en tu rama actual.
+    1. Haz clic en **Create branch**.
+  </Tab>
+  <Tab title="Usando desarrollo local">
+    <Steps>
+      <Step title="Crea una rama desde tu terminal">
+        ```bash
+        git checkout -b branch-name
+        ```
+
+        Esto crea la rama y cambia a ella en un solo comando.
+      </Step>
+      <Step title="Envía la rama a GitHub">
+        ```bash
+        git push -u origin branch-name
+        ```
+
+        La opción `-u` configura el seguimiento para que en futuros envíos solo necesites ejecutar `git push`.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+<div id="save-changes-on-a-branch">
+  ## Guardar cambios en una branch
+</div>
+
+<Tabs>
+  <Tab title="Usar el editor web">
+    Selecciona el botón **Save as commit** en la parte superior derecha de la barra de herramientas del editor. Esto crea una confirmación y sube tu trabajo a tu branch automáticamente.
+  </Tab>
+
+  <Tab title="Usar desarrollo local">
+    Prepara, confirma y sube tus cambios.
+
+    ```bash
+    git add .
+    git commit -m "Describe your changes"
+    git push
+    ```
+  </Tab>
+</Tabs>
+
+<div id="switch-branches">
+  ## Cambiar de branch
+</div>
+
+<Tabs>
+  <Tab title="Usar el editor web">
+    1. Haz clic en el nombre del branch en la barra de herramientas del editor para abrir el menú desplegable de branches.
+    1. Busca un branch por nombre o desplázate por la lista.
+    1. Haz clic en el branch al que quieres cambiar.
+
+    Cada branch en el menú desplegable muestra un indicador de estado para que puedas ver si está listo, sincronizándose o ha fallado.
+
+    <Warning>
+      Los cambios sin guardar se pierden al cambiar de branch. Guarda tu trabajo primero.
+    </Warning>
+  </Tab>
+  <Tab title="Usar el entorno de desarrollo local">
+    Cambia a un branch existente:
+
+    ```bash
+    git checkout branch-name
+    ```
+
+    O crea y cambia en un solo comando:
+
+    ```bash
+    git checkout -b new-branch-name
+    ```
+  </Tab>
+</Tabs>
+
+<div id="merge-branches">
+  ## Fusionar branches
+</div>
+
+Cuando tus cambios estén listos para su publicación, crea una solicitud de extracción para fusionar tu branch en la rama de implementación. 

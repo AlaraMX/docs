@@ -1,0 +1,66 @@
+---
+title: "Configuración de monorepo"
+description: "Configura la ruta de la documentación y el directorio de contenido en un monorepo para que Mintlify despliegue solo desde tu carpeta designada."
+keywords: ["monorepo", "content directory", "multi-project repository"]
+---
+
+Configura Mintlify para desplegar la documentación desde un directorio específico dentro de un monorepo. Esta configuración te permite mantener la documentación junto con tu código en repositorios que contienen múltiples proyectos o servicios.
+
+<Note>
+  Un despliegue de monorepo usa un solo repositorio con un subdirectorio de docs. Para combinar contenido de más de un repositorio en un solo sitio, consulta [Implementaciones multi-repositorio](/es/deploy/multi-repo).
+</Note>
+
+Una estructura típica de monorepo podría verse así:
+
+```text
+your-repo/
+├── apps/
+│   ├── web/
+│   └── api/
+├── docs/
+│   ├── docs.json
+│   └── quickstart.mdx
+└── package.json
+```
+
+En este ejemplo, configurarías la ruta de tu documentación como `/docs`.
+
+<div id="prerequisites">
+  ## Requisitos previos
+</div>
+
+* Acceso de administrador a tu proyecto de Mintlify.
+* Archivos de documentación organizados en un directorio dedicado dentro de tu monorepo.
+* Un `docs.json` válido en tu directorio de documentación.
+
+<div id="configure-monorepo-deployment">
+  ## Configurar la implementación en un monorepo
+</div>
+
+<Steps>
+<Step title="Accede a la configuración de Git">
+Ve a [Git Settings](https://app.mintlify.com/settings/deployment/git-settings) en tu dashboard.
+
+<Frame>
+<img
+  className="block dark:hidden my-0 pointer-events-none"
+  src="/images/monorepo-light.png"
+  alt="El panel de configuración del proyecto en el menú Git Settings, donde el interruptor docs.json is in a subdirectory está activado y se especifica una ruta al directorio /docs."
+/>
+<img
+  className="hidden dark:block my-0 pointer-events-none"
+  src="/images/monorepo-dark.png"
+  alt="El panel de configuración del proyecto en el menú Git Settings, donde el interruptor docs.json is in a subdirectory está activado y se especifica una ruta al directorio /docs."
+/>
+</Frame>
+
+</Step>
+<Step title="Define la ruta de tu documentación">
+1. Activa el interruptor **docs.json is in a subdirectory**.
+2. Ingresa la ruta relativa a tu directorio de documentación. Por ejemplo, si tu documentación está en el directorio `docs`, ingresa `/docs`.
+<Note>
+  No incluyas una barra final en la ruta.
+</Note>
+3. Selecciona **Guardar cambios**. Al guardar se activa un nuevo despliegue desde la ruta configurada.
+</Step>
+</Steps>

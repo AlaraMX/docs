@@ -1,0 +1,24 @@
+---
+title: "Obtener consultas de búsqueda"
+description: "Exporta las consultas de búsqueda de tu documentación en Mintlify con conteos de resultados, CTR y la última fecha de búsqueda por término."
+openapi: /es/analytics.openapi.json GET /v1/analytics/{projectId}/searches
+keywords: [ "Analytics", "búsqueda", "exportación", "consultas", "términos de búsqueda" ]
+---
+
+<div id="usage">
+  ## Uso
+</div>
+
+Usa este endpoint para exportar el análisis de búsqueda de la documentación. Los resultados se ordenan de mayor a menor número de resultados, mostrando los términos que más buscan tus usuarios.
+
+Pagina los resultados usando el parámetro `nextCursor` devuelto en la respuesta. Continúa obteniendo resultados mientras `nextCursor` no sea nulo.
+
+<div id="filtering">
+  ## Filtrado
+</div>
+
+Filtra los datos de búsqueda por rango de fechas usando los parámetros `dateFrom` y `dateTo`.
+
+## Límites de uso
+
+Este endpoint permite 100 solicitudes por organización por hora. Todos los endpoints de analytics comparten este límite.

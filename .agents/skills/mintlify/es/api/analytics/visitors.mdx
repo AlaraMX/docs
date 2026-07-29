@@ -1,0 +1,24 @@
+---
+title: "Obtener visitantes únicos"
+description: "Obtén el número de visitantes únicos de tu documentación en Mintlify, por ruta y a nivel de sitio, con desglose entre tráfico humano y de IA."
+openapi: /es/analytics.openapi.json GET /v1/analytics/{projectId}/visitors
+keywords: [ "Analytics", "visitantes", "visitantes únicos", "tráfico", "exportación" ]
+---
+
+<div id="usage">
+  ## Uso
+</div>
+
+Usa este endpoint para exportar el análisis de visitantes únicos. Los resultados incluyen totales del sitio completo y desgloses por página, divididos entre tráfico humano y de IA. El campo `total` se deduplica entre el tráfico humano y el de IA.
+
+Pagina los resultados usando paginación basada en desplazamiento. Incrementa `offset` en `limit` mientras `hasMore` sea `true`.
+
+<div id="filtering">
+  ## Filtrado
+</div>
+
+Filtra los datos de visitantes por rango de fechas usando los parámetros `dateFrom` y `dateTo`.
+
+## Límites de uso
+
+Este endpoint permite 100 solicitudes por organización por hora. Todos los endpoints de analytics comparten este límite.

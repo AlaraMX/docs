@@ -1,0 +1,43 @@
+---
+title: "Plausible"
+description: "Intégrez Plausible Analytics à votre documentation Mintlify pour un suivi des visiteurs léger et respectueux de la vie privée, sans cookies."
+keywords: ["Plausible Analytics", "analytics respectueux de la vie privée", "analytics auto‑hébergés", "configuration du domain"]
+boost: 3
+---
+
+Ajoutez le domain de votre site dans `docs.json` pour envoyer des Analytics à Plausible.
+
+<Info>
+  N’incluez pas `https://` pour le domain ou le serveur.
+</Info>
+
+<CodeGroup>
+
+```json Options d’Analytics dans docs.json
+"integrations": {
+    "plausible": {
+        "domain": "votre-domain-de-documentation",
+        "server": "optionnel - le nom d’hôte de votre serveur Plausible auto‑hébergé"
+    }
+}
+```
+
+```json Exemple
+"integrations": {
+    "plausible": {
+        "domain": "docs.domain.com"
+    }
+}
+```
+
+</CodeGroup>
+
+### Options de configuration
+
+<ParamField path="domain" type="string" required>
+  Le domain de votre site de documentation. Par exemple, `docs.example.com`. N’incluez pas `https://`.
+</ParamField>
+
+<ParamField path="server" type="string">
+  Le nom d’hôte de votre instance Plausible auto‑hébergée. Par exemple, `plausible.example.com`. Requis uniquement si vous auto‑hébergez Plausible. Omettez ce champ pour utiliser `plausible.io`. N’incluez pas `https://`.
+</ParamField>

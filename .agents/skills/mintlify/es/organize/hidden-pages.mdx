@@ -1,0 +1,184 @@
+---
+title: "Páginas ocultas"
+description: "Oculta páginas de la barra lateral pero mantenlas accesibles por URL directa, búsqueda o asistente de IA para casos de uso especiales y borradores."
+keywords: ["ocultar de la navegación", "no listada", "visibilidad de la página"]
+---
+
+Las páginas ocultas no aparecen en la navegación de tu sitio, pero cualquiera que conozca la URL aún puede acceder a ellas. Por ejemplo, si creas una página oculta como `guides/hidden-page.mdx`, los visitantes pueden acceder a ella en `docs.yoursite.com/guides/hidden-page`.
+
+Usa páginas ocultas para contenido al que quieras que los usuarios accedan o al que hagan referencia como contexto para herramientas de IA, pero que no quieras que aparezca listado en la navegación.
+
+<Warning>
+  Las páginas ocultas no son privadas. Cualquier persona con la URL puede verlas, y los enlaces compartidos externamente siguen funcionando. Ocultar una página solo la elimina de la navegación renderizada.
+
+  Si tu contenido requiere un control de acceso estricto, debes configurar la [autenticación](/es/deploy/authentication-setup). Para restringir páginas a grupos de usuarios específicos, configura el [control de acceso basado en grupos](/es/deploy/authentication-setup#control-access-with-groups).
+</Warning>
+
+Consulta un [ejemplo de página oculta](/es/organize/hidden-page-example).
+
+<Note>
+  Algunos elementos de navegación, como las barras laterales, los menús desplegables y las pestañas, pueden aparecer vacíos o cambiar de diseño en las páginas ocultas.
+</Note>
+
+<div id="hide-a-page">
+  ## Ocultar una página
+</div>
+
+Para ocultar una página, configura `hidden: true` en el [frontmatter](/es/organize/pages) de la página o elimínala de la navigation de tu archivo `docs.json`.
+
+<div id="set-hidden-true-in-frontmatter">
+  ### Establecer `hidden: true` en el frontmatter
+</div>
+
+Agrega `hidden: true` al frontmatter de una página para eliminarla de la navegación visible y seguir incluyéndola en tu configuración de `docs.json`.
+
+```yaml
+---
+title: "My hidden page"
+hidden: true
+---
+```
+
+Para hacer visible una página de nuevo, elimina el campo `hidden` por completo. No establezcas `hidden: false` ya que produce un comportamiento indefinido.
+
+<Note>
+  De forma predeterminada, `hidden: true` excluye una página de la indexación en motores de búsqueda, los mapas del sitio y el contexto de IA.
+
+  Para incluirla de todos modos, configura `seo.indexing: "all"` en `docs.json`. Consulta [Búsqueda, SEO e indexación de IA](https://www.mintlify.com/docs/#search-seo-and-ai-indexing) para más detalles.
+
+  Nota: `noindex: true` solo afecta a la indexación; no oculta la página de la navegación. Consulta [Desactivar la indexación](https://www.mintlify.com/docs/optimize/seo#disable-indexing) para obtener más información.
+</Note>
+
+<div id="remove-the-page-from-navigation">
+  ### Quitar la página de la navegación
+</div>
+
+Si no incluyes una página en la propiedad `navigation` de tu `docs.json`, esa página quedará oculta. Este método funciona bien para páginas que no quieres que aparezcan en la navegación en absoluto.
+
+<div id="hide-a-group-of-pages">
+  ## Ocultar un grupo de páginas
+</div>
+
+Para ocultar un grupo de páginas, establece la propiedad `hidden` en `true` para el grupo en tu archivo `docs.json`:
+
+```json highlight={4}
+"groups": [
+  {
+    "group": "Primeros pasos",
+    "hidden": true,
+    "pages": [
+      "index",
+      "quickstart"
+    ]
+  },
+  {
+    "group": "Guides",
+    "pages": [
+      "guides/hidden-page.mdx",
+      "guides/hidden-groups.mdx"
+    ]
+  }
+]
+```
+
+En este ejemplo, el grupo `Getting started` permanece oculto y el grupo `Guides` permanece visible.
+
+<div id="hide-a-tab">
+  ### Ocultar una Tab
+</div>
+
+Para ocultar una Tab, añade la propiedad `hidden` para la Tab en tu archivo `docs.json`:
+
+```json highlight={4}
+"tabs": [
+  {
+    "tab": "Inicio",
+    "hidden": true,
+    "pages": [
+      "index",
+      "quickstart"
+    ]
+  }
+]
+```
+
+<div id="search-seo-and-ai-indexing">
+  ## Búsqueda, SEO e indexación de IA
+</div>
+
+De forma predeterminada, las páginas ocultas no aparecen en la indexación para los motores de búsqueda, la búsqueda interna de tu documentación ni como contexto para el assistant de IA. Tienes dos formas de incluir contenido oculto en la búsqueda y la indexación.
+
+La siguiente tabla resume cómo cada propiedad afecta la visibilidad y la indexación de las páginas:
+
+| Propiedad | Navegación lateral | Búsqueda del sitio | Sitemap | Indexación en motores de búsqueda | Contexto del assistant de IA |
+|---|---|---|---|---|---|
+| `hidden: true` | Oculta | Excluida | Excluida | Excluida | Excluida |
+| `noindex: true` | Visible | Excluida | Excluida | Excluida | Excluida |
+| `searchable: false` (frontmatter de la página) | Visible | Excluida | Incluida | Incluida | Excluida |
+| `searchable: true` (en una pestaña o grupo oculto) | Oculta | Incluida | Incluida | Incluida | Incluida |
+| `seo.indexing: "all"` (en `docs.json`) | Oculta | Incluida | Incluida | Incluida | Incluida |
+
+<div id="include-all-hidden-pages">
+  ### Incluir todas las páginas ocultas
+</div>
+
+Para incluir todas las páginas ocultas de tu sitio en la búsqueda, los sitemaps y el contexto de IA, agrega la propiedad `seo` a tu `docs.json`:
+
+```json
+"seo": {
+    "indexing": "all"
+}
+```
+
+<div id="include-pages-under-specific-hidden-tabs-or-groups">
+  ### Incluir páginas bajo pestañas o grupos ocultos específicos
+</div>
+
+Para incluir solo las páginas que están bajo una pestaña o un grupo oculto específico, establece `searchable: true` en esa pestaña o grupo en tu `docs.json`. Usa esta opción cuando ocultes pestañas o grupos para controlar el diseño de la navegación pero quieras que las páginas descendientes sigan siendo localizables.
+
+```json highlight={5}
+"tabs": [
+  {
+    "tab": "Storage",
+    "hidden": true,
+    "searchable": true,
+    "groups": [
+      {
+        "group": "Buckets",
+        "pages": ["products/storage/buckets/create-bucket"]
+      }
+    ]
+  }
+]
+```
+
+Con `searchable: true`, las páginas descendientes permanecen en:
+
+- La búsqueda interna del sitio de documentación
+- `sitemap.xml`
+- El contexto del assistant de IA
+- Los resultados de búsqueda del servidor MCP
+- La indexación de los motores de búsqueda (no se aplica la metaetiqueta `noindex`)
+
+La pestaña o el grupo en sí mismo permanece oculto en la navegación renderizada.
+
+El `hidden: true` del frontmatter de una página individual siempre tiene prioridad. Para volver a excluir un grupo descendiente, establece `hidden: true` en él sin `searchable: true`.
+
+<div id="page-level-searchable">
+  ### `searchable` a nivel de página
+</div>
+
+En el frontmatter de una página, `searchable` solo acepta `false`. Úsalo para mantener una página indexable por los motores de búsqueda externos y, al mismo tiempo, excluirla de la búsqueda integrada del producto y del contexto del asistente de IA. Consulta [Excluir una página de la búsqueda](/es/optimize/search#exclude-a-page-from-search) para ver un ejemplo.
+
+`searchable` a nivel de página no anula `hidden: true` en la misma página. Para que una página oculta sea detectable, deja `searchable` sin establecer y, o bien colócala bajo una pestaña o grupo oculto con `searchable: true`, o bien define `seo.indexing: "all"` en `docs.json`.
+
+<div id="understanding-hidden-versus-noindex">
+  ### Comprender hidden versus noindex
+</div>
+
+La relación entre `hidden` y `noindex` es unidireccional:
+
+* **`hidden: true` → aplica automáticamente `noindex`**: Las páginas ocultas se excluyen automáticamente de los motores de búsqueda, los sitemaps y el contexto de IA.
+* **`noindex: true` → NO aplica `hidden`**: Las páginas con `noindex: true` siguen siendo visibles en la navegación. No aparecen en la búsqueda del sitio, los sitemaps, la indexación en motores de búsqueda ni el contexto del asistente de IA.
+
+Para excluir una página específica de los motores de búsqueda manteniéndola visible en la navegación, agrega `noindex: true` a su frontmatter. Para ocultar una página de la navegación y de los motores de búsqueda, usa `hidden: true`. Para excluir una página solo de la búsqueda integrada y del contexto del asistente de IA, manteniéndola indexable por los motores de búsqueda externos, usa [`searchable: false`](/es/optimize/search#exclude-a-page-from-search) en su lugar.

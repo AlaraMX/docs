@@ -1,0 +1,135 @@
+---
+title: "Preview deployments"
+description: "Get unique preview URLs for each pull request so reviewers can see documentation changes in a live environment before merging to production."
+keywords: ["preview URLs", "pull request previews", "branch previews", "staging environments"]
+---
+
+<Info>
+  Preview deployments require a [Pro or Enterprise plan](https://mintlify.com/pricing?ref=preview-deployments).
+</Info>
+
+Preview deployments let you see how changes to your docs look before merging to production. Each preview creates a shareable URL that updates automatically as you push new changes. 
+
+Preview URLs are publicly viewable by default. Share a preview link with anyone who needs to review your changes.
+
+## Create preview deployments
+
+Create preview deployments automatically through pull requests or manually from your dashboard.
+
+### Automatic previews
+
+<Note>
+  Automatic previews are only created for pull requests targeting your [deployment branch](/guides/git-concepts#deployment-branch).
+</Note>
+
+When you create a pull request, the Mintlify bot automatically adds a link to view the preview deployment in your pull request. The preview updates each time you push new commits to the branch.
+
+<Frame>
+  <img src="/images/previews/preview-deployment-light.png" alt="Link to view deployment in the pull request timeline" className="block dark:hidden" />
+  <img src="/images/previews/preview-deployment-dark.png" alt="Link to view deployment in the pull request timeline" className="hidden dark:block" />
+</Frame>
+
+### Fork pull requests
+
+Pull requests opened from a fork do not generate preview deployments. The Mintlify GitHub App must be installed on a repository to generate a preview, so it cannot read a fork or build a preview against it.
+
+To preview changes from a fork, a maintainer with write access to the main repository can push the forked contributor's branch to a branch in the main repository (or merge the fork into an integration branch). The GitHub App can then build a preview for a pull request opened from that branch.
+
+### Manual previews
+
+You can manually create a preview for any branch.
+
+1. Go to your [dashboard](https://app.mintlify.com/).
+2. Click **Previews**.
+3. Click **Create custom preview**.
+4. Enter the name of the branch you want to preview.
+5. Click **Create preview**.
+
+### API
+
+You can also create preview deployments programmatically using the [Trigger preview deployment](/api/preview/trigger) API endpoint. This is useful for integrating preview creation into CI/CD pipelines or custom tooling.
+
+## Redeploy a preview
+
+Redeploy a preview to refresh content or retry after a failed deployment.
+
+1. Click the preview from your [dashboard](https://app.mintlify.com/).
+2. Click **Redeploy**.
+
+<Frame>
+  <img src="/images/previews/redeploy-preview-light.png" alt="The Previews menu with the deploy button emphasized by an orange rectangle." className="block dark:hidden" />
+  <img src="/images/previews/redeploy-preview-dark.png" alt="The Previews menu with the deploy button emphasized by an orange rectangle." className="hidden dark:block" />
+</Frame>
+
+## Preview widget
+
+The preview widget appears on preview deployments to help you navigate and review updated pages. The widget is a floating button in the bottom-right corner of your preview deployment.
+
+<Frame>
+  <img src="/images/previews/widget-light.png" alt="Preview widget expanded to show list of changed files." className="block dark:hidden" />
+  <img src="/images/previews/widget-dark.png" alt="Preview widget expanded to show list of changed files." className="hidden dark:block" />
+</Frame>
+
+1. Click the widget to show all added, modified, or removed files in the preview.
+1. Click a file to view the changes on the corresponding page.
+1. Use the search bar to filter the list of changed files.
+1. Hover over a file and click the **Open in editor** icon to edit the file directly in the web editor.
+
+The widget only appears on preview deployments, not on your live site or local previews.
+
+## Restrict access to preview deployments
+
+By default, preview deployments are publicly accessible to anyone with the URL. You can restrict access by requiring organization authentication for all previews or by password-protecting individual previews.
+
+### Require organization authentication
+
+Restrict preview access to authenticated members of your Mintlify organization.
+
+1. Navigate to the **Previews** section in the [Add-ons](https://app.mintlify.com/products/addons) page of your dashboard.
+2. Click the **Preview authentication** toggle to enable or disable preview authentication.
+  <Frame>
+    <img src="/images/previews/preview-auth-light.png" alt="The preview authentication toggle in the Add-ons page" className="block dark:hidden" />
+    <img src="/images/previews/preview-auth-dark.png" alt="The preview authentication toggle in the Add-ons page" className="hidden dark:block" />
+  </Frame>
+
+### Password-protect an individual preview
+
+Password-protect a specific preview to share it with external reviewers without adding them to your Mintlify organization. This option is available when creating a manual preview and is not shown when organization authentication is already enabled for your deployment.
+
+1. Go to your [dashboard](https://app.mintlify.com/).
+2. Click **Previews**.
+3. Click **Create custom preview**.
+4. Enter the name of the branch you want to preview.
+5. Toggle **Make private** on and enter a password. Passwords must be at least 8 characters.
+  <Frame>
+    <img src="/images/previews/private-preview-light.png" alt="The Create a custom preview modal with the Make private toggle enabled and a password field." className="block dark:hidden" />
+    <img src="/images/previews/private-preview-dark.png" alt="The Create a custom preview modal with the Make private toggle enabled and a password field." className="hidden dark:block" />
+  </Frame>
+6. Click **Create preview**.
+
+## Preview lifetime
+
+Preview deployments stay live as long as their source branch exists in your repository and continue to receive updates on every push.
+
+- **Automatic previews**: The preview for a pull request remains available while the PR is open and after it's merged or closed, as long as the source branch still exists. When you delete the branch, the next dashboard sync removes the preview.
+- **Manual previews**: Manual previews stay live until you delete them. Redeploying a manual preview refreshes its content against the latest commit on the specified branch.
+- **Delete a preview**: In your [dashboard](https://app.mintlify.com/), go to **Previews**, open the preview, and click **Delete** to remove it immediately.
+
+Preview URLs are unique per branch. If you delete a preview and later recreate one for the same branch, Mintlify may issue a new URL.
+
+Mintlify generates preview URLs automatically. The subdomain and domain are not configurable, and custom domains only apply to your production deployment.
+
+## Troubleshooting preview deployments
+
+If your preview deployment fails, try these troubleshooting steps.
+
+- **View the build logs**: In your [dashboard](https://app.mintlify.com/), go to **Previews** and click the failed preview. The deployment logs show errors that caused failures.
+- **Check your configuration**:
+   - Missing `docs.json` at the configured content root. If your `docs.json` is in a subdirectory, confirm the **docs.json is in a subdirectory** setting points to the correct path.
+   - Invalid `docs.json` syntax (for example, an empty file or a stray trailing comma that breaks JSON parsing).
+   - Schema errors in `docs.json` such as an invalid `theme`, malformed `navigation`, or unresolved `$ref` values.
+   - Missing or incorrect file paths referenced in your navigation.
+   - Invalid frontmatter in MDX files.
+   - Broken image links or missing image files.
+- **Validate locally**: Run `mint dev` and `mint validate` locally to catch configuration and build errors before pushing to the repository.
+- **Check recent changes**: Review the most recent commits in your branch to identify what changes caused the build to fail.

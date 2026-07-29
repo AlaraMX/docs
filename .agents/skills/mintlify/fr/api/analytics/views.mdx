@@ -1,0 +1,26 @@
+---
+title: "Obtenir les vues de page"
+description: "Récupérez le nombre de vues de page de votre documentation Mintlify, ventilé par chemin et séparant le trafic humain du trafic généré par les IA."
+openapi: /fr/analytics.openapi.json GET /v1/analytics/{projectId}/views
+keywords: [ "analytics", "vues", "vues de page", "trafic", "export" ]
+---
+
+<div id="usage">
+  ## Utilisation
+</div>
+
+Utilisez cet endpoint pour exporter les analyses de vues de page. Les résultats incluent les totaux du site et les détails par page, répartis entre le trafic humain et celui de l'IA.
+
+Parcourez les résultats à l'aide de la pagination par décalage. Incrémentez `offset` de `limit` tant que `hasMore` est `true`.
+
+<div id="filtering">
+  ## Filtrage
+</div>
+
+Filtrez les données de vues par plage de dates à l'aide des paramètres `dateFrom` et `dateTo`.
+
+<div id="rate-limits">
+  ## Limites de débit
+</div>
+
+Cet endpoint autorise 100 requêtes par organisation et par heure. Tous les endpoints d'analytics partagent cette limite.

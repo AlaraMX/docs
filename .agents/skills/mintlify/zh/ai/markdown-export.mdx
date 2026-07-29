@@ -1,0 +1,121 @@
+---
+title: "Markdown 导出"
+description: "将文档页面导出为整洁的 Markdown 格式，用于 AI 工具、LLM 集成和自动化内容处理工作流程。"
+keywords: ["markdown", "token 效率", "AI 处理"]
+---
+
+import { PreviewButton } from "/snippets/previewbutton.jsx"
+
+与 HTML 相比，Markdown 提供的结构化文本更便于 AI 工具高效处理，从而带来更高的响应准确性、更快的处理速度，以及更低的 token 使用量。
+
+Mintlify 会自动生成针对 AI 工具和外部 integrations 优化的页面 Markdown 版本。
+
+
+<div id="md-url-extension">
+  ## .md URL 后缀
+</div>
+
+在任意页面的 URL 末尾添加 `.md`，即可查看其 Markdown 版本。
+
+<PreviewButton href="https://mintlify.com/docs/ai/markdown-export.md">以 Markdown 打开此页面</PreviewButton>
+
+<div id="accept-header">
+  ## Accept 标头
+</div>
+
+向任意页面 URL 发送带有 `Accept: text/markdown` 或 `Accept: text/plain` 的请求，即可接收 Markdown 版本而非 HTML。这对于以编程方式获取文档内容的 AI 工具和 integrations 非常有用。
+
+```bash
+curl -L -H "Accept: text/markdown" https://mintlify.com/docs/ai/markdown-export
+```
+
+<div id="audience-specific-content">
+  ## 面向特定受众的内容
+</div>
+
+使用 [visibility](/zh/components/visibility) 组件为人类和 AI 受众自定义内容。
+
+用 `<Visibility for="humans">` 包裹的内容会显示在网页上，但不会出现在 Markdown 输出中。用 `<Visibility for="agents">` 包裹的内容会出现在 Markdown 输出中，但不会显示在网页上。
+
+```mdx
+<Visibility for="humans">
+  Click the **Get started** button in the top-right corner to create your account.
+</Visibility>
+
+<Visibility for="agents">
+  To create an account, call `POST /v1/accounts` with a valid email address.
+</Visibility>
+```
+
+<div id="api-reference-pages">
+  ## API 参考页面
+</div>
+
+默认情况下，API 参考页面的 Markdown 导出包含完整的 OpenAPI 或 AsyncAPI 规范，以便 AI 工具能够获得每个端点的完整上下文。
+
+如果你希望从 Markdown 输出中省略该规范，请在 `docs.json` 中将 `markdown.schema` 设置为 `false`：
+
+```json
+"markdown": {
+  "schema": false
+}
+```
+
+<div id="custom-agent-instructions">
+  ## 自定义代理指令
+</div>
+
+若要在 Mintlify 向 AI 代理提供的 Markdown 中追加你自己的指引，请在 `docs.json` 中设置 `markdown.instructions`。可以将其用于站点范围的说明，例如注明 API 版本、优先使用特定 SDK 或遵循你的术语约定。
+
+提供单个字符串：
+
+```json Example agent instructions string
+"markdown": {
+  "instructions": "Always cite the API version. Prefer the TypeScript SDK in examples."
+}
+```
+
+或提供一个字符串数组，Mintlify 会以换行符将它们连接起来：
+
+```json Example agent instructions array
+"markdown": {
+  "instructions": [
+    "Always cite the API version.",
+    "Prefer the TypeScript SDK in examples."
+  ]
+}
+```
+
+Mintlify 会在 Markdown 输出中将你的指令渲染为 `Agent Instructions` 块：
+
+```md Example rendered agent instructions
+> ## Agent Instructions
+> Always cite the API version.
+> Prefer the TypeScript SDK in examples.
+```
+
+该块会出现在以下位置：
+
+- 每个页面的 Markdown 导出中，包括 API 参考页面。
+- 你的 [`llms.txt`](/zh/ai/llmstxt) 文件中，位于站点标题和描述之后。
+- 你的 `llms-full.txt` 文件中。
+
+这些指令会应用于每个页面。若要为单个页面或特定受众定制内容，请改用 [visibility](/zh/components/visibility) 组件。
+
+<div id="authentication">
+  ## 身份验证
+</div>
+
+Markdown 导出遵循与每个页面 HTML 版本相同的身份验证规则。
+
+| 身份验证模式 | 行为 |
+|-----------|----------|
+| 无身份验证 | 所有 `.md` URL 均可公开访问。 |
+| 部分身份验证 | 公共页面的 `.md` URL 可公开访问。受保护页面的 `.md` URL 需要身份验证，并遵循用户组限制。 |
+| 完整身份验证 | 所有 `.md` URL 都需要身份验证，并遵循用户组限制。 |
+
+<div id="keyboard-shortcut">
+  ## 键盘快捷键
+</div>
+
+按 <kbd>Command</kbd> + <kbd>C</kbd>（在 Windows 上为 <kbd>Ctrl</kbd> + <kbd>C</kbd>）将页面以 Markdown 格式复制到剪贴板。

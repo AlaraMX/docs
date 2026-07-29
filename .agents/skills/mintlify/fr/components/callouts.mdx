@@ -1,0 +1,64 @@
+---
+title: "Encarts"
+description: "Ajoutez des composants d'encart info, note, tip, check, warning, danger ou personnalisés pour mettre en avant les informations clés de votre documentation."
+keywords: ["callouts", "notes", "warnings", "info boxes", "tips", "emphasis", "highlight"]
+boost: 3
+---
+
+import IconsOptional from "/snippets/fr/icons-optional.mdx";
+
+Présentez les encarts sous forme de Note, Avertissement, Info, Conseil, Check, Danger, ou créez votre propre encart :
+
+<Note>Ajoute une note dans le contenu</Note>
+
+```mdx
+<Note>Ajoute une note dans le contenu</Note>
+```
+
+<Warning>Cela génère un avertissement à prendre en compte</Warning>
+
+```mdx
+<Warning>Cela génère un avertissement à prendre en compte</Warning>
+```
+
+<Info>Met en avant des informations importantes</Info>
+
+```mdx
+<Info>Met en avant des informations importantes</Info>
+```
+
+<Tip>Voici un conseil utile</Tip>
+
+```mdx
+<Tip>Voici un conseil utile</Tip>
+```
+
+<Check>Cela nous donne un statut validé</Check>
+
+```mdx
+<Check>Cela nous donne un statut validé</Check>
+```
+
+<Danger>Ceci est une alerte de danger</Danger>
+
+```mdx
+<Danger>Ceci est une alerte de danger</Danger>
+```
+
+<Callout icon="key" color="#FFC107" iconType="regular"> C’est un encadré personnalisé</Callout>
+
+```mdx wrap
+<Callout icon="key" color="#FFC107" iconType="regular">Ceci est un encadré personnalisé</Callout>
+```
+
+<div id="custom-callout-properties">
+  ## Propriétés d'encart personnalisé
+</div>
+
+Le composant générique `Callout` prend en charge les icônes et couleurs personnalisées. Les encarts typés (`Note`, `Warning`, `Info`, `Tip`, `Check`, `Danger`) utilisent des icônes et couleurs prédéfinies et n'acceptent que `children`.
+
+<IconsOptional />
+
+<ResponseField name="color" type="string">
+  Couleur personnalisée sous forme de code hexadécimal (par exemple, `#FFC107`). Définit la bordure, la teinte de fond et la couleur du texte de l'encart.
+</ResponseField>

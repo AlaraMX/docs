@@ -1,0 +1,87 @@
+---
+title: "简介"
+description: "使用 Mintlify REST API 触发部署、嵌入 AI 助手、导出 Analytics 数据，并以编程方式管理文档。"
+keywords: ["REST API", "endpoints", "API keys"]
+boost: 3
+---
+
+<Info>
+  REST API 需要 [Pro 或 Enterprise 方案](https://mintlify.com/pricing?ref=api)。
+</Info>
+
+Mintlify 的 REST（Representational State Transfer）API 让你可以以编程方式与文档交互、触发更新、嵌入 AI 驱动的聊天体验，并导出 Analytics 数据。
+
+<div id="endpoints">
+  ## 端点
+</div>
+
+* [Trigger update](/zh/api/update/trigger)：在需要时触发您站点的更新。
+* [Get update status](/zh/api/update/status)：获取某次更新的状态以及与您的文档相关的其他详细信息。
+* [Trigger preview deployment](/zh/api/preview/trigger)：为特定分支创建或更新预览部署。
+* [Trigger automation](/zh/api/automations/trigger)：按需运行已计划的自动化。
+* [Detect AI-sounding prose](/zh/api/admin/deslop)：分析页面中由 AI 生成的文字，并获取人工风格的改写建议。
+* [Create agent job](/zh/api/agent/v2/create-agent-job)：创建一个代理任务以自动编辑您的文档。
+* [Get agent job](/zh/api/agent/v2/get-agent-job)：获取特定代理任务的详细信息和状态。
+* [Send follow-up message](/zh/api/agent/v2/send-message)：向已有的代理任务发送后续消息。
+* [Create assistant message](/zh/api/assistant/create-assistant-message-v2)：将基于您的文档训练的 AI 助手嵌入到任意您选择的应用中。
+* [搜索文档](/zh/api/assistant/search)：搜索您的文档。
+* [获取页面内容](/zh/api/assistant/get-page-content)：检索文档页面的完整文本内容。
+* [获取用户反馈](/zh/api/analytics/feedback)：从您的文档中导出用户反馈。
+* [获取 AI 助手会话](/zh/api/analytics/assistant-conversations)：导出 AI 助手的会话历史。
+* [Get assistant caller stats](/zh/api/analytics/assistant-caller-stats)：获取按调用方类型划分的助手查询次数明细。
+
+<div id="common-use-cases">
+  ### 常见用例
+</div>
+
+* **自动化部署**：使用 [Trigger update](/zh/api/update/trigger) 和 [Get update status](/zh/api/update/status)，在设定的时间间隔或当特定事件发生时触发站点更新。
+* **CI/CD 集成**：在代码变更时，将文档更新作为部署流水线的一部分来执行，使用 [Trigger update](/zh/api/update/trigger)。
+* **预览部署**：使用 [Trigger preview deployment](/zh/api/preview/trigger)，在 CI/CD 流水线中以编程方式创建或更新预览部署。
+* **按需自动化**：使用 [Trigger automation](/zh/api/automations/trigger)，从 CI/CD 流水线、发布脚本或内部工具中按需运行计划自动化。
+* **助手集成**：使用 [Create assistant message](/zh/api/assistant/create-assistant-message-v2)，将 AI 助手嵌入到你的产品、支持门户或内部工具中。
+* **文档检索**：使用 [Search documentation](/zh/api/assistant/search) 和 [Get page content](/zh/api/assistant/get-page-content)，为自定义搜索体验查找和检索文档。
+* **自动化编辑**：使用 agent 任务，以编程方式大规模更新文档，配合 [Create agent job](/zh/api/agent/v2/create-agent-job)、[Get agent job](/zh/api/agent/v2/get-agent-job) 和 [Send follow-up message](/zh/api/agent/v2/send-message)。
+* **Analytics 导出**：使用 [Get user feedback](/zh/api/analytics/feedback)、[Get assistant conversations](/zh/api/analytics/assistant-conversations) 和 [Get assistant caller stats](/zh/api/analytics/assistant-caller-stats)，导出反馈、助手会话和调用方统计数据以进行外部分析。
+
+<div id="base-url">
+  ## 基础 URL
+</div>
+
+所有 Mintlify REST API 请求都使用以下基础 URL：
+
+```
+https://api.mintlify.com
+```
+
+
+<div id="authentication">
+  ## 认证
+</div>
+
+在控制台的 [API keys 页面](https://dashboard.mintlify.com/settings/organization/api-keys)生成 API key。每个 API key 都属于一个组织，你可以在同一组织内的多个部署中使用这些 API key。
+
+每个组织每小时最多可创建 10 个 API key。
+
+创建 API key 时，你可以将其设置为在 7、30、60 或 90 天后过期，或选择**永不过期**。新的 API key 默认在 90 天后过期。API keys 页面会为将在 7 天内过期的 API key 显示**将在 … 后过期**徽章，为已过期的 API key 显示**已过期**徽章。已过期的 API key 将停止工作，请在过期日期之前轮换或更换它们。
+
+<div id="admin-api-key">
+  ### 管理员 API key
+</div>
+
+使用管理员 API key 对发送到 [Trigger update](/zh/api/update/trigger)、[Get update status](/zh/api/update/status)、[Trigger preview deployment](/zh/api/preview/trigger)、[Trigger automation](/zh/api/automations/trigger)、[Detect AI-sounding prose](/zh/api/admin/deslop)、[Create agent job](/zh/api/agent/v2/create-agent-job)、[Get agent job](/zh/api/agent/v2/get-agent-job)、[Send follow-up message](/zh/api/agent/v2/send-message)、[Get user feedback](/zh/api/analytics/feedback)、[Get assistant conversations](/zh/api/analytics/assistant-conversations) 和 [Get assistant caller stats](/zh/api/analytics/assistant-caller-stats) 的请求进行身份验证。
+
+管理员 API key 以 `mint_` 前缀开头。
+
+管理员 API key 是一个服务器端密钥。不要在客户端代码中暴露它。
+
+<div id="assistant-api-key">
+  ### Assistant API key
+</div>
+
+使用 assistant API key 对发往 [Create assistant message](/zh/api/assistant/create-assistant-message-v2)、[Search documentation](/zh/api/assistant/search) 和 [Get page content](/zh/api/assistant/get-page-content) 端点的请求进行认证。
+
+assistant API key 以 `mint_dsc_` 前缀开头。
+
+<Note>
+  Search documentation 和 Get page content 请求不消耗额度。Create assistant message 请求会消耗额度，并可能产生超额费用。
+</Note>

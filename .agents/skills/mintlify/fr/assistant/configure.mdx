@@ -1,0 +1,129 @@
+---
+title: "Configurer l'assistant"
+description: "Configurez l'assistant IA dans le tableau de bord Mintlify : disponibilité, réponses personnalisées, questions de démarrage, anti-bots et facturation."
+keywords: ["assistant", "paramètres", "redirection", "protection contre les bots", "facturation"]
+---
+
+Configurez l'assistant sur la page [Assistant](https://dashboard.mintlify.com/products/assistant) de votre tableau de bord. Gérez la facturation et l'utilisation sur la page [Utilisation](https://dashboard.mintlify.com/settings/organization/usage).
+
+<div id="enable-or-disable-the-assistant">
+  ## Activer ou désactiver l'assistant
+</div>
+
+Basculez le statut de l'assistant pour l'activer ou le désactiver sur votre site de documentation.
+
+<Frame>
+  <img src="/images/assistant/status-light.png" alt="Le bouton de statut de l'assistant dans le tableau de bord." className="block dark:hidden" />
+  <img src="/images/assistant/status-dark.png" alt="Le bouton de statut de l'assistant dans le tableau de bord." className="hidden dark:block" />
+</Frame>
+
+<div id="set-deflection-email">
+  ## Définir les e-mails de redirection
+</div>
+
+Dans la section Gestion des réponses, activez l'assistant pour inviter les utilisateurs à contacter vos équipes de support et de ventes lorsqu'il ne peut pas répondre à une question par lui-même.
+
+Renseignez l'une ou les deux adresses suivantes :
+
+- **Support** : Pour les questions que l'assistant ne peut pas résoudre à partir de votre documentation.
+- **Ventes** : Pour les questions sur les tarifs, les offres ou les achats.
+
+Lorsque vous activez la redirection et que l'assistant détecte une question correspondante, un formulaire de contact s'affiche dans le chat. Le formulaire demande le prénom, le nom, l'entreprise, l'e-mail professionnel et un message de l'utilisateur. Mintlify envoie la soumission par e-mail à l'équipe appropriée, qui peut répondre directement à l'e-mail de l'utilisateur.
+
+Si vous préférez rediriger les questions de support vers vos canaux existants, désactivez **Afficher le formulaire de contact** dans la section Gestion des réponses. Lorsque le formulaire de contact est désactivé, l'assistant redirige les utilisateurs vers votre adresse e-mail de support en texte brut au lieu d'afficher le formulaire dans le chat. Les questions commerciales continuent d'utiliser le formulaire dans le chat lorsqu'un e-mail commercial est configuré. Ce paramètre est activé par défaut.
+
+<Frame>
+  <img src="/images/assistant/deflection-light.png" alt="Le panneau de redirection de l'assistant dans le tableau de bord. La redirection de l'assistant est activée et support@mintlify.com est défini comme e-mail de redirection." className="block dark:hidden" />
+  <img src="/images/assistant/deflection-dark.png" alt="Le panneau de redirection de l'assistant dans le tableau de bord. La redirection de l'assistant est activée et support@mintlify.com est défini comme e-mail de redirection." className="hidden dark:block" />
+</Frame>
+
+<div id="search-domains">
+  ## Domaines de recherche
+</div>
+
+Dans la section Gestion des réponses, configurez les domaines que l'assistant peut utiliser pour effectuer des recherches web afin de trouver un contexte supplémentaire lorsqu'il répond aux questions.
+
+- Les domaines doivent être accessibles publiquement.
+- Les domaines nécessitant JavaScript pour se charger ne sont pas pris en charge.
+
+<Frame>
+  <img src="/images/assistant/search-domains-light.png" alt="Le panneau des domaines de recherche de l'assistant activé dans le tableau de bord. L'assistant est configuré pour rechercher sur le domaine mintlify.com/pricing." className="block dark:hidden" />
+  <img src="/images/assistant/search-domains-dark.png" alt="Le panneau des domaines de recherche de l'assistant activé dans le tableau de bord. L'assistant est configuré pour rechercher sur le domaine mintlify.com/pricing." className="hidden dark:block" />
+</Frame>
+
+Pour un contrôle plus précis sur ce que l'assistant peut rechercher, utilisez la syntaxe de filtrage.
+
+- **Filtrage au niveau du domaine**
+  - `example.com` : Rechercher uniquement sur le domaine `example.com`
+  - `docs.example.com` : Rechercher uniquement sur le sous-domaine `docs.example.com`
+  - `*.example.com` : Rechercher sur tous les sous-domaines de `example.com`
+- **Filtrage au niveau du chemin**
+  - `docs.example.com/api` : Rechercher toutes les pages sous le sous-chemin `/api`
+- **Plusieurs motifs**
+  - Ajoutez plusieurs entrées pour cibler différentes sections de sites
+
+<div id="add-sample-questions">
+  ## Ajouter des questions de démarrage
+</div>
+
+Aidez vos utilisateurs à démarrer des conversations avec l'assistant en ajoutant des questions de démarrage.
+
+L'assistant peut générer des questions spécifiques à la page en fonction de la page consultée par l'utilisateur, ou vous pouvez ajouter des questions persistantes disponibles sur toutes les pages.
+
+Vous pouvez ajouter jusqu'à trois questions de démarrage. Cliquez sur **Demander à l'assistant** pour obtenir des questions recommandées basées sur votre documentation.
+
+<Frame>
+  <img src="/images/assistant/search-suggestions-light.png" alt="Le panneau de suggestions de recherche dans le tableau de bord avec les questions de démarrage contextuelles activées." className="block dark:hidden" />
+  <img src="/images/assistant/search-suggestions-dark.png" alt="Le panneau de suggestions de recherche dans le tableau de bord avec les questions de démarrage contextuelles activées." className="hidden dark:block" />
+</Frame>
+
+<div id="bot-protection">
+  ## Protection contre les bots
+</div>
+
+Dans la section Protection contre les bots, activez le captcha invisible pour protéger votre assistant contre les abus automatisés. La protection contre les bots respecte la vie privée et est invisible pour la quasi-totalité des visiteurs.
+
+Pour activer la protection contre les bots :
+
+1. Accédez à la page [Paramètres de l'assistant](https://dashboard.mintlify.com/products/assistant/settings) dans votre tableau de bord.
+2. Dans la section **Bot Protection**, activez **Invisible Captcha**.
+
+Les modifications prennent jusqu'à 10 minutes pour se propager.
+
+<Note>
+  Si vous utilisez des [en-têtes Content Security Policy](/fr/deploy/csp-configuration) personnalisés, vous devez inclure `hcaptcha.com` et `*.hcaptcha.com` dans votre liste autorisée.
+</Note>
+
+<div id="manage-billing">
+  ## Gérer la facturation
+</div>
+
+L'assistant fonctionne avec des crédits. Chaque message de l'assistant consomme des crédits, un message correspondant à toute interaction utilisateur avec l'assistant qui reçoit une réponse. Pour en savoir plus, consultez [Tarification par crédits](/fr/credits).
+
+<div id="change-your-credit-tier">
+  ### Changer de palier de crédits
+</div>
+
+1. Rendez-vous sur la page [Utilisation](https://app.mintlify.com/settings/organization/usage) de votre tableau de bord.
+2. Dans la section **Credit packages**, sélectionnez un palier dans le menu déroulant.
+3. Confirmez le changement pour passer au checkout.
+
+<div id="allow-overages">
+  ### Autoriser les dépassements
+</div>
+
+Mintlify désactive les dépassements par défaut. Lorsque les dépassements sont désactivés, l'assistant devient indisponible dès que vous atteignez votre allocation de crédits et le reste jusqu'au renouvellement de votre allocation.
+
+Pour autoriser les dépassements, activez-les dans la section **Spending controls** de la page [Utilisation](https://app.mintlify.com/settings/organization/usage) de votre tableau de bord. Si vous activez les dépassements, chaque crédit au-delà de votre allocation entraîne un frais de dépassement.
+
+<div id="set-usage-alerts">
+  ### Configurer les alertes d'utilisation
+</div>
+
+Dans la section **Spending controls**, configurez des alertes d'utilisation pour recevoir un e-mail lorsque vous atteignez un certain pourcentage de votre allocation de crédits.
+
+<div id="higher-credit-volumes">
+  ### Volumes de crédits plus élevés
+</div>
+
+Si 10 000 crédits par mois ne suffisent pas, [contactez l'équipe commerciale](mailto:sales@mintlify.com) au sujet d'un plan Enterprise avec des forfaits de crédits personnalisés.

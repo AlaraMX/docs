@@ -1,0 +1,151 @@
+---
+title: "Precios por créditos"
+description: "Entiende cómo funciona el saldo de créditos de tu organización, qué consume créditos y cómo facturamos los complementos de créditos, los excedentes y los acumulados."
+keywords: ["créditos", "facturación", "precios", "organización", "assistant", "agente", "automatizaciones", "complementos", "excedentes", "acumulados", "uso", "exportar", "CSV", "registro de actividad"]
+---
+
+Las funciones de IA de Mintlify se ejecutan con créditos. Tu organización tiene un único saldo mensual de créditos, compartido por cada deployment y por todos los integrantes de tu equipo. Adminístralo en la página de [Uso](https://app.mintlify.com/settings/organization/usage) de tu panel.
+
+<div id="your-shared-balance">
+  ## Tu saldo compartido
+</div>
+
+Tu saldo proviene de tres fuentes:
+
+- **Tus planes.** Cada plan Pro en tu organización aporta 10,000 créditos al mes. Una organización con dos deployments Pro comienza cada mes con 20,000 créditos.
+- **Complementos.** Compra un complemento cuando necesites más de lo que incluyen tus planes. Un complemento es una única compra para la organización en lugar de una por deployment, y cualquier deployment puede utilizarlo.
+- **Acumulado.** Los créditos no utilizados se trasladan al mes siguiente y se suman al mismo saldo.
+
+Cada deployment y cada integrante del equipo consume de ese saldo compartido. La página de [Uso](https://app.mintlify.com/settings/organization/usage) muestra el saldo a nivel de toda la organización, con el uso por deployment desglosado debajo.
+
+Dos cosas siguen siendo específicas de cada deployment: su plan y su configuración de excedentes, que determina si ese deployment sigue funcionando después de que se agote el saldo compartido.
+
+<Note>
+  Anteriormente, los créditos se rastreaban por deployment. Ahora se agrupan a nivel de organización.
+</Note>
+
+{/* TODO: Confirm what happened at migration to per-deployment balances, add-ons, and rollover credits that existed before the change. */}
+
+<div id="what-uses-credits">
+  ## Qué consume créditos
+</div>
+
+Tres productos consumen de tu saldo: el assistant, el agente y las automatizaciones.
+
+| Función | Promedio de créditos por interacción |
+|:--------|:-------------------------------------|
+| Respuesta del Assistant | 23 |
+| Ejecución del agente en el editor | 115 |
+| Ejecución del agente en Slack | 110 |
+
+Las automatizaciones consumen créditos cada vez que se ejecutan, ya sea de forma programada, por un disparador o de forma manual.
+
+| Automatización | Promedio de créditos por ejecución |
+|:---------|:-----------------------------------|
+| Actualización a partir de cambios de código | 180 |
+| Actualización a partir de conversaciones con el assistant | 212 |
+| Detección de enlaces rotos | 285 |
+| Changelog | 223 |
+| Auditoría SEO | 422 |
+| Traducciones | 913 |
+| Revisión de erratas | 330 |
+| Estilo de redacción | 235 |
+
+Estos números son promedios. Una ejecución puede costar más o menos según el tamaño de la tarea: cuánto contenido lee el agente, cuántos archivos modifica y cuánto tiempo dura la ejecución.
+
+<div id="plan-availability">
+  ## Disponibilidad del plan
+</div>
+
+Los créditos están disponibles en los planes Pro y Enterprise.
+
+El plan Starter no incluye funciones de IA y no puedes comprar créditos en él. Para usar el assistant, el agente o las automatizaciones, actualiza a Pro o Enterprise.
+
+<Note>
+  Los clientes con planes de créditos heredados conservan sus paquetes de créditos y precios existentes. Los complementos que se muestran a continuación se aplican al plan Pro.
+</Note>
+
+<div id="credit-add-ons">
+  ## Complementos de créditos
+</div>
+
+Cada complemento suma créditos al saldo mensual de tu organización, además de los que incluyen tus planes.
+
+| Créditos adicionales por mes | Costo mensual |
+|:------------------------|:-------------|
+| 15,000 | $145 |
+| 40,000 | $370 |
+| 90,000 | $800 |
+
+Un único deployment Pro con el complemento de 40,000 créditos dispone de 50,000 créditos al mes. Los complementos más grandes cuestan menos por crédito: el complemento de 90,000 créditos sale aproximadamente un 8 % más barato por crédito que el de 15,000, y los tres cuestan menos por crédito que la tarifa de excedente de $0.01.
+
+Agrega o cambia un complemento en la sección **Credit packages** de la página de [Uso](https://app.mintlify.com/settings/organization/usage). Los cambios entran en vigor de inmediato y prorrateamos los cargos a tu ciclo de facturación actual.
+
+El complemento de 90,000 créditos es el más grande que puedes comprar por tu cuenta. Para más que eso, [contacta con ventas](https://www.mintlify.com/contact/sales) para hablar de un paquete de créditos personalizado, disponible solo en los planes Enterprise.
+
+Para conocer los precios más actualizados, consulta la [página de precios](https://mintlify.com/pricing).
+
+<div id="spending-controls">
+  ## Controles de gasto
+</div>
+
+<div id="overages">
+  ### Excedentes
+</div>
+
+Los excedentes permiten que un deployment siga funcionando después de que tu organización agote sus créditos mensuales, a un costo de $0.01 por crédito adicional. Están desactivados por defecto. Actívalos en la sección **Spending controls** de la página de [Uso](https://app.mintlify.com/settings/organization/usage).
+
+Los excedentes se configuran por deployment, de modo que cuando se agota el saldo compartido, la configuración propia de cada deployment determina qué le sucede. Un deployment con los excedentes desactivados pierde sus funciones basadas en créditos hasta que el saldo se reinicie.
+
+Cada complemento cuesta menos por crédito que la tarifa de excedente de $0.01. Utiliza los excedentes para absorber un mes ocasionalmente intenso. Si tu organización supera su saldo de manera constante, compra un complemento o cambia a uno más grande.
+
+<div id="usage-alerts">
+  ### Alertas de uso
+</div>
+
+Configura alertas de uso en la sección **Spending controls** de la página de [Uso](https://app.mintlify.com/settings/organization/usage) para recibir un correo electrónico cuando tu organización alcance un porcentaje determinado de su saldo. Las alertas cubren la organización en su conjunto, no un solo deployment.
+
+<div id="rollovers">
+  ### Acumulados
+</div>
+
+Hasta el 50 % de los créditos no utilizados se traslada al mes siguiente, de modo que el máximo que tu organización puede tener disponible en un mes es 1.5 veces su saldo mensual. Los acumulados se reinician cuando cambias de complemento.
+
+<div id="estimating-your-usage">
+  ## Estimar tu uso
+</div>
+
+Usa los promedios de [Qué consume créditos](#what-uses-credits) para estimar lo que tu organización necesita cada mes.
+
+Un sitio que gestiona 500 respuestas del Assistant al mes consume aproximadamente 11,500 créditos (500 × 23). Añadir una automatización semanal de detección de enlaces rotos suma unos 1,140 créditos al mes (4 × 285).
+
+Las estimaciones te dan un punto de partida. Después de un mes de uso real, revisa la página de [Uso](https://app.mintlify.com/settings/organization/usage) y ajusta tu complemento.
+
+<div id="export-usage-activity">
+  ## Exportar la actividad de uso
+</div>
+
+Exporta tu registro de actividad de uso a CSV para un análisis más profundo, reportes o para llevar un histórico.
+
+1. Ve a la página de [Uso](https://app.mintlify.com/settings/organization/usage) de tu panel.
+2. Opcionalmente, ajusta el rango de fechas en la barra de herramientas para cambiar el período que cubre la exportación.
+3. En la sección **Activity log**, haz clic en **Export to CSV**.
+4. Mintlify te enviará por correo electrónico un enlace de descarga cuando la exportación esté lista. El enlace expira después de 72 horas.
+
+El CSV exportado incluye la fecha, el producto y los créditos consumidos para cada evento en el rango seleccionado.
+
+<div id="reduce-credit-usage">
+  ## Reducir el consumo de créditos
+</div>
+
+<div id="run-automations-on-a-schedule">
+  ### Ejecuta las automatizaciones de forma programada
+</div>
+
+Las auditorías SEO, las verificaciones de estilo de redacción y la detección de enlaces rotos no necesitan ejecutarse con cada cambio de código. Una programación diaria o semanal reduce el consumo de créditos porque el agente agrupa el trabajo de varios cambios en una sola ejecución. La contrapartida es un retraso entre el momento en que cambia el contenido y el momento en que la automatización actúa sobre él.
+
+<div id="find-whats-consuming-your-credits">
+  ### Descubre qué está consumiendo tus créditos
+</div>
+
+La página de [Uso](https://app.mintlify.com/settings/organization/usage) desglosa el uso por categoría de función. Si una automatización cuesta más de lo que esperabas, revisa su frecuencia de disparo y cualquier instrucción personalizada que amplíe su alcance.

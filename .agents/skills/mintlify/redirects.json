@@ -1,0 +1,490 @@
+[
+    {
+      "source": "/editor/drafts",
+      "destination": "/editor/branching-and-publishing"
+    },
+    {
+      "source": "/agent/integrations",
+      "destination": "/automations/integrations"
+    },
+    {
+      "source": "/es/agent/integrations",
+      "destination": "/es/automations/integrations"
+    },
+    {
+      "source": "/fr/agent/integrations",
+      "destination": "/fr/automations/integrations"
+    },
+    {
+      "source": "/zh/agent/integrations",
+      "destination": "/zh/automations/integrations"
+    },
+    {
+      "source": "/guides/windsurf",
+      "destination": "/guides/devin-desktop"
+    },
+    {
+      "source": "/cli/analytics",
+      "destination": "/cli/commands"
+    },
+    {
+      "source": "/optimize/search-boost",
+      "destination": "/optimize/search"
+    },
+    {
+      "source": "/ai/assistant",
+      "destination": "/assistant/index"
+    },
+    {
+      "source": "/agent/linear",
+      "destination": "/agent/index"
+    },
+    {
+      "source": "/es/agent/linear",
+      "destination": "/es/agent/index"
+    },
+    {
+      "source": "/fr/agent/linear",
+      "destination": "/fr/agent/index"
+    },
+    {
+      "source": "/zh/agent/linear",
+      "destination": "/zh/agent/index"
+    },
+    {
+      "source": "/guides/support-center",
+      "destination": "/guides/help-center"
+    },
+    {
+      "source": "/content/components/accordions",
+      "destination": "/components/accordions"
+    },
+    {
+      "source": "/content/components/callouts",
+      "destination": "/components/callouts"
+    },
+    {
+      "source": "/content/components/cards",
+      "destination": "/components/cards"
+    },
+    {
+      "source": "/content/components/card-groups",
+      "destination": "/components/columns"
+    },
+    {
+      "source": "/content/components/code-groups",
+      "destination": "/components/code-groups"
+    },
+    {
+      "source": "/content/components/examples",
+      "destination": "/components/examples"
+    },
+    {
+      "source": "/content/components/expandables",
+      "destination": "/components/expandables"
+    },
+    {
+      "source": "/content/components/fields",
+      "destination": "/components/fields"
+    },
+    {
+      "source": "/content/components/frames",
+      "destination": "/components/frames"
+    },
+    {
+      "source": "/content/components/icons",
+      "destination": "/components/icons"
+    },
+    {
+      "source": "/content/components/mermaid-diagrams",
+      "destination": "/components/mermaid-diagrams"
+    },
+    {
+      "source": "/content/components/steps",
+      "destination": "/components/steps"
+    },
+    {
+      "source": "/content/components/tabs",
+      "destination": "/components/tabs"
+    },
+    {
+      "source": "/content/components/tooltips",
+      "destination": "/components/tooltips"
+    },
+    {
+      "source": "/content/components/update",
+      "destination": "/components/update"
+    },
+    {
+      "source": "/api-playground/openapi/setup",
+      "destination": "/api-playground/openapi-setup"
+    },
+    {
+      "source": "/api-playground/openapi/writing-openapi",
+      "destination": "/api-playground/openapi-setup"
+    },
+    {
+      "source": "/settings/authentication-personalization/*",
+      "destination": "/deploy/authentication-setup"
+    },
+    {
+      "source": "/authentication-personalization/*",
+      "destination": "/deploy/authentication-setup"
+    },
+    {
+      "source": "/deploy/personalization-setup",
+      "destination": "/create/personalization"
+    },
+    {
+      "source": "/ai-ingestion",
+      "destination": "/ai/llmstxt"
+    },
+    {
+      "source": "/api-reference/chat/*",
+      "destination": "/api/assistant/*"
+    },
+    {
+      "source": "/api-reference",
+      "destination": "/api/introduction"
+    },
+    {
+      "source": "/api-reference/*",
+      "destination": "/api/*"
+    },
+    {
+      "source": "/fr/api-reference/*",
+      "destination": "/fr/api/*"
+    },
+    {
+      "source": "/es/api-reference/*",
+      "destination": "/es/api/*"
+    },
+    {
+      "source": "/zh/api-reference/*",
+      "destination": "/zh/api/*"
+    },
+    {
+      "source": "/editor/inline-ai",
+      "destination": "/editor/index"
+    },
+    {
+      "source": "/es/editor/inline-ai",
+      "destination": "/es/editor/index"
+    },
+    {
+      "source": "/fr/editor/inline-ai",
+      "destination": "/fr/editor/index"
+    },
+    {
+      "source": "/zh/editor/inline-ai",
+      "destination": "/zh/editor/index"
+    },
+    {
+      "source": "/editor/getting-started",
+      "destination": "/editor/index"
+    },
+    {
+      "source": "/editor/content-management",
+      "destination": "/editor/index"
+    },
+    {
+      "source": "/editor/publishing",
+      "destination": "/editor/branching-and-publishing"
+    },
+    {
+      "source": "/editor/troubleshooting",
+      "destination": "/editor/index"
+    },
+    {
+      "source": "/guides/analytics",
+      "destination": "/optimize/analytics"
+    },
+    {
+      "source": "/guides/assistant",
+      "destination": "/assistant/index"
+    },
+    {
+      "source": "/api-playground/customization/adding-sdk-examples",
+      "destination": "/api-playground/adding-sdk-examples"
+    },
+    {
+      "source": "/api-playground/customization/complex-data-types",
+      "destination": "/api-playground/complex-data-types"
+    },
+    {
+      "source": "/api-playground/customization/managing-page-visibility",
+      "destination": "/api-playground/managing-page-visibility"
+    },
+    {
+      "source": "/api-playground/customization/multiple-responses",
+      "destination": "/api-playground/multiple-responses"
+    },
+    {
+      "source": "/settings/broken-links",
+      "destination": "/create/redirects"
+    },
+    {
+      "source": "/guides/changelogs",
+      "destination": "/create/changelogs"
+    },
+    {
+      "source": "/code",
+      "destination": "/create/code"
+    },
+    {
+      "source": "/components/files",
+      "destination": "/create/files"
+    },
+    {
+      "source": "/image-embeds",
+      "destination": "/create/image-embeds"
+    },
+    {
+      "source": "/list-table",
+      "destination": "/create/list-table"
+    },
+    {
+      "source": "/reusable-snippets",
+      "destination": "/create/reusable-snippets"
+    },
+    {
+      "source": "/text",
+      "destination": "/create/text"
+    },
+    {
+      "source": "/settings/custom-404-page",
+      "destination": "/customize/custom-404-page"
+    },
+    {
+      "source": "/settings/custom-domain",
+      "destination": "/customize/custom-domain"
+    },
+    {
+      "source": "/settings/custom-scripts",
+      "destination": "/customize/custom-scripts"
+    },
+    {
+      "source": "/react-components",
+      "destination": "/customize/react-components"
+    },
+    {
+      "source": "/themes",
+      "destination": "/customize/themes"
+    },
+    {
+      "source": "/advanced/dashboard/permissions",
+      "destination": "/dashboard/permissions"
+    },
+    {
+      "source": "/advanced/dashboard/roles",
+      "destination": "/dashboard/roles"
+    },
+    {
+      "source": "/advanced/dashboard/sso",
+      "destination": "/dashboard/sso"
+    },
+    {
+      "source": "/settings/ci",
+      "destination": "/deploy/ci"
+    },
+    {
+      "source": "/advanced/subpath/cloudflare",
+      "destination": "/deploy/cloudflare"
+    },
+    {
+      "source": "/guides/csp-configuration",
+      "destination": "/deploy/csp-configuration"
+    },
+    {
+      "source": "/guides/deployments",
+      "destination": "/deploy/deployments"
+    },
+    {
+      "source": "/settings/github",
+      "destination": "/deploy/github"
+    },
+    {
+      "source": "/settings/gitlab",
+      "destination": "/deploy/gitlab"
+    },
+    {
+      "source": "/guides/monorepo",
+      "destination": "/deploy/monorepo"
+    },
+    {
+      "source": "/settings/preview-deployments",
+      "destination": "/deploy/preview-deployments"
+    },
+    {
+      "source": "/guides/reverse-proxy",
+      "destination": "/deploy/reverse-proxy"
+    },
+    {
+      "source": "/advanced/subpath/route53-cloudfront",
+      "destination": "/deploy/route53-cloudfront"
+    },
+    {
+      "source": "/advanced/subpath/vercel",
+      "destination": "/deploy/vercel"
+    },
+    {
+      "source": "/editor/branches",
+      "destination": "/guides/branches"
+    },
+    {
+      "source": "/editor/git-concepts",
+      "destination": "/guides/git-concepts"
+    },
+    {
+      "source": "/analytics/improving-docs",
+      "destination": "/guides/improving-docs"
+    },
+    {
+      "source": "/api-playground/migrating-from-mdx",
+      "destination": "/guides/migrating-from-mdx"
+    },
+    {
+      "source": "/guides/migration",
+      "destination": "/migration"
+    },
+    {
+      "source": "/settings/seo",
+      "destination": "/optimize/seo"
+    },
+    {
+      "source": "/guides/hidden-page-example",
+      "destination": "/organize/hidden-page-example"
+    },
+    {
+      "source": "/guides/hidden-pages",
+      "destination": "/organize/hidden-pages"
+    },
+    {
+      "source": "/navigation",
+      "destination": "/organize/navigation"
+    },
+    {
+      "source": "/pages",
+      "destination": "/organize/pages"
+    },
+    {
+      "source": "/settings",
+      "destination": "/organize/settings"
+    },
+    {
+      "source": "/api-playground/mdx/:slug*",
+      "destination": "/api-playground/mdx-setup"
+    },
+    {
+      "source": "/api-playground/asyncapi/setup",
+      "destination": "/api-playground/asyncapi-setup"
+    },
+    {
+      "source": "/create/broken-links",
+      "destination": "/create/redirects"
+    },
+    {
+      "source": "/ai/autopilot",
+      "destination": "/automations/index"
+    },
+    {
+      "source": "/ai/slack-app",
+      "destination": "/ai/slack-bot"
+    },
+    {
+      "source": "/changelog/overview",
+      "destination": "/changelog"
+    },
+    {
+      "source": "/ai/agent",
+      "destination": "/agent/index"
+    },
+    {
+      "source": "/ai/suggestions",
+      "destination": "/automations/index"
+    },
+    {
+      "source": "/insights/overview",
+      "destination": "/optimize/analytics"
+    },
+    {
+      "source": "/insights/feedback",
+      "destination": "/optimize/feedback"
+    },
+    {
+      "source": "/migration-services/custom",
+      "destination": "/migration-services/enterprise"
+    },
+    {
+      "source": "/migration-services/pro",
+      "destination": "/migration-services/enterprise"
+    },
+    {
+      "source": "/es/migration-services/pro",
+      "destination": "/es/migration-services/enterprise"
+    },
+    {
+      "source": "/fr/migration-services/pro",
+      "destination": "/fr/migration-services/enterprise"
+    },
+    {
+      "source": "/zh/migration-services/pro",
+      "destination": "/zh/migration-services/enterprise"
+    },
+    {
+      "source": "/agent/suggestions",
+      "destination": "/automations/index"
+    },
+    {
+      "source": "/agent/workflows",
+      "destination": "/automations/index"
+    },
+    {
+      "source": "/agent/workflows/:page",
+      "destination": "/automations/:page"
+    },
+    {
+      "source": "/agent/quickstart",
+      "destination": "/agent/index"
+    },
+    {
+      "source": "/installation",
+      "destination": "/cli/install"
+    },
+    {
+      "source": "/settings/global",
+      "destination": "/organize/settings"
+    },
+    {
+      "source": "/editor/publish",
+      "destination": "/editor/branching-and-publishing"
+    },
+    {
+      "source": "/editor/media",
+      "destination": "/editor/pages"
+    },
+    {
+      "source": "/workflows/enable",
+      "destination": "/automations/manage"
+    },
+    {
+      "source": "/workflows/index",
+      "destination": "/automations/index"
+    },
+    {
+      "source": "/workflows/reference",
+      "destination": "/automations/reference"
+    },
+    {
+      "source": "/workflows/manage",
+      "destination": "/automations/manage"
+    },
+    {
+      "source": "/workflows/create",
+      "destination": "/automations/create"
+    },
+    {
+      "source": "/guides/use-workflows",
+      "destination": "/guides/use-automations"
+    }
+  ]

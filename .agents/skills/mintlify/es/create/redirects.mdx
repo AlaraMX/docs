@@ -1,0 +1,138 @@
+---
+title: "Redirecciones"
+description: "Configura redirecciones de URL en docs.json para páginas movidas, renombradas o eliminadas, preservando el SEO y evitando enlaces rotos."
+keywords: ["redirects"]
+boost: 3
+---
+
+Cuando cambias la ruta de un archivo en tu carpeta de docs, también cambia la URL de esa página. Esto puede ocurrir al reestructurar tus docs o al cambiar el título de la barra lateral.
+
+<div id="redirects">
+  ## Redirecciones
+</div>
+
+<Note>
+  Las **fuentes** de redirección no pueden incluir anclas de URL como `path#anchor` ni parámetros de consulta como `path?query=value`. Los destinos sí pueden incluir anclas (por ejemplo, `/destination/path#section`).
+</Note>
+
+Añade el campo `redirects` al nivel superior de tu archivo `docs.json` para configurar redirecciones.
+
+```json docs.json
+{
+  "name": "My docs",
+  "redirects": [
+    {
+      "source": "/source/path",
+      "destination": "/destination/path"
+    }
+  ]
+}
+```
+
+Esto redirige `/source/path` a `/destination/path`.
+
+De forma predeterminada, las redirecciones son permanentes (308). Para usar una redirección temporal (307), establece `permanent` en `false`.
+
+```json
+"redirects": [
+  {
+    "source": "/source/path",
+    "destination": "/destination/path",
+    "permanent": false
+  }
+]
+```
+
+Tanto 307 como 308 conservan el método HTTP de la solicitud original (a diferencia de 301 y 302), por lo que son adecuados para redirigir solicitudes POST.
+
+Usa una redirección permanente (308) cuando una página se haya movido de forma definitiva: para slugs renombrados, navegación reestructurada o páginas eliminadas que se asignan a un reemplazo. Los motores de búsqueda transfieren el ranking SEO al destino y los navegadores almacenan la redirección en caché.
+
+Usa una redirección temporal (307) para redireccionamientos a corto plazo en los que la URL de origen volverá a estar disponible, como páginas de mantenimiento, pruebas A/B o enlaces de campañas que planeas reutilizar. Los motores de búsqueda mantienen la URL de origen en su índice y no transfieren el ranking.
+
+<div id="redirect-limits">
+  ### Límites de redirecciones
+</div>
+
+No hay un límite estricto para el número de redirecciones que puedes definir en `docs.json`. Los arrays de redirecciones muy grandes (miles de entradas) pueden ralentizar los despliegues y dificultar la revisión del archivo, por lo que conviene consolidarlos con [redirecciones con comodines](#wildcard-redirects) siempre que sea posible.
+
+<div id="wildcard-redirects">
+  ### Redirecciones con comodín
+</div>
+
+Para hacer coincidir una ruta con comodín, usa `*` después de un parámetro. En este ejemplo, `/beta/:slug*` coincide con `/beta/introduction` y la redirige a `/v2/introduction`.
+
+```json
+"redirects": [
+  {
+    "source": "/beta/:slug*",
+    "destination": "/v2/:slug*"
+  }
+]
+```
+
+<div id="partial-wildcard-redirects">
+  ### Redirecciones con comodín parcial
+</div>
+
+Usa comodines parciales para hacer coincidir los segmentos de la URL que comienzan con un prefijo específico.
+
+```json
+"redirects": [
+  {
+    "source": "/articles/concepts-*",
+    "destination": "/collections/overview"
+  }
+]
+```
+
+Esto coincide con cualquier URL con la ruta `/articles/concepts-`, como `/articles/concepts-getting-started` y `/articles/concepts-overview`, y las redirige todas a `/collections/overview`.
+
+También puedes usar el valor del comodín capturado en el destino.
+
+```json
+"redirects": [
+  {
+    "source": "/old/article-*",
+    "destination": "/new/article-*"
+  }
+]
+```
+
+Esto redirige `/old/article-123` a `/new/article-123`, manteniendo el valor capturado después del prefijo.
+
+<div id="avoid-infinite-redirects">
+  ### Evita redirecciones infinitas
+</div>
+
+Para evitar bucles infinitos, no crees redirecciones circulares en las que las rutas se redirijan unas a otras.
+
+```json
+"redirects": [
+  {
+    "source": "/docs/:slug*",
+    "destination": "/help/:slug*"
+  },
+  {
+    "source": "/help/:slug*",
+    "destination": "/docs/:slug*"
+  }
+]
+```
+
+<div id="when-redirects-take-effect">
+  ## Cuándo surten efecto las redirecciones
+</div>
+
+Las redirecciones en `docs.json` se aplican en el momento de la solicitud en la capa de hosting de Mintlify, por lo que entran en vigor en cuanto tus cambios se despliegan. Los despliegues de vista previa también aplican las redirecciones, lo que te permite verificar el comportamiento antes de hacer merge a tu rama de producción.
+
+Para probar las redirecciones de forma local, ejecuta `mint dev` y visita la ruta de origen en tu navegador. El servidor de desarrollo local aplica las redirecciones definidas en tu `docs.json`.
+
+<div id="check-for-broken-links">
+  ## Comprobar enlaces rotos
+</div>
+
+Detecta enlaces rotos con la [CLI](/es/cli).
+
+```bash
+mint broken-links
+```

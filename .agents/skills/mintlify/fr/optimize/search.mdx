@@ -1,0 +1,151 @@
+---
+title: "Configurer classement, résultats et filtres de recherche"
+sidebarTitle: "Recherche"
+description: "Configurez la barre de recherche de votre site Mintlify : boosts de classement, nombre maximal de résultats et filtres par produit et par version."
+keywords: ["recherche", "classement de recherche", "boost de recherche", "boost", "priorisation de la recherche", "maximum de résultats de recherche", "max résultats", "searchable", "exclure de la recherche", "filtres"]
+---
+
+Configurez le comportement de la barre de recherche sur votre site de documentation hébergé par Mintlify. Ces paramètres n'affectent que la recherche intégrée. Ils ne changent pas la façon dont les moteurs de recherche externes indexent vos pages.
+
+<div id="boost-search-ranking">
+  ## Booster le classement de la recherche
+</div>
+
+Utilisez `boost` pour orienter le classement de la recherche intégrée pour des pages ou sections spécifiques. La valeur est un multiplicateur numérique appliqué au score de pertinence de chaque fragment : `boost: 3` rend un fragment trois fois plus pertinent qu'il ne le serait sans boost.
+
+<div id="boost-a-single-page">
+  ### Booster une seule page
+</div>
+
+Définissez `boost` dans le [frontmatter](/fr/organize/pages) d'une page pour multiplier son classement dans la recherche.
+
+```mdx
+---
+title: "Custom domain"
+description: "Connect your custom domain to your Mintlify documentation."
+boost: 3
+---
+```
+
+<div id="boost-a-navigation-group">
+  ### Booster un groupe de navigation
+</div>
+
+Définissez `boost` sur un groupe dans la navigation de votre `docs.json` pour appliquer le multiplicateur à chaque page qu'il contient.
+
+```json
+{
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get started",
+        "boost": 5,
+        "pages": [
+          "quickstart",
+          "concepts"
+        ]
+      }
+    ]
+  }
+}
+```
+
+Une page hérite du facteur de boost de son ancêtre le plus proche qui en définit un. Une page enfant ou un groupe imbriqué peut remplacer le boost hérité en définissant sa propre valeur `boost`. Le `boost` du frontmatter d'une page l'emporte toujours sur une valeur héritée de la navigation.
+
+<div id="de-prioritize-content">
+  ### Dé-prioriser du contenu
+</div>
+
+Utilisez une valeur inférieure à `1` pour reléguer les pages plus bas dans les résultats de recherche. Par exemple, `boost: 0.5` réduit de moitié le score de pertinence d'une page par rapport aux autres pages. Un `boost` de `1` équivaut à l'absence de boost.
+
+```mdx
+---
+title: "Deprecated API"
+description: "Documentation for the deprecated v1 API."
+boost: 0.25
+---
+```
+
+<Note>
+  Les facteurs de boost se combinent avec le score de pertinence existant. Utilisez-les avec parcimonie. Des multiplicateurs élevés peuvent faire en sorte que des pages moins pertinentes dominent les résultats de recherche et dégradent la qualité globale de la recherche.
+</Note>
+
+<div id="recommended-boost-range">
+  ### Plage de boost recommandée
+</div>
+
+`boost` accepte tout nombre positif. En pratique, maintenez les valeurs entre `0.1` et `10` :
+
+- `0.1`–`0.9` : dé-prioriser le contenu hérité, déprécié ou de support.
+- `1` : aucun changement (équivalent à ne pas définir `boost`).
+- `2`–`5` : prioriser une page d'atterrissage clé, un quickstart ou une référence très consultée.
+- `5`–`10` : à réserver à une poignée de pages de premier niveau qui doivent presque toujours apparaître en premier.
+
+Évitez les valeurs supérieures à `10`. Des multiplicateurs très élevés écrasent le score de pertinence sous-jacent et font remonter les pages boostées même lorsqu'elles ne correspondent pas bien à la requête.
+
+<div id="exclude-a-page-from-search">
+  ## Exclure une page de la recherche
+</div>
+
+Les pages sont consultables par défaut. Le champ `searchable` est facultatif et vaut `true` par défaut. Définissez `searchable: false` dans le [frontmatter](/fr/organize/pages) d'une page pour l'exclure des résultats de recherche de votre site de documentation. `searchable` est un champ qui ne s'applique qu'au niveau de la page : pour exclure toutes les pages situées sous un onglet ou un groupe de navigation, masquez plutôt l'onglet ou le groupe. Consultez [Pages masquées](/fr/organize/hidden-pages) pour les contrôles au niveau de l'onglet et du groupe.
+
+```mdx
+---
+title: "Notes internes"
+description: "Documents de référence que nous ne voulons pas faire apparaître dans la recherche."
+searchable: false
+---
+```
+
+Contrairement à `noindex`, `searchable: false` n'affecte pas le référencement externe. La page reste :
+
+- Explorable par les moteurs de recherche externes
+- Listée dans votre `sitemap.xml`
+
+Elle est exclue des résultats de recherche de votre site de documentation et du contexte de l'assistant IA.
+
+Utilisez `searchable: false` pour les pages qui doivent rester accessibles via des liens directs ou des moteurs de recherche externes, mais qui ne devraient pas apparaître lorsque les utilisateurs effectuent une recherche dans vos docs. C'est utile pour les pages de référence approfondies, le contenu hérité ou les supports complémentaires qui pourraient sinon éclipser des résultats plus pertinents.
+
+Pour exclure une page à la fois de la recherche intégrée et de l'indexation externe, utilisez plutôt [`noindex: true`](/fr/optimize/seo#disable-indexing).
+
+<div id="maximum-search-results">
+  ## Maximum de résultats de recherche
+</div>
+
+Contrôlez le nombre de résultats que la barre de recherche renvoie par requête depuis votre dashboard. La valeur par défaut est `6` résultats. Vous pouvez définir n'importe quelle valeur entre `1` et `100`.
+
+Accédez à la page de paramètres [Search](https://app.mintlify.com/settings/deployment/search) dans votre dashboard. Dans la section "Maximum search results", définissez **Results per query** sur la valeur souhaitée.
+
+<Frame>
+  <img
+    alt="La page de paramètres Search dans le dashboard avec le sélecteur Maximum search results défini sur 6."
+    className="block dark:hidden"
+    src="/images/search-settings-light.png"
+  />
+  <img
+    alt="La page de paramètres Search dans le dashboard avec le sélecteur Maximum search results défini sur 6."
+    className="hidden dark:block"
+    src="/images/search-settings-dark.png"
+  />
+</Frame>
+
+Des valeurs plus élevées font apparaître davantage de correspondances par requête, ce qui est utile pour les sites avec une couverture thématique large où les utilisateurs s'attendent à examiner de nombreux candidats. Des valeurs plus basses gardent le panneau de résultats compact et orientent les utilisateurs vers la correspondance la mieux classée.
+
+<div id="search-filters">
+  ## Filtres de recherche
+</div>
+
+<Note>
+  Les filtres de recherche nécessitent un [plan Enterprise](https://mintlify.com/pricing?ref=search-filters).
+</Note>
+
+Les filtres de recherche ajoutent des listes déroulantes de produit et de version aux résultats de recherche pour que les utilisateurs puissent restreindre les résultats à un seul produit ou à une seule version. Les filtres sont utiles pour les sites qui maintiennent des produits ou des versions distincts, où une requête pourrait autrement renvoyer des correspondances sur du contenu que l'utilisateur ne recherche pas.
+
+Activez ou désactivez les filtres de recherche sur la page de paramètres [Search](https://app.mintlify.com/settings/deployment/search) de votre dashboard.
+
+Les listes déroulantes affichées dépendent de la configuration de votre navigation.
+
+- Le filtre **produit** apparaît lorsque votre navigation définit plusieurs [produits](/fr/organize/navigation#products).
+- Le filtre **version** apparaît lorsque votre navigation définit des [versions](/fr/organize/navigation#versions).
+
+Si votre navigation n'a ni produits ni versions, activer les filtres de recherche n'a aucun effet visible.

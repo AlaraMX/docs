@@ -1,0 +1,26 @@
+---
+title: "获取页面浏览量"
+description: "获取 Mintlify 文档的页面浏览量统计，按路径细分，并区分来自真实用户与 AI 爬虫或代理的流量来源。"
+openapi: /zh/analytics.openapi.json GET /v1/analytics/{projectId}/views
+keywords: ["analytics", "浏览量", "页面浏览量", "流量", "导出"]
+---
+
+<div id="usage">
+  ## 使用方法
+</div>
+
+使用此端点导出页面浏览量分析数据。结果包括全站总量和各页面明细，并按人工流量和 AI 流量分类。
+
+使用基于偏移量的分页浏览结果。当 `hasMore` 为 `true` 时，将 `offset` 递增 `limit`。
+
+<div id="filtering">
+  ## 筛选
+</div>
+
+使用 `dateFrom` 和 `dateTo` 参数按日期范围过滤浏览量数据。
+
+<div id="rate-limits">
+  ## 速率限制
+</div>
+
+此端点允许每个组织每小时最多 100 次请求。所有分析端点共享此限制。

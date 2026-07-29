@@ -1,0 +1,74 @@
+---
+title: "Despliega en una subruta con Vercel"
+sidebarTitle: "Vercel"
+description: "Sirve tu sitio de Mintlify en una subruta de tu dominio principal usando rewrites de Vercel, con una guía paso a paso de configuración de vercel.json."
+keywords: ["vercel.json", "implementación en Vercel", "configuración de rewrites", "enrutamiento de subrutas"]
+boost: 3
+---
+
+import { VercelJsonGenerator } from "/snippets/es/vercel-json-generator.mdx";
+import SubpathSetupSteps from "/snippets/es/subpath-setup-steps.mdx";
+
+Configura tu archivo `vercel.json` para reenviar mediante un proxy las solicitudes desde tu dominio principal a tu documentación en una subruta.
+
+<div id="the-verceljson-file">
+  ## El archivo vercel.json
+</div>
+
+El archivo `vercel.json` configura cómo se compila e implementa tu proyecto. Se encuentra en el directorio raíz de tu proyecto y controla varios aspectos de la implementación, como el enrutamiento, las redirecciones, los encabezados y la configuración de compilación.
+
+Mintlify utiliza la configuración de `rewrites` en tu archivo `vercel.json` para enrutar las solicitudes desde tu dominio principal hacia tu documentación mediante un proxy.
+
+Las reglas de reescritura (rewrites) asignan las solicitudes entrantes a distintos destinos sin cambiar la URL en el navegador. Cuando alguien visita `yoursite.com/docs`, Vercel obtiene internamente el contenido desde `your-subdomain.mintlify.site/docs`, pero el usuario sigue viendo `yoursite.com/docs` en su navegador. Esto es diferente de las redirecciones, que envían a los usuarios a otra URL por completo.
+
+<div id="configuration">
+  ## Configuración
+</div>
+
+<div id="host-at-docs-subpath">
+  ### Alojar en la subruta `/docs`
+</div>
+
+1. Ve a la [configuración de dominio personalizado](https://app.mintlify.com/settings/deployment/custom-domain) en tu dashboard.
+2. Habilita el interruptor **Host at**.
+3. Ingresa tu dominio.
+4. Ingresa `docs` como tu ruta base.
+5. Haz clic en **Add domain**.
+5. Agrega las siguientes reglas de reescritura a tu archivo `vercel.json`. Sustituye `[subdomain]` por tu subdominio, que se encuentra al final de la URL de tu dashboard. Por ejemplo, `app.mintlify.com/your-organization/your-subdomain` tiene un identificador de dominio de `your-subdomain`.
+
+    ```json
+    {
+      "rewrites": [
+        {
+          "source": "/docs",
+          "destination": "https://[subdomain].mintlify.site/docs"
+        },
+        {
+          "source": "/docs/:match*",
+          "destination": "https://[subdomain].mintlify.site/docs/:match*"
+        }
+      ]
+    }
+    ```
+
+La configuración de `rewrites` asigna la subruta `/docs` en tu dominio a la subruta `/docs` en tu documentación.
+
+- **`source`**: El patrón de ruta en tu dominio que activa la reescritura.
+- **`destination`**: Adonde se debe enviar la solicitud mediante proxy.
+- **`:match*`**: Un comodín que captura cualquier segmento de ruta después de tu subruta.
+
+Para obtener más información, consulta [Configuring projects with vercel.json: Rewrites](https://vercel.com/docs/projects/project-configuration#rewrites) en la documentación de Vercel.
+
+<div id="host-at-custom-subpath">
+  ### Hospedar en una subruta personalizada
+</div>
+
+Para usar una subruta personalizada (cualquier ruta distinta de `/docs`):
+
+<SubpathSetupSteps />
+
+Luego utiliza el generador a continuación para crear tu configuración de `rewrites` y añade las reglas de `rewrites` a tu archivo `vercel.json`.
+
+Mintlify reconstruye tu documentación para servirla en tu ruta base, por lo que tus archivos de documentación no necesitan estar en un directorio que coincida con tu subruta.
+
+<VercelJsonGenerator />

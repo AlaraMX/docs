@@ -1,0 +1,399 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Mintlify External API",
+    "description": "Una API para gestionar la documentación de Mintlify y acceder a recursos.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.mintlify.com/v1"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "x-mcp": {
+    "enabled": true
+  },
+  "paths": {
+    "/project/update/{projectId}": {
+      "post": {
+        "summary": "Iniciar actualización",
+        "description": "Pone en cola una actualización de implementación para tu proyecto de documentación. Devuelve un ID de estado que se puede usar para hacer seguimiento del progreso de la actualización. La actualización se activa desde la rama de implementación que tengas configurada.\n\nAutentícate con una clave de API de administrador.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "El ID de tu proyecto. Puedes copiarlo de la página de [API keys](https://dashboard.mintlify.com/settings/organization/api-keys) de tu dashboard.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Una respuesta satisfactoria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusId": {
+                      "type": "string",
+                      "description": "El ID de estado de la actualización que se activó."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/project/update-status/{statusId}": {
+      "get": {
+        "summary": "Obtener el estado de la actualización",
+        "description": "Obtén el estado de una actualización mediante el ID de estado\n\nAutentícate con una clave de API de administrador.",
+        "parameters": [
+          {
+            "name": "statusId",
+            "in": "path",
+            "description": "El identificador de estado de una actualización activada.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Una respuesta correcta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "description": "El ID de estado de la actualización que se activó."
+                    },
+                    "projectId": {
+                      "type": "string",
+                      "description": "El identificador del proyecto de documentación."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "description": "Un ISODate con la fecha y la hora especificadas en UTC"
+                    },
+                    "endedAt": {
+                      "type": "string",
+                      "description": "Un ISODate con la fecha y hora especificadas en UTC"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "queued",
+                        "in_progress",
+                        "success",
+                        "failure"
+                      ],
+                      "description": "El estado de la actualización."
+                    },
+                    "summary": {
+                      "type": "string",
+                      "description": "Resumen del estado de la actualización"
+                    },
+                    "logs": {
+                      "type": "array",
+                      "description": "Una matriz de registros.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "subdomain": {
+                      "type": "string",
+                      "description": "El subdominio de la documentación que se está actualizando."
+                    },
+                    "screenshot": {
+                      "type": "string",
+                      "description": "Una captura de pantalla de la documentación."
+                    },
+                    "screenshotLight": {
+                      "type": "string",
+                      "description": "Una captura de pantalla de la documentación."
+                    },
+                    "screenshotDark": {
+                      "type": "string",
+                      "description": "Captura de pantalla de la documentación en modo oscuro."
+                    },
+                    "author": {
+                      "type": "object",
+                      "description": "El autor de la actualización.",
+                      "nullable": true,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "El nombre del autor."
+                        },
+                        "avatarUrl": {
+                          "type": "string",
+                          "description": "URL de la imagen de avatar del autor."
+                        },
+                        "githubUserId": {
+                          "type": "number",
+                          "description": "El identificador de usuario de GitHub del autor."
+                        }
+                      }
+                    },
+                    "commit": {
+                      "type": "object",
+                      "description": "Detalles de la confirmación",
+                      "properties": {
+                        "sha": {
+                          "type": "string",
+                          "description": "El SHA de la confirmación."
+                        },
+                        "ref": {
+                          "type": "string",
+                          "description": "La referencia de la confirmación."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "El mensaje de confirmación."
+                        },
+                        "filesChanged": {
+                          "type": "object",
+                          "description": "Detalles de los archivos modificados.",
+                          "properties": {
+                            "added": {
+                              "type": "array",
+                              "description": "Se han añadido nuevos archivos.",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "modified": {
+                              "type": "array",
+                              "description": "Archivos existentes que fueron modificados.",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "removed": {
+                              "type": "array",
+                              "description": "Archivos eliminados.",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string",
+                      "description": "Origen del disparador de la actualización.",
+                      "enum": [
+                        "internal",
+                        "github-app-installation",
+                        "api",
+                        "github",
+                        "dashboard",
+                        "gitlab",
+                        "onboarding"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/project/preview/{projectId}": {
+      "post": {
+        "summary": "Activar implementación de vista previa",
+        "description": "Crea o actualiza una implementación de vista previa para una rama específica. Si ya existe una vista previa para la rama, se activa una reimplementación. Devuelve un ID de estado para hacer seguimiento del progreso y la URL de la vista previa.\n\nAutentícate con una clave de API de administrador.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "El ID de tu proyecto. Puedes copiarlo de la página de [API keys](https://dashboard.mintlify.com/settings/organization/api-keys) de tu dashboard.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "branch"
+                ],
+                "properties": {
+                  "branch": {
+                    "type": "string",
+                    "description": "El nombre de la rama de Git para la cual crear una implementación de vista previa.",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Implementación de vista previa puesta en cola correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusId": {
+                      "type": "string",
+                      "description": "El ID de estado para hacer seguimiento de la implementación de vista previa. Úsalo con el endpoint [Get deployment status](/es/api/update/status)."
+                    },
+                    "previewUrl": {
+                      "type": "string",
+                      "description": "La URL donde se aloja la implementación de vista previa."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud no válida. El campo `branch` es obligatorio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Las implementaciones de vista previa no están disponibles en tu plan actual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workflow/{projectId}/{workflowSchemaId}/trigger": {
+      "post": {
+        "summary": "Activar automatización",
+        "description": "Activa una automatización programada para que se ejecute de inmediato, en lugar de esperar a su próxima hora programada. Útil para ejecutar automatizaciones desde pipelines CI/CD, como una GitHub Action que se ejecuta en cada fusión a tu rama predeterminada. Solo se pueden activar automatizaciones programadas (con programación personalizada). La ejecución recoge los cambios desde la última ejecución completada, de forma idéntica a una ejecución programada normal.\n\nAutentícate con una clave de API de administrador.",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "El ID de tu proyecto. Puedes copiarlo de la página de [API keys](https://app.mintlify.com/settings/organization/api-keys) de tu dashboard.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workflowSchemaId",
+            "in": "path",
+            "description": "El ID de la automatización que se va a activar. Puedes copiarlo del panel de configuración de la automatización en la página [Automatizaciones](https://app.mintlify.com/products/automations) de tu dashboard.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Ejecución de la automatización puesta en cola correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schemaId": {
+                      "type": "string",
+                      "description": "El ID de la automatización activada."
+                    },
+                    "instanceId": {
+                      "type": "string",
+                      "description": "El ID de la ejecución de la automatización puesta en cola. Aparece en el historial de ejecuciones en la página [Ejecuciones de automatizaciones](https://app.mintlify.com/products/automations)."
+                    },
+                    "jobId": {
+                      "type": "string",
+                      "description": "El ID del trabajo en segundo plano que procesa la ejecución."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud no válida. El ID de la automatización tiene un formato incorrecto, la automatización no está activa o no está configurada con una programación personalizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se encontró la automatización o no pertenece a este proyecto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "El encabezado Authorization requiere un token de tipo Bearer. Usa una clave de API de administrador. Esta es una clave secreta del lado del servidor. Genera una en la [página de claves de API](https://dashboard.mintlify.com/settings/organization/api-keys) de tu dashboard."
+      }
+    }
+  }
+}

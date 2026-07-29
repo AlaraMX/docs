@@ -1,0 +1,28 @@
+---
+title: "Heap"
+description: "Integra Heap Analytics en tu sitio de documentación de Mintlify para capturar automáticamente interacciones y eventos de los usuarios y analizarlos."
+keywords: ["Heap Analytics", "registro automático de eventos", "Heap app ID", "seguimiento de interacciones de usuario"]
+boost: 3
+---
+
+Agrega lo siguiente a tu archivo `docs.json` para enviar Analytics a Heap.
+
+<CodeGroup>
+  ```json Opciones de Analytics en docs.json
+  "integrations": {
+      "heap": {
+          "appId": "required"
+      }
+  }
+  ```
+
+  ```json Ejemplo
+  "integrations": {
+      "heap": {
+          "appId": "1234567890"
+      }
+  }
+  ```
+</CodeGroup>
+
+Reemplaza `1234567890` con tu ID de aplicación de Heap. Puedes encontrarlo en la [configuración de tu cuenta de Heap](https://heapanalytics.com/app/settings).

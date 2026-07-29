@@ -1,0 +1,124 @@
+---
+title: "Collect page feedback from users and AI agents"
+sidebarTitle: "Feedback"
+description: "Enable feedback widgets, page ratings, contextual notes, code snippet reactions, and agent feedback to find and fix documentation gaps."
+keywords: ["user feedback", "thumbs rating", "contextual", "satisfaction", "agents"]
+boost: 3
+---
+
+<Info>
+  Feedback requires a [Pro or Enterprise plan](https://mintlify.com/pricing?ref=feedback).
+</Info>
+
+The feedback section of the [analytics](https://app.mintlify.com/analytics) page displays quantitative thumbs up and thumbs down votes your pages receive from users and any qualitative feedback that they provide. Use this information to gauge the quality of your content and make improvements.
+
+Review your feedback data to:
+
+- **Identify successful content**: Pages with the most positive feedback show what works well in your documentation.
+- **Prioritize improvements**: Pages with the most negative feedback indicate what content might need attention.
+- **Take action**: Make documentation updates based on direct user feedback.
+
+<Frame>
+  <img
+    className="block dark:hidden"
+    src="/images/analytics/feedback-light.png"
+    alt="Feedback tab in the Analytics page."
+  />
+
+  <img
+    className="hidden dark:block"
+    src="/images/analytics/feedback-dark.png"
+    alt="Feedback tab in the Analytics page."
+  />
+</Frame>
+
+## Enable feedback
+
+<Note>
+  If you disable telemetry in your `docs.json` file, you cannot enable feedback features.
+</Note>
+
+To collect and view feedback from users, you must enable feedback from the [Add-ons](https://app.mintlify.com/products/addons) page in your dashboard.
+
+1. Navigate to the [Add-ons](https://app.mintlify.com/products/addons) page.
+2. Enable your desired feedback types.
+  * **Thumbs rating**: Simple thumbs up/down voting to gauge overall satisfaction with pages.
+  * **Edit suggestions**: Allow users to suggest edits to your documentation. Only available for public repositories.
+  * **Raise issues**: Allow users to create issues directly from your site. Only available for public repositories.
+  * **Contextual feedback**: Free-form feedback about the content of a page. Optionally, enable email collection to allow users to provide their email address when submitting feedback.
+  * **Code snippet feedback**: Feedback specifically on code snippets.
+
+<Frame>
+  <img
+    className="block dark:hidden"
+    src="/images/analytics/feedback-addons-light.png"
+    alt="Feedback toggles in the Add-ons page."
+  />
+
+  <img
+    className="hidden dark:block"
+    src="/images/analytics/feedback-addons-dark.png"
+    alt="Feedback toggles in the Add-ons page."
+  />
+</Frame>
+
+## Manage feedback
+
+You can set the status of a piece of feedback and add internal notes to track your work resolving user feedback.
+
+### Change feedback status
+
+Select the status beside a piece of feedback to mark it as **Pending**, **In Progress**, **Resolved**, or **Dismissed**.
+
+Best practices for setting feedback statuses:
+
+- **Pending**: Feedback is awaiting review.
+- **In Progress**: Work is in progress to address the feedback.
+- **Resolved**: You resolved the feedback.
+- **Dismissed**: Feedback is irrelevant or inaccurate.
+
+### Filter by status
+
+Use the **Filters** menu to control which feedback displays. Clear a status to hide all feedback with that status. By default, all feedback types display.
+
+### Filter by type
+
+Select between **Ratings by page**, **Detailed feedback**, and **Code snippets** depending on the information you want to analyze.
+
+- **Ratings by page**: See which pages have the most positive and negative feedback. Use this quantitative data to identify pages that users find most and least helpful.
+- **Detailed feedback**: Review the open feedback users leave on pages to identify targeted improvements to specific pages. Detailed feedback only displays feedback that includes additional information. Submissions that use only the thumbs up or thumbs down rating without selecting an additional feedback option do not appear in the detailed view.
+- **Code snippets**: Review the open feedback users leave on code snippets to identify targeted improvements to specific blocks of code.
+
+### Add internal notes
+
+Click a piece of feedback to add an internal note. These notes are only visible to people with access to your dashboard.
+
+Use notes to add information for collaboration, link relevant support or engineering tickets, or remember any other useful information.
+
+## Agent feedback
+
+<Note>
+  Agent feedback is in beta and subject to change.
+</Note>
+
+Third-party AI agents can submit structured feedback about pages they find incorrect, outdated, or difficult to use.
+
+This feedback appears in the **Detailed feedback** section identified by an **Agent** badge. Manage agent feedback the same way as human feedback.
+
+### How agent feedback works
+
+Connect an agent to your site's [search MCP server](/ai/model-context-protocol). The server exposes a `submit_feedback` tool that requires the page path and a description of the problem.
+
+<Note>
+  Web search and web fetch tools do not connect an agent to the search MCP server. Connect the agent to the server so it can discover and call the `submit_feedback` tool.
+</Note>
+
+Mintlify records each submission as unhelpful feedback for the specified page. The feedback appears in the dashboard alongside human feedback.
+
+### Retrieve agent feedback via API
+
+Use the [analytics feedback endpoint](/api/analytics/feedback) to retrieve agent feedback programmatically. Filter by `source=agent` to return only agent feedback.
+
+Agent feedback responses include:
+- `comment`: The feedback text submitted by the agent.
+- `path`: The path of the page the feedback is about.

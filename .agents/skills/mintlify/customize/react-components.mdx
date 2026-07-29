@@ -1,0 +1,225 @@
+---
+title: "React components"
+description: "Build interactive and reusable elements with custom React components in your Mintlify documentation using JSX, state, and client-side logic."
+keywords: ["React components", "interactive components", "JSX", "custom components"]
+boost: 3
+---
+
+import { ColorGenerator } from "/snippets/color-generator.jsx";
+
+Build interactive elements in your docs using [React components](https://react.dev) and [hooks](https://react.dev/reference/react/hooks) directly in MDX files.
+
+## Inline components
+
+Declare components directly in your MDX file:
+
+export const Counter = () => {
+  const [count, setCount] = useState(0)
+
+  const increment = () => setCount(count + 1)
+  const decrement = () => setCount(count - 1)
+
+  return (
+  <div className="flex items-center justify-center">
+      <div className="flex items-center rounded-xl overflow-hidden border border-zinc-950/20 dark:border-white/20">
+        <button
+          onClick={decrement}
+          className="flex items-center justify-center h-8 w-8 text-zinc-950/80 dark:text-white/80 border-r border-zinc-950/20 dark:border-white/20"
+          aria-label="Decrease"
+        >
+          -
+        </button>
+
+        <div className="flex text-sm items-center justify-center h-8 px-6 text-zinc-950/80 dark:text-white/80 font-medium min-w-[4rem] text-center">
+          {count}
+        </div>
+
+        <button
+          onClick={increment}
+          className="flex items-center justify-center h-8 w-8 text-zinc-950/80 dark:text-white/80 border-l border-zinc-950/20 dark:border-white/20"
+          aria-label="Increase"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  )
+}
+
+<Counter />
+
+```mdx
+export const Counter = () => {
+  const [count, setCount] = useState(0)
+  const increment = () => setCount(count + 1)
+  const decrement = () => setCount(count - 1)
+
+  return (
+    <div>
+      <button onClick={decrement}>-</button>
+      <span>{count}</span>
+      <button onClick={increment}>+</button>
+    </div>
+  )
+}
+
+<Counter />
+```
+
+## Constraints
+
+React components in Mintlify run in a sandboxed MDX environment with the following constraints:
+
+{/* vale Mintlify.Ellipses = NO */}
+
+- **React hooks are pre-injected**: `useState`, `useEffect`, `useRef`, `useCallback`, `useMemo`, `useContext`, and `useReducer` are available without importing them.
+- **No external npm packages**: You cannot import third-party packages (for example, `lodash`, `axios`, `date-fns`). Use browser built-ins or write the logic inline.
+- **No default exports**: Use named exports (`export const MyComponent = ...`). Default exports (`export default`) are not supported.
+- **No cross-snippet imports**: Snippet files cannot import other snippet files. Import all dependencies directly in the parent MDX file.
+- **No JSON imports**: Importing `.json` files is not supported.
+- **No code splitting**: `React.lazy` and dynamic `import()` are not supported. All component code on a page, including imported snippets, compiles into the page and loads with it.
+
+{/* vale Mintlify.Ellipses = YES */}
+
+## Import components
+
+Component files must be in the `/snippets/` folder. Learn more about [reusable snippets](/create/reusable-snippets).
+
+<Note>
+Nested imports are not supported. Import all referenced components directly into the parent MDX file.
+</Note>
+
+Create a component file in `snippets/`:
+
+```mdx /snippets/color-generator.jsx [expandable]
+export const ColorGenerator = () => {
+  const [hue, setHue] = useState(180)
+  const [saturation, setSaturation] = useState(50)
+  const [lightness, setLightness] = useState(50)
+  const [colors, setColors] = useState([])
+
+  useEffect(() => {
+    const newColors = []
+    for (let i = 0; i < 5; i++) {
+      const l = Math.max(10, Math.min(90, lightness - 20 + i * 10))
+      newColors.push(`hsl(${hue}, ${saturation}%, ${l}%)`)
+    }
+    setColors(newColors)
+  }, [hue, saturation, lightness])
+
+  const copyToClipboard = (color) => {
+    navigator.clipboard
+      .writeText(color)
+      .then(() => {
+        console.log(`Copied ${color} to clipboard!`)
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err)
+      })
+  }
+
+  return (
+    <div className="p-4 border dark:border-zinc-950/80 rounded-xl not-prose">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm text-zinc-950/70 dark:text-white/70">
+            Hue: {hue}°
+            <input
+              type="range"
+              min="0"
+              max="360"
+              value={hue}
+              onChange={(e) => setHue(Number.parseInt(e.target.value))}
+              className="w-full h-2 bg-zinc-950/20 rounded-lg appearance-none cursor-pointer dark:bg-white/20 mt-1"
+              style={{
+                background: `linear-gradient(to right, 
+                  hsl(0, ${saturation}%, ${lightness}%), 
+                  hsl(60, ${saturation}%, ${lightness}%), 
+                  hsl(120, ${saturation}%, ${lightness}%), 
+                  hsl(180, ${saturation}%, ${lightness}%), 
+                  hsl(240, ${saturation}%, ${lightness}%), 
+                  hsl(300, ${saturation}%, ${lightness}%), 
+                  hsl(360, ${saturation}%, ${lightness}%))`,
+              }}
+            />
+          </label>
+
+          <label className="block text-sm text-zinc-950/70 dark:text-white/70">
+            Saturation: {saturation}%
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={saturation}
+              onChange={(e) => setSaturation(Number.parseInt(e.target.value))}
+              className="w-full h-2 bg-zinc-950/20 rounded-lg appearance-none cursor-pointer dark:bg-white/20 mt-1"
+              style={{
+                background: `linear-gradient(to right, 
+                  hsl(${hue}, 0%, ${lightness}%), 
+                  hsl(${hue}, 50%, ${lightness}%), 
+                  hsl(${hue}, 100%, ${lightness}%))`,
+              }}
+            />
+          </label>
+
+          <label className="block text-sm text-zinc-950/70 dark:text-white/70">
+            Lightness: {lightness}%
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={lightness}
+              onChange={(e) => setLightness(Number.parseInt(e.target.value))}
+              className="w-full h-2 bg-zinc-950/20 rounded-lg appearance-none cursor-pointer dark:bg-white/20 mt-1"
+              style={{
+                background: `linear-gradient(to right, 
+                  hsl(${hue}, ${saturation}%, 0%), 
+                  hsl(${hue}, ${saturation}%, 50%), 
+                  hsl(${hue}, ${saturation}%, 100%))`,
+              }}
+            />
+          </label>
+        </div>
+
+        <div className="flex space-x-1">
+          {colors.map((color, idx) => (
+            <div
+              key={idx}
+              className="h-16 rounded flex-1 cursor-pointer transition-transform hover:scale-105"
+              style={{ backgroundColor: color }}
+              title={`Click to copy: ${color}`}
+              onClick={() => copyToClipboard(color)}
+            />
+          ))}
+        </div>
+
+        <div className="text-sm font-mono text-zinc-950/70 dark:text-white/70">
+          <p>
+            Base color: hsl({hue}, {saturation}%, {lightness}%)
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+Then import and use it:
+
+```mdx
+import { ColorGenerator } from "/snippets/color-generator.jsx"
+
+<ColorGenerator />
+```
+
+<ColorGenerator />
+
+## Considerations
+
+- **SEO**: Search engines may not fully index client-rendered dynamic content.
+- **Initial load**: Visitors may see a flash before components render.
+- **Accessibility**: Ensure screen readers announce dynamic content changes.
+- **Optimize dependency arrays**: Only include necessary dependencies in `useEffect`.
+- **Memoize expensive operations**: Use `useMemo` or `useCallback` where appropriate.
+- **Reduce re-renders**: Break large components into smaller ones.
+- **Lazy loading**: Component code cannot lazy load. All components load with the page. If a component performs resource-intensive operations when it mounts, such as fetching data or heavy computation, use conditional rendering to defer mounting it until user interaction.

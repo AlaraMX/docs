@@ -1,0 +1,82 @@
+---
+title: "Excluir archivos de la publicación"
+sidebarTitle: "Excluir archivos"
+description: "Excluye archivos y directorios específicos de tu documentación publicada usando un archivo .mintignore con patrones glob, similar a la sintaxis de .gitignore."
+keywords: ["excluir", "ignorar", "gitignore", "borradores", "privados"]
+---
+
+El archivo `.mintignore` te permite excluir archivos y directorios específicos en tu repositorio de documentación del procesamiento y la publicación en tu sitio de documentación.
+
+Usa `.mintignore` para mantener borradores, notas internas y archivos fuente fuera de tu documentación pública mientras los sigues conservando en tu repositorio.
+
+<div id="create-a-mintignore-file">
+  ## Crear un archivo .mintignore
+</div>
+
+Crea un archivo `.mintignore` en la raíz de tu directorio de documentación. Este archivo utiliza la misma sintaxis de patrones que `.gitignore`.
+
+```plaintext .mintignore
+# Excluir borradores de documentos
+drafts/
+*.draft.mdx
+
+# Excluir documentación interna
+internal/
+
+# Excluir archivos específicos
+private-notes.md
+```
+
+Cuando Mintlify construye tu documentación, lee el archivo `.mintignore` y excluye del procesamiento cualquier archivo o directorio que coincida.
+
+Archivos excluidos:
+
+* No aparecen en tu documentación publicada.
+* No se indexan en la búsqueda.
+* No son accesibles para los visitantes.
+* No tienen sus enlaces salientes verificados por [`mint broken-links`](/es/cli/commands#mint-broken-links).
+* Hacen que cualquier enlace que apunte a ellos desde otras páginas aparezca como roto en las comprobaciones de `mint broken-links`.
+
+<div id="default-ignored-patterns">
+  ## Patrones ignorados de forma predeterminada
+</div>
+
+Mintlify ignora automáticamente los siguientes directorios y archivos sin requerir ninguna configuración:
+
+* `.git`
+* `.github`
+* `.claude`
+* `.agents`
+* `.idea`
+* `.vscode`
+* `node_modules`
+* `build`
+* `dist`
+* `coverage`
+* `.cache`
+* `tmp`
+* `temp`
+* `README.md`
+* `LICENSE.md`
+* `CHANGELOG.md`
+* `CONTRIBUTING.md`
+
+No necesitas añadirlos a tu archivo `.mintignore`.
+
+<Note>
+  A diferencia de las [páginas ocultas](/es/organize/hidden-pages), `.mintignore` elimina completamente los archivos coincidentes de tu sitio. Los visitantes no pueden acceder a ellos mediante una URL.
+</Note>
+
+<div id="pattern-syntax">
+  ## Sintaxis de patrones
+</div>
+
+El archivo `.mintignore` sigue la sintaxis de `.gitignore`. Algunos patrones comunes son:
+
+| Pattern            | Descripción                                          |
+| ------------------ | ---------------------------------------------------- |
+| `drafts/`          | Excluye todo el directorio `drafts`                  |
+| `*.draft.mdx`      | Excluye todos los archivos que terminan en `.draft.mdx` |
+| `private-notes.md` | Excluye un archivo específico                        |
+| `**/internal/**`   | Excluye cualquier directorio `internal` en cualquier nivel |
+| `!important.mdx`   | Anula un patrón anterior (incluye el archivo)        |

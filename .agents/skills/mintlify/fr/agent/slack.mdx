@@ -1,0 +1,158 @@
+---
+title: "Ajouter l'agent à Slack"
+description: "Installez l'agent Mintlify dans Slack pour poser des questions, transformer les conversations d'équipe en mises à jour et capturer le savoir en PR."
+keywords: ["Intégration Slack", "Bot Slack", "Collaboration d'équipe", "Intégration de l'agent", "Capture des connaissances"]
+---
+
+<Note>
+  Si le propriétaire de votre espace de travail Slack exige l'approbation d'un administrateur pour installer des applications, demandez-lui d'approuver l'application Mintlify avant de la connecter.
+</Note>
+
+Utilisez l'agent dans Slack pour mettre à jour votre contenu, poser des questions et capturer les connaissances de l'équipe. Mentionnez l'agent dans un canal pour l'utiliser de manière collaborative, ou envoyez-lui un message direct pour l'utiliser en privé.
+
+<Tip>
+  L'application Slack et les intégrations tierces fonctionnent ensemble. Installez l'application Slack pour discuter avec l'agent et lui donner accès au contenu Slack autorisé. Connectez ensuite des [intégrations](/fr/automations/integrations) afin qu'il puisse aussi utiliser le contexte d'applications comme Notion, Jira, Linear ou Google Drive.
+</Tip>
+
+<div id="connect-your-slack-workspace">
+  ## Connectez votre espace de travail Slack
+</div>
+
+1. Accédez à la page [Agent](https://dashboard.mintlify.com/products/agent) de votre Dashboard.
+2. Dans la section "Agent settings", cliquez sur **Install Slack app**.
+3. Suivez les instructions Slack pour installer l'application `mintlify` dans votre espace de travail.
+4. Suivez les instructions Slack pour lier votre compte Mintlify à votre espace de travail Slack.
+5. Vérifiez que l'agent fonctionne et répond lorsque vous :
+   - Envoyez un message direct à l'agent.
+    - Mentionnez l'agent avec `@mintlify` dans un canal.
+
+<Note>
+  Chaque espace de travail Slack ne peut être connecté qu'à une seule organisation Mintlify à la fois. Si vous tentez d'installer l'agent dans un espace de travail déjà connecté à une autre organisation, l'installation échoue avec une erreur « wrong organization ». Désinstallez d'abord l'application de l'autre organisation, ou utilisez un autre espace de travail Slack.
+
+  Vous pouvez installer l'agent Slack même si vous n'avez pas de déploiement hébergé par Mintlify. L'agent fonctionne toujours pour répondre aux questions et tenir des conversations. Les fonctionnalités qui ouvrent des pull requests nécessitent un dépôt connecté.
+</Note>
+
+<Warning>
+  Sur Slack Enterprise Grid, installer l'application au niveau de votre organisation ne suffit pas. Vous devez également l'installer dans l'espace de travail spécifique où vous souhaitez utiliser l'agent. Si vous omettez cette étape, l'agent apparaît comme disponible au niveau de l'organisation, mais ne répond pas dans votre espace de travail.
+
+  Pour ajouter l'application à un espace de travail, ouvrez la page de gestion des applications de votre organisation à une URL telle que `https://app.slack.com/manage/<your-org-id>/integrations/installed`, trouvez l'application `mintlify` et installez-la dans votre espace de travail.
+</Warning>
+
+<div id="reconnect-or-reinstall-the-agent">
+  ### Reconnecter ou réinstaller l'agent
+</div>
+
+Si vous devez réautoriser l'agent — par exemple, pour accorder de nouvelles permissions après une mise à jour des scopes Slack ou pour récupérer après la révocation d'un jeton — réinstallez l'application depuis votre dashboard Mintlify.
+
+Lorsque vous réinstallez l'agent dans un espace de travail déjà connecté à votre organisation, Mintlify met à jour le bot token stocké sur place. Vos canaux et fils de discussion existants restent intacts.
+
+<Tip>
+Si votre organisation dispose de plusieurs déploiements, l'agent vous demande de choisir avec quel déploiement travailler la première fois que vous envoyez une demande.
+
+Votre déploiement préféré est propre à votre compte Slack et n'affecte pas
+les autres membres de l'équipe. Vous pouvez passer à un autre déploiement à tout
+moment pendant une conversation en cliquant sur le bouton **Switch deployment** dans
+le message de statut de l'agent dans le fil. L'agent conserve votre historique de
+conversation afin que vous puissiez reprendre là où vous en étiez avec le nouveau
+déploiement.
+</Tip>
+
+<div id="use-the-agent-in-slack">
+  ## Utiliser l'agent dans Slack
+</div>
+
+Une fois connecté, vous pouvez :
+
+- Envoyer des messages directs à l'agent pour l'utiliser en privé afin de mettre à jour votre documentation.
+- Mentionner `@mintlify` dans un canal pour l'utiliser publiquement et de manière collaborative.
+- Joindre des fichiers et des images directement à vos messages pour que l'agent les analyse et les intègre à votre documentation.
+- Poursuivre les conversations dans des fils pour affiner les modifications ou poser des questions de suivi. L'agent réutilise les fichiers, images et réactions emoji partagés plus tôt dans le fil comme contexte pour les demandes suivantes, vous n'avez donc pas besoin de les téléverser à nouveau.
+- Partager des liens de pull request (demandes de fusion) avec l'agent pour mettre à jour la documentation associée.
+
+<div id="ask-questions-about-your-docs">
+  ## Poser des questions sur votre documentation
+</div>
+
+Posez à l'agent des questions sur votre produit ou votre documentation et recevez les réponses dans le fil.
+
+- **Nouvelle question** : Envoyez un message direct à l'agent ou mentionnez `@mintlify` dans un canal avec votre question.
+- **Fil existant** : Répondez dans le fil et mentionnez `@mintlify` avec une question de suivi.
+
+Exemples de questions :
+- « Quelles pages mentionnent la limite de débit de l'API ? »
+- « Comment configurer l'authentification ? »
+- « Comment est structurée notre navigation ? »
+
+<div id="use-connected-integrations">
+  ## Utiliser les intégrations connectées
+</div>
+
+L'agent Slack peut utiliser les applications tierces connectées comme outils en lecture seule lorsqu'il répond aux questions ou met à jour votre documentation.
+
+- Les **intégrations partagées** sont disponibles pour toute l'organisation.
+- Les **intégrations personnelles** utilisent le compte connecté par la personne qui discute avec l'agent.
+
+Vous n'avez pas à sélectionner les intégrations pour chaque conversation. Mentionnez naturellement l'application dans votre demande, par exemple : « Compare ce ticket Linear avec le plan de lancement dans mon Google Drive. »
+
+Si une application n'est pas connectée, demandez à l'agent de la connecter. Suivez le lien d'autorisation qu'il renvoie, puis envoyez un autre message dans le même fil pour qu'il confirme la connexion.
+
+Consultez [Intégrations](/fr/automations/integrations) pour les applications prises en charge, les portées de connexion et les autorisations.
+
+<div id="update-documentation">
+  ## Mettre à jour la documentation
+</div>
+
+Utilisez l'agent pour mettre à jour votre documentation au moyen d'une nouvelle demande ou dans un fil existant.
+
+- **Nouvelle demande** : Envoyez un message direct à l'agent ou mentionnez `@mintlify` dans un canal avec des instructions sur ce qu'il faut mettre à jour.
+- **Fil existant** : Répondez dans le fil et mentionnez `@mintlify` avec des instructions sur ce qu'il faut mettre à jour.
+- **Avec des pièces jointes** : Téléversez des images, des diagrammes, des PDF, des SVG, des fichiers de code ou d'autres documents avec votre message. L'agent les traite automatiquement et les inclut dans votre documentation. Dans un fil, l'agent a accès aux images et fichiers partagés dans les messages précédents, vous pouvez donc y faire référence dans les demandes suivantes sans avoir à les téléverser à nouveau.
+
+L'agent lit le contexte de la demande ou du fil et met à jour votre référentiel connecté. Selon votre [paramètre de processus de relecture](/fr/agent/index#choose-how-the-agent-publishes-changes), l'agent ouvre une pull request (demande de fusion) ou pousse les modifications directement sur votre branche de déploiement.
+
+<div id="reference-other-repositories">
+  ## Référencer d'autres dépôts
+</div>
+
+L'agent peut lire le code source de n'importe quel dépôt connecté via la [GitHub app](/fr/deploy/github) ou l'[intégration GitLab](/fr/deploy/gitlab), même s'il ne s'agit pas de votre dépôt de documentation. Cela lui permet de construire un contexte plus approfondi pour guider les mises à jour de la documentation.
+
+Lorsque vous mentionnez un autre dépôt dans votre demande, l'agent le clone à la demande et examine les fichiers pertinents avant de rédiger les modifications.
+
+Exemples de prompts :
+
+- « Mettez à jour le guide d'authentification en fonction des changements dans `acme/api-server/src/auth.ts`. »
+- « Documentez les nouveaux endpoints ajoutés dans `acme/backend#1234`. »
+- « À quels dépôts avez-vous accès ? »
+
+Les dépôts clonés sont en lecture seule. L'agent les utilise comme contexte, mais n'écrit des modifications que dans votre dépôt de documentation.
+
+<div id="track-progress-in-real-time">
+  ## Suivez la progression en temps réel
+</div>
+
+Pendant que l'agent travaille sur votre demande, il fournit un retour en direct dans le fil Slack.
+
+- **Mises à jour de statut** : Un message mis à jour en direct indique ce que l'agent est en train de faire, comme le nombre de fichiers qu'il a recherchés, lus et modifiés.
+- **Progression des tâches** : Lorsque l'agent décompose votre demande en plusieurs tâches, il affiche une liste de contrôle pour que vous puissiez suivre la progression de chacune.
+- **Questions** : Si l'agent a besoin de plus d'informations, il présente des options parmi lesquelles vous pouvez choisir ou vous pouvez répondre dans le fil avec une réponse personnalisée.
+- **Interruptions** : Si vous envoyez un message de suivi pendant que l'agent travaille encore, il arrête la tâche en cours et commence la nouvelle.
+- **Achèvement** : Lorsque l'agent a terminé, il publie un résumé avec un lien vers la pull request (demande de fusion) ou le commit et un lien pour ouvrir les modifications dans l'éditeur web.
+
+<div id="roles-and-permissions">
+  ## Rôles et autorisations
+</div>
+
+Les capacités de l'agent dans Slack correspondent au [rôle](/fr/dashboard/roles) du compte Mintlify associé :
+
+- **Administrateurs et éditeurs** : Peuvent poser des questions et apporter des modifications à la documentation. L'agent a accès aux outils d'édition de fichiers et de pull requests.
+- **Lecteurs** : Peuvent uniquement poser des questions. L'agent fonctionne en mode lecture seule, donc les outils d'édition de fichiers, de commit et de pull request ne sont pas disponibles. Si un lecteur demande à l'agent d'apporter une modification, celui-ci explique la limitation et suggère de demander à un coéquipier éditeur ou administrateur.
+
+Pour modifier les autorisations d'un coéquipier, mettez à jour son rôle depuis la page [Members](https://dashboard.mintlify.com/settings/organization/members) de votre Dashboard.
+
+<div id="best-practices">
+  ## Bonnes pratiques
+</div>
+
+- **Soyez précis** : Indiquez exactement à l’agent ce que vous souhaitez documenter et où cela doit être ajouté.
+- **Ajoutez du contexte** : Si un fil de discussion ne contient pas toutes les informations nécessaires, ajoutez des détails supplémentaires dans votre message à l’agent.
+- **Relisez attentivement** : Vous devez toujours relire les pull requests (demandes de fusion) créées par l’agent avant de les fusionner.

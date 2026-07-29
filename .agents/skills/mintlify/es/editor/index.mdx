@@ -1,0 +1,100 @@
+---
+title: "Descripción general del editor"
+sidebarTitle: "Descripción general"
+description: "Cree, edite y publique contenido en el navegador con colaboración en tiempo real, guardado automático, vistas previas en vivo y sincronización con Git."
+keywords: ["editor", "visual", "collaborative", "web editor"]
+---
+
+<Card title="¿Es nuevo en el editor? Empiece con el tutorial." icon="graduation-cap" horizontal href="/es/editor/tutorial">
+  Un recorrido paso a paso: cree una branch, haga un cambio, comparta una vista previa y publique.
+</Card>
+
+<div id="open-the-editor">
+
+## Abrir el editor
+
+</div>
+
+Abre el editor desde la pestaña [Editor](https://app.mintlify.com/editor) en tu dashboard de Mintlify. Cualquier miembro de tu organización puede abrir el editor; lo que puedes hacer dentro depende de tu [rol](/es/dashboard/roles). Los admins y editors pueden editar y publicar, y los viewers pueden explorar el contenido y dejar [comentarios](/es/editor/comments) o [sugerencias](/es/editor/suggestions).
+
+<div id="how-the-editor-works">
+
+## Cómo funciona el editor
+
+</div>
+
+**Los cambios se guardan automáticamente.** A medida que escribe, el editor guarda su trabajo. Sus cambios persisten entre pestañas, dispositivos e interrupciones de red. Los cambios solo se publican cuando usted los publica.
+
+**Git se mantiene sincronizado.** Cuando alguien envía cambios a su repositorio desde fuera del editor, esos cambios aparecen automáticamente en el editor. No necesita hacer pull ni actualizar. El editor fusiona los cambios que no entran en conflicto y resalta lo que requiere su atención.
+
+<Tip>
+  Si el editor alguna vez parece estar desincronizado con su repositorio, use [Reset editor](/es/editor/settings#reset-editor) para forzar una resincronización desde Git. Por ejemplo, el árbol de archivos está vacío o muestra `Unable to find docs.json` aunque el archivo esté presente en su deployment branch.
+</Tip>
+
+**Publicar escribe en Git.** Cuando publica, el editor confirma sus cambios en su repositorio. En una deployment branch, esto actualiza su sitio en producción de inmediato. En una feature branch, crea una pull request.
+
+**Su equipo edita en conjunto.** Varias personas pueden editar la misma página al mismo tiempo. Los cursores en vivo muestran quién está editando y dónde.
+
+<div id="the-editor-layout">
+
+## El diseño del editor
+
+</div>
+
+<Frame>
+  <img src="/images/editor/editor-layout-light.png" alt="Captura de pantalla del editor que muestra el selector de branch, el botón ask agent, el botón publish, la barra lateral de navegación y la barra superior." className="block dark:hidden" />
+  <img src="/images/editor/editor-layout-dark.png" alt="Captura de pantalla del editor que muestra el selector de branch, el botón ask agent, el botón publish, la barra lateral de navegación y la barra superior." className="hidden dark:block" />
+</Frame>
+
+- **Barra superior**: Use la barra superior para controlar en qué branch trabaja, acceder al agente, ver una vista previa y publicar los cambios.
+- **Barra lateral de navegación**: Seleccione una página para editar, cree nuevas páginas y administre la estructura del sitio.
+
+<div id="explore-the-editor">
+
+## Explorar el editor
+
+</div>
+
+<Card title="Branches y publicación" icon="git-branch" horizontal href="/es/editor/branching-and-publishing">
+  Cómo las branches y las reglas de protección determinan lo que sucede al publicar, y cómo gestionar el proceso de revisión de pull requests.
+</Card>
+
+<Card title="Comentarios" icon="message-square" horizontal href="/es/editor/comments">
+  Deja retroalimentación, haz preguntas y discute los cambios con tu equipo.
+</Card>
+
+<Card title="Sugerencias" icon="pen-line" horizontal href="/es/editor/suggestions">
+  Propón cambios que tus compañeros pueden revisar, aceptar o rechazar.
+</Card>
+
+<Card title="Preguntar al agente" icon="sparkles" horizontal href="/es/editor/agent">
+  Edite páginas, busque su contenido, modifique ajustes y configure su sitio desde una interfaz de chat.
+</Card>
+
+<Card title="Crear y editar páginas" icon="notebook-pen" horizontal href="/es/editor/pages">
+  Añada páginas nuevas y actualice las existentes.
+</Card>
+
+<Card title="Organizar la navegación" icon="list-tree" horizontal href="/es/editor/navigation">
+  Reordene las páginas y administre la estructura del sitio.
+</Card>
+
+<Card title="Vista previa en vivo" icon="play" horizontal href="/es/editor/live-preview">
+  Previsualice su sitio en tiempo real mientras edita, sin esperar a una compilación.
+</Card>
+
+<Card title="Configuraciones" icon="sliders-horizontal" horizontal href="/es/editor/configurations">
+  Configure la marca, los colores y las funciones de su sitio.
+</Card>
+
+<Card title="Ajustes" icon="settings" horizontal href="/es/editor/settings">
+  Configure las instrucciones de IA y los ajustes predeterminados de publicación para su deployment.
+</Card>
+
+<Card title="Conceptos esenciales de Git" icon="git-merge" horizontal href="/es/editor/git-essentials">
+  Comprenda los conceptos de Git en los que se basa el editor: branches, commits, pull requests y merges.
+</Card>
+
+<Card title="Atajos de teclado" icon="keyboard" horizontal href="/es/editor/keyboard-shortcuts">
+  Ahorre tiempo con atajos de teclado.
+</Card>

@@ -1,0 +1,160 @@
+---
+title: "Implementaciones de vista previa"
+description: "Obtén URLs de vista previa únicas para cada pull request y permite que los revisores vean los cambios en un entorno en vivo antes de fusionar."
+keywords: ["preview URLs", "pull request previews", "branch previews", "staging environments"]
+---
+
+<Info>
+  Las implementaciones de vista previa requieren un [plan Pro o Enterprise](https://mintlify.com/pricing?ref=preview-deployments).
+</Info>
+
+Las implementaciones de vista previa te permiten ver cómo se ven los cambios en tu documentación antes de fusionarlos en producción. Cada vista previa crea una URL para compartir que se actualiza automáticamente a medida que haces push de nuevos cambios. 
+
+De forma predeterminada, las URLs de vista previa son públicas. Comparte un enlace de vista previa con quien necesite revisar tus cambios.
+
+<div id="create-preview-deployments">
+  ## Crear implementaciones de vista previa
+</div>
+
+Crea implementaciones de vista previa automáticamente mediante solicitudes de extracción o manualmente desde tu dashboard.
+
+<div id="automatic-previews">
+  ### Vistas previas automáticas
+</div>
+
+<Note>
+  Las vistas previas automáticas solo se crean para las solicitudes de extracción dirigidas a tu [rama de implementación](/es/guides/git-concepts#deployment-branch).
+</Note>
+
+Cuando creas una solicitud de extracción, el bot de Mintlify agrega automáticamente un enlace para ver la implementación de la vista previa en tu solicitud de extracción. La vista previa se actualiza cada vez que haces push de nuevas confirmaciones a la rama.
+
+<Frame>
+  <img src="/images/previews/preview-deployment-light.png" alt="Enlace para ver la implementación en la línea de tiempo de la solicitud de extracción" className="block dark:hidden" />
+
+  <img src="/images/previews/preview-deployment-dark.png" alt="Enlace para ver la implementación en la línea de tiempo de la solicitud de extracción" className="hidden dark:block" />
+</Frame>
+
+<div id="fork-pull-requests">
+  ### Pull requests desde forks
+</div>
+
+No se generan vistas previas automáticas para las pull requests abiertas desde un fork. La aplicación de GitHub de Mintlify está instalada en tu repositorio de documentación y solo puede acceder a los repositorios donde se le haya instalado explícitamente, por lo que no puede leer el fork del colaborador ni compilar una vista previa a partir de él.
+
+Para previsualizar los cambios de un fork, un mantenedor con permisos de escritura en el repositorio principal puede hacer push de la branch del colaborador a una branch del repositorio principal (o fusionar el fork en una branch de integración). Entonces la aplicación de GitHub podrá compilar una vista previa para una pull request abierta desde esa branch.
+
+<div id="manual-previews">
+  ### Vistas previas manuales
+</div>
+
+Puedes crear manualmente una vista previa para cualquier branch.
+
+1. Ve a tu [dashboard](https://dashboard.mintlify.com/).
+2. Selecciona **Previews**.
+3. Selecciona **Create custom preview**.
+4. Ingresa el nombre del branch que quieres previsualizar.
+5. Selecciona **Create preview**.
+
+<div id="api">
+  ### API
+</div>
+
+También puedes crear implementaciones de vista previa de forma programática usando el endpoint de la API [Trigger preview deployment](/es/api/preview/trigger). Esto es útil para integrar la creación de vistas previas en pipelines CI/CD o herramientas personalizadas.
+
+<div id="redeploy-a-preview">
+  ## Volver a implementar una vista previa
+</div>
+
+Vuelve a implementar una vista previa para actualizar el contenido o volver a intentarlo después de una implementación fallida.
+
+1. Selecciona la vista previa en tu [dashboard](https://dashboard.mintlify.com/).
+2. Selecciona **Volver a implementar**.
+
+<Frame>
+  <img src="/images/previews/redeploy-preview-light.png" alt="El menú Previews con el botón de implementación resaltado con un rectángulo naranja." className="block dark:hidden" />
+  <img src="/images/previews/redeploy-preview-dark.png" alt="El menú Previews con el botón de implementación resaltado con un rectángulo naranja." className="hidden dark:block" />
+</Frame>
+
+<div id="preview-widget">
+  ## Widget de vista previa
+</div>
+
+El widget de vista previa aparece en las implementaciones de vista previa y está pensado para ayudarte a navegar y revisar las páginas actualizadas. El widget es un botón flotante en la esquina inferior derecha de tu implementación de vista previa.
+
+<Frame>
+  <img src="/images/previews/widget-light.png" alt="Widget de vista previa expandido para mostrar la lista de archivos con cambios." className="block dark:hidden" />
+  <img src="/images/previews/widget-dark.png" alt="Widget de vista previa expandido para mostrar la lista de archivos con cambios." className="hidden dark:block" />
+</Frame>
+
+1. Haz clic en el widget para mostrar todos los archivos agregados, modificados o eliminados en la vista previa.
+1. Haz clic en un archivo para ver los cambios en la página correspondiente.
+1. Usa la barra de búsqueda para filtrar la lista de archivos con cambios.
+1. Pasa el cursor sobre un archivo y haz clic en el icono **Abrir en el editor** para editar el archivo directamente en el editor web.
+
+El widget solo aparece en las implementaciones de vista previa, no en tu sitio en producción ni en las vistas previas locales.
+
+<div id="restrict-access-to-preview-deployments">
+  ## Restringir el acceso a las implementaciones de vista previa
+</div>
+
+De forma predeterminada, las implementaciones de vista previa son accesibles públicamente para cualquiera que tenga la URL. Puedes restringir el acceso exigiendo autenticación de la organización para todas las vistas previas o protegiendo con contraseña vistas previas individuales.
+
+<div id="require-organization-authentication">
+  ### Requerir autenticación de la organización
+</div>
+
+Restringe el acceso a las vistas previas a los miembros autenticados de tu organización en Mintlify.
+
+1. Ve a la sección **Previews** en la página de [Add-ons](https://dashboard.mintlify.com/products/addons) de tu dashboard.
+2. Haz clic en el interruptor **Preview authentication** para habilitar o deshabilitar la autenticación de la vista previa.
+  <Frame>
+    <img src="/images/previews/preview-auth-light.png" alt="El interruptor de autenticación de vista previa en la página Add-ons" className="block dark:hidden" />
+    <img src="/images/previews/preview-auth-dark.png" alt="El interruptor de autenticación de vista previa en la página Add-ons" className="hidden dark:block" />
+  </Frame>
+
+<div id="password-protect-an-individual-preview">
+  ### Proteger con contraseña una vista previa individual
+</div>
+
+Protege con contraseña una vista previa específica para compartirla con revisores externos sin necesidad de agregarlos a tu organización de Mintlify. Esta opción está disponible al crear una vista previa manual y no se muestra cuando la autenticación de la organización ya está habilitada para tu despliegue.
+
+1. Ve a tu [dashboard](https://dashboard.mintlify.com/).
+2. Selecciona **Previews**.
+3. Selecciona **Create custom preview**.
+4. Ingresa el nombre del branch que quieres previsualizar.
+5. Activa **Make private** e ingresa una contraseña. Las contraseñas deben tener al menos 8 caracteres.
+  <Frame>
+    <img src="/images/previews/private-preview-light.png" alt="El modal Crear una vista previa personalizada con el interruptor Make private activado y un campo de contraseña." className="block dark:hidden" />
+    <img src="/images/previews/private-preview-dark.png" alt="El modal Crear una vista previa personalizada con el interruptor Make private activado y un campo de contraseña." className="hidden dark:block" />
+  </Frame>
+6. Selecciona **Create preview**.
+
+<div id="preview-lifetime">
+  ## Duración de las vistas previas
+</div>
+
+Las implementaciones de vista previa se mantienen activas mientras la rama de origen exista en tu repositorio y siguen recibiendo actualizaciones con cada push.
+
+- **Vistas previas automáticas**: La vista previa de una pull request permanece disponible mientras la PR esté abierta y después de que se fusione o cierre, siempre que la rama de origen siga existiendo. Eliminar la rama elimina la vista previa en la siguiente sincronización del dashboard.
+- **Vistas previas manuales**: Las vistas previas manuales permanecen activas hasta que las eliminas. Volver a desplegar una vista previa manual actualiza su contenido con el último commit de la rama especificada.
+- **Eliminar una vista previa**: En tu [dashboard](https://app.mintlify.com/), ve a **Previews**, abre la vista previa y haz clic en **Delete** para eliminarla de inmediato.
+
+Las URLs de vista previa son únicas por rama. Si eliminas una vista previa y más tarde vuelves a crear otra para la misma rama, Mintlify puede emitir una nueva URL.
+
+Mintlify genera las URLs de vista previa automáticamente. El subdominio y el dominio no son configurables, y los dominios personalizados están reservados para tu implementación en producción.
+
+<div id="troubleshooting-preview-deployments">
+  ## Solución de problemas con las implementaciones de vista previa
+</div>
+
+Si tu implementación de vista previa falla, prueba estos pasos de solución de problemas.
+
+- **Ver los registros de compilación**: En tu [dashboard](https://dashboard.mintlify.com/), ve a **Previews** y haz clic en la vista previa con error. Los registros de implementación muestran los errores que provocaron el fallo.
+- **Revisar tu configuración**:
+   - Falta `docs.json` en la raíz de contenido configurada. Si tu `docs.json` está en un subdirectorio, confirma que la opción **docs.json is in a subdirectory** apunte a la ruta correcta.
+   - Sintaxis no válida en `docs.json` (por ejemplo, un archivo vacío o una coma final perdida que rompe el análisis JSON).
+   - Errores de esquema en `docs.json`, como un `theme` no válido, una `navigation` mal formada o valores de `$ref` sin resolver.
+   - Rutas de archivos ausentes o incorrectas referenciadas en tu `navigation`.
+   - frontmatter no válido en archivos MDX.
+   - Enlaces de imágenes rotos o archivos de imagen ausentes.
+- **Validar localmente**: Ejecuta `mint dev` y `mint validate` en local para detectar errores de configuración y compilación antes de subir los cambios al repositorio.
+- **Revisar los cambios recientes**: Revisa las confirmaciones más recientes en tu branch para identificar qué cambios provocaron el fallo de la compilación.

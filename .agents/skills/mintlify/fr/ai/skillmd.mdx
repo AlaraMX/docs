@@ -1,0 +1,279 @@
+---
+title: "skill.md"
+description: "Rendez votre documentation prête pour les agents avec des fichiers skill.md générés automatiquement qui décrivent les capacités de votre produit à l'IA."
+keywords: ["agents IA", "compétences", "compétences d'agent", "agents"]
+boost: 3
+---
+
+Mintlify héberge un fichier `skill.md` à la racine de votre projet qui décrit ce que les agents d'IA peuvent faire avec votre produit.
+
+La [spécification skill.md](https://agentskills.io/specification) est un format structuré et lisible par les machines qui rend explicites les capacités, les entrées requises et les contraintes des produits afin que les agents puissent les utiliser de manière plus fiable.
+
+Mintlify génère automatiquement un fichier `skill.md` pour votre projet en analysant votre documentation avec une boucle pilotée par des agents. Ce fichier reste à jour à mesure que vous mettez à jour votre documentation et ne nécessite aucune maintenance. Vous pouvez également ajouter un fichier `skill.md` personnalisé à la racine de votre projet qui remplace celui généré automatiquement.
+
+<Note>La génération ou la mise à jour d'un fichier `skill.md` peut prendre jusqu'à 24 heures.</Note>
+
+Affichez votre `skill.md` en ajoutant `/skill.md` à l'URL de votre site de documentation. Mintlify ne génère des fichiers `skill.md` que pour les sites de documentation publics.
+
+<PreviewButton href="https://mintlify.com/docs/skill.md">
+  Ouvrir le skill.md de ce site.
+</PreviewButton>
+
+<Tip>
+  Les fichiers `llms.txt` et `skill.md` aident tous deux les agents à travailler avec votre documentation, mais ils ont des objectifs différents.
+
+  - `llms.txt` est un index. Il répertorie toutes les pages de votre documentation avec des descriptions pour que les agents sachent où trouver l'information.
+  - `skill.md` est un résumé de capacités. Il indique aux agents ce qu'ils peuvent accomplir avec votre produit, quelles entrées sont nécessaires et quelles contraintes s'appliquent.
+</Tip>
+
+<div id="use-skillmd-files-with-agents">
+  ## Utiliser les fichiers `skill.md` avec des agents
+</div>
+
+<Note>
+  Si vous utilisez un [proxy inverse](/fr/deploy/reverse-proxy), configurez-le pour qu'il redirige les chemins `/skill.md`, `/.well-known/skills/*` et `/.well-known/agent-skills/*` vers votre sous-domaine Mintlify. Consultez la [configuration du routage](/fr/deploy/reverse-proxy#routing-configuration) pour les chemins de destination et les stratégies de mise en cache.
+</Note>
+
+Lorsque les utilisateurs se connectent à votre serveur MCP, leurs agents peuvent découvrir et utiliser vos fichiers `skill.md` en tant que [ressources MCP](/fr/ai/model-context-protocol#mcp-resources) sans installer les skills séparément.
+
+Pour ajouter vos skills au contexte d'un agent manuellement, utilisez la [CLI skills](https://www.npmjs.com/package/skills).
+
+```bash
+npx skills add https://your-docs-domain.com
+```
+
+Cela ajoute les capacités de votre produit au contexte de l'agent afin qu'il puisse effectuer des actions au nom des utilisateurs.
+
+{/* vale off */}
+
+<Prompt description="Installez les fichiers skill.md d'un produit dans votre agent." actions={["copy", "cursor"]}>
+Installe les fichiers `skill.md` d'un site de documentation hébergé sur Mintlify dans le contexte de mon agent pour que tu saches ce que ce produit peut faire.
+
+1. Demande-moi l'URL du site de documentation si je ne l'ai pas fournie, puis exécute `npx skills add <url>` avec cette URL.
+2. Affiche la liste des skills installés, en incluant le nom et la description de chaque skill.
+3. Résume les capacités clés en un paragraphe pour que je sache ce que tu peux maintenant m'aider à accomplir avec ce produit.
+4. Si un skill déclare des entrées obligatoires ou des contraintes dans son frontmatter, signale-les-moi avant que je te demande de l'utiliser.
+</Prompt>
+
+{/* vale on */}
+
+<Tip>
+  Expliquez à vos utilisateurs comment utiliser les fichiers `skill.md` avec des agents afin qu'ils obtiennent de meilleurs résultats en utilisant votre produit avec leurs outils d'IA.
+</Tip>
+
+<div id="skillmd-structure">
+  ## Structure de `skill.md`
+</div>
+
+Mintlify génère un fichier `skill.md` selon la [spécification agentskills.io](https://agentskills.io/specification). Le fichier généré comprend :
+
+- **Metadata** : nom du projet, description et version.
+- **Capacités** : ce que les agents peuvent accomplir avec votre produit.
+- **Compétences** : actions spécifiques organisées par catégorie.
+- **Flux de travail** : procédures étape par étape pour les tâches courantes.
+- **Intégrations** : outils et services pris en charge.
+- **Contexte** : informations générales sur l'architecture de votre produit.
+
+<div id="custom-skill-files">
+  ## Fichiers de skill personnalisés
+</div>
+
+Ajoutez des fichiers de skill personnalisés pour remplacer le `skill.md` généré automatiquement. Mintlify prend en charge l'hébergement d'un fichier de skill unique et d'un répertoire pour plusieurs skills. Si vous supprimez tous les fichiers de skill personnalisés, Mintlify génère un nouveau fichier `skill.md`.
+
+<div id="single-skill-file">
+  ### Fichier de skill unique
+</div>
+
+Ajoutez un fichier `skill.md` à la racine de votre projet pour remplacer le fichier généré automatiquement.
+
+<div id="multiple-skill-files">
+  ### Fichiers de skill multiples
+</div>
+
+Ajoutez plusieurs fichiers de skill au répertoire `.mintlify/skills/` de votre projet. Chaque skill doit se trouver dans son propre sous-répertoire avec un fichier `SKILL.md` :
+
+```
+.mintlify/
+  skills/
+    payments/
+      SKILL.md
+    analytics/
+      SKILL.md
+```
+
+Lorsque vous disposez de plusieurs skills, l'endpoint `/skill.md` redirige vers l'endpoint de découverte `/.well-known/skills/index.json`, qui liste toutes les skills disponibles. Les endpoints de découverte rendent chaque skill accessible individuellement.
+
+<Note>
+  Vous pouvez combiner les deux approches avec un fichier `skill.md` à la racine et un répertoire `.mintlify/skills/`. L'index de découverte inclut toutes les skills.
+</Note>
+
+<div id="use-symlinks-to-avoid-duplication">
+  ### Utiliser des liens symboliques pour éviter la duplication
+</div>
+
+Si vos fichiers de skill se trouvent ailleurs dans votre dépôt (par exemple, dans un répertoire `plugins/` ou `skills/`), vous pouvez créer un lien symbolique de `.mintlify/skills` vers cet emplacement au lieu de dupliquer les fichiers :
+
+```bash
+# Skills live in a top-level skills/ directory
+ln -s ../skills .mintlify/skills
+```
+
+```
+project/
+  skills/
+    payments/
+      SKILL.md
+    analytics/
+      SKILL.md
+  .mintlify/
+    skills -> ../skills
+  docs.json
+```
+
+Mintlify résout les liens symboliques lors du déploiement, ce qui lui permet de découvrir et de servir les fichiers de skill comme s'ils se trouvaient directement dans `.mintlify/skills/`. Cela fonctionne aussi bien avec les liens symboliques de répertoires qu'avec les liens symboliques de skills individuels.
+
+<div id="frontmatter-fields">
+  ### Champs de frontmatter
+</div>
+
+Les fichiers `skill.md` personnalisés doivent commencer par un frontmatter YAML.
+
+| Nom du champ    | Type   | Description                                                                                                                 |
+| --------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `name`          | string | Le nom de votre skill.                                                                                                      |
+| `description`   | string | Une brève description de ce que fait votre skill.                                                                           |
+| `license`       | string | La licence de votre skill (par exemple : `MIT` ou `Apache-2.0`).                                                            |
+| `compatibility` | string | Exigences ou notes de compatibilité (par exemple : dépendances d'exécution).                                                |
+| `metadata`      | object | Métadonnées supplémentaires sous forme de paires clé-valeur de chaînes de caractères (par exemple : `author` ou `version`). |
+| `allowed-tools` | string | Liste, séparée par des espaces, des outils préautorisés que le skill peut utiliser (expérimental).                          |
+| `groups`        | array  | Restreint le skill à des groupes d'utilisateurs authentifiés spécifiques. Voir [Restreindre les skills à des groupes d'utilisateurs](#restrict-skills-to-user-groups). |
+
+```md Example frontmatter
+---
+name: mintlify
+description: Créez et maintenez des sites de documentation avec Mintlify. À utiliser lors de la création de pages de documentation, de la configuration de la navigation, de l'ajout de composants ou de la mise en place de références API.
+license: MIT
+compatibility: Nécessite Node.js pour l'interface en ligne de commande (CLI). Fonctionne avec tout workflow basé sur Git.
+metadata:
+  author: mintlify
+  version: "1.0"
+---
+```
+
+<div id="restrict-skills-to-user-groups">
+  ### Restreindre les skills à des groupes d'utilisateurs
+</div>
+
+Si votre documentation utilise l'[authentification](/fr/deploy/authentication-setup), vous pouvez restreindre un skill à des groupes d'utilisateurs spécifiques en ajoutant un tableau `groups` à son frontmatter. Le filtrage par groupes fonctionne comme la [visibilité des pages](/fr/create/personalization#page-visibility) : le skill n'est exposé qu'aux utilisateurs authentifiés qui appartiennent à au moins un des groupes listés.
+
+```md SKILL.md
+---
+name: admin-tools
+description: Opérations internes pour les administrateurs.
+groups: ["admin"]
+---
+```
+
+Les skills restreints par groupes :
+
+- Sont masqués des [endpoints publics de découverte](#skills-discovery-endpoints) et du fichier public `/skill.md`.
+- Sont exposés en tant que [ressources MCP](/fr/ai/model-context-protocol#mcp-resources) uniquement aux utilisateurs finaux authentifiés dont les groupes correspondent. Les utilisateurs qui ne correspondent pas et les clients machine à machine sans utilisateur final ne voient que les skills sans groupes.
+
+Les skills sans champ `groups` restent visibles pour tous.
+
+<div id="skills-discovery-endpoints">
+  ## Endpoints de découverte des skills
+</div>
+
+Mintlify héberge des répertoires de skills à `/.well-known/skills/` et `/.well-known/agent-skills/` que les agents peuvent utiliser pour découvrir et récupérer vos fichiers de skills de manière programmatique.
+
+<div id="agent-skills-discovery">
+  ### Découverte agent-skills (recommandé)
+</div>
+
+L'endpoint `/.well-known/agent-skills/` suit la [spécification agent-skills discovery 0.2.0](https://schemas.agentskills.io/discovery/0.2.0/schema.json) et inclut la vérification d'intégrité du contenu.
+
+`GET /.well-known/agent-skills/index.json` renvoie un manifeste JSON listant toutes les skills disponibles :
+
+```json
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "my-product",
+      "type": "skill-md",
+      "description": "A brief description of what your skill does.",
+      "url": "/.well-known/agent-skills/my-product/SKILL.md",
+      "digest": "sha256:a1b2c3..."
+    }
+  ]
+}
+```
+
+| Champ         | Description                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------- |
+| `$schema`     | URL du schéma pour la spécification agent-skills discovery 0.2.0.                                 |
+| `name`        | Un slug compatible URL dérivé du champ `name` dans le frontmatter de votre `skill.md`.            |
+| `type`        | Le format de la skill. Toujours `skill-md`.                                                       |
+| `description` | Une brève description issue du frontmatter de votre `skill.md`, tronquée à 1024 caractères.       |
+| `url`         | Le chemin pour récupérer le fichier de skill complet.                                             |
+| `digest`      | Un hash `sha256` du contenu du fichier de skill pour la vérification d'intégrité.                 |
+
+`GET /.well-known/agent-skills/{name}/SKILL.md` renvoie le fichier `skill.md` d'une skill spécifique identifiée par son nom slugifié depuis l'index.
+
+<div id="skills-index">
+  ### Index des skills
+</div>
+
+L'endpoint `/.well-known/skills/` est le format de découverte original.
+
+`GET /.well-known/skills/index.json` renvoie un manifeste JSON listant toutes les skills disponibles :
+
+```json
+{
+  "skills": [
+    {
+      "name": "my-product",
+      "description": "A brief description of what your skill does.",
+      "files": ["SKILL.md"]
+    }
+  ]
+}
+```
+
+Le champ `name` est un slug compatible URL dérivé du champ `name` dans le frontmatter de votre `skill.md`.
+
+<div id="individual-skill-files">
+  ### Fichiers de skills individuels
+</div>
+
+`GET /.well-known/skills/{name}/skill.md` renvoie le fichier `skill.md` d'une skill spécifique identifiée par son nom slugifié depuis l'index.
+
+<div id="agent-card">
+  ## Carte d'agent
+</div>
+
+Mintlify héberge une carte d'agent [Agent-to-Agent (A2A)](https://a2aproject.github.io/A2A/latest/) à l'adresse `/.well-known/agent-card.json`. La carte d'agent est un document JSON standardisé qui permet aux agents compatibles A2A de découvrir votre site de documentation et les skills disponibles en une seule requête.
+
+`GET /.well-known/agent-card.json` renvoie un document JSON conforme au [schéma 0.3 de la carte d'agent A2A](https://a2aproject.github.io/A2A/latest/specification/#agent-card). Chaque entrée du tableau `skills` correspond à une skill provenant de vos endpoints de découverte de skills.
+
+Les agents compatibles A2A récupèrent `/.well-known/agent-card.json` pour découvrir votre site par son nom et sa description, suivent `documentationUrl` pour obtenir du contenu lisible par un humain, et parcourent `skills` pour récupérer chaque fichier `skill.md`. La carte expose également un tableau `supportedInterfaces` afin que les agents puissent négocier le transport avant d'envoyer une requête.
+
+| Champ                 | Description                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `protocolVersion`     | Version du protocole A2A. Toujours `0.3`.                                                                            |
+| `preferredTransport`  | Transport par défaut pour les clients qui ne négocient pas. Toujours `HTTP+JSON`.                                    |
+| `supportedInterfaces` | Tableau d'entrées `{ url, protocolBinding, protocolVersion }` décrivant comment les agents peuvent joindre le site.  |
+| `provider`            | `{ url, organization }` identifiant le site de documentation. `organization` correspond au titre du site.            |
+| `defaultInputModes`   | Types de média acceptés en entrée par l'agent. Toujours `["text/plain"]`.                                            |
+| `defaultOutputModes`  | Types de média produits par l'agent. Toujours `["text/plain"]`.                                                      |
+| `capabilities`        | Indicateurs de fonctionnalités. Actuellement `{ streaming: false, pushNotifications: false }`.                       |
+| `skills`              | Les skills exposées par `/.well-known/agent-skills/`.                                                                |
+
+Les URL de la carte (`url`, `documentationUrl`, `provider.url` et chaque URL de skill) sont construites à partir du domaine personnalisé configuré lorsqu'il est défini, afin que la carte publiée annonce toujours le domaine canonique au lieu du sous-domaine `*.mintlify.site`.
+
+<Note>
+  Si vous utilisez un [reverse proxy](/fr/deploy/reverse-proxy), configurez-le pour transférer `/.well-known/agent-card.json` vers votre sous-domaine Mintlify.
+</Note>
+
+La carte d'agent complète [MCP](/fr/ai/model-context-protocol) en fournissant une couche de découverte légère qui ne nécessite pas l'établissement d'une session.

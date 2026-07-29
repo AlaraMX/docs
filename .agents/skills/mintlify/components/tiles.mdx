@@ -1,0 +1,84 @@
+---
+title: "Tiles"
+description: "Use the tiles component to display visual previews with image thumbnails, titles, and descriptions in a responsive grid layout for your docs."
+keywords: ["tiles", "visual preview", "grid", "showcase"]
+boost: 3
+---
+
+Use tiles to create visual showcase elements with a patterned background, title, and description. Tiles are ideal for displaying component previews, feature highlights, or navigation items in a grid layout.
+
+<Tile href="/components/tiles" title="Tile title" description="Short description">
+  <img src="/images/tiles/placeholder-light.svg" alt="Tile preview placeholder" className="block dark:hidden" />
+  <img src="/images/tiles/placeholder-dark.svg" alt="Tile preview placeholder (dark mode)" className="hidden dark:block" />
+</Tile>
+
+```mdx Tile example
+<Tile href="/your-link" title="Tile title" description="Short description">
+  <img src="/images/your-preview-light.svg" alt="Tile preview" className="block dark:hidden" />
+  <img src="/images/your-preview-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+</Tile>
+```
+
+Tiles can contain any image, SVG, or other React node that you want to display in the preview area. Provide separate light and dark mode assets using the `block dark:hidden` and `hidden dark:block` utility classes so the preview matches the active theme.
+
+The tile preview area is a fixed-height, responsive container.
+
+- **Aspect ratio**: Use a 16:9 or 4:3 landscape ratio.
+- **Dimensions**: Design for at least 800×450 pixels.
+- **Format**: Prefer SVG for illustrations, UI mockups, and diagrams. Use WebP or PNG for photographs and screenshots.
+- **File size**: Keep each asset under 200 KB to preserve page load performance, especially in multi-tile grids.
+- **Padding**: Include any surrounding padding in the asset. The tile does not add internal margin around the child image.
+
+## Grid layout
+
+Combine tiles with the [columns component](/components/columns) to create a responsive grid of visual previews.
+
+<Columns cols={3}>
+  <Tile href="/components/tiles" title="Tile one" description="Short description">
+    <img src="/images/tiles/placeholder-light.svg" alt="Tile preview placeholder" className="block dark:hidden" />
+    <img src="/images/tiles/placeholder-dark.svg" alt="Tile preview placeholder (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/components/tiles" title="Tile two" description="Short description">
+    <img src="/images/tiles/placeholder-light.svg" alt="Tile preview placeholder" className="block dark:hidden" />
+    <img src="/images/tiles/placeholder-dark.svg" alt="Tile preview placeholder (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/components/tiles" title="Tile three" description="Short description">
+    <img src="/images/tiles/placeholder-light.svg" alt="Tile preview placeholder" className="block dark:hidden" />
+    <img src="/images/tiles/placeholder-dark.svg" alt="Tile preview placeholder (dark mode)" className="hidden dark:block" />
+  </Tile>
+</Columns>
+
+```mdx Grid layout example
+<Columns cols={3}>
+  <Tile href="/link-one" title="Tile one" description="Short description">
+    <img src="/images/preview-one-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-one-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/link-two" title="Tile two" description="Short description">
+    <img src="/images/preview-two-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-two-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/link-three" title="Tile three" description="Short description">
+    <img src="/images/preview-three-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-three-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+</Columns>
+```
+
+## Properties
+
+<ResponseField name="href" type="string" required>
+  URL to navigate to when users click the tile.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  The title displayed below the tile preview.
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  A short description displayed below the title.
+</ResponseField>
+
+<ResponseField name="children" type="React.ReactNode" required>
+  Content displayed inside the tile preview area, typically images or SVGs.
+</ResponseField>

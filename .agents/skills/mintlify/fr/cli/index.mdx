@@ -1,0 +1,86 @@
+---
+title: "Mintlify CLI"
+description: "Utilisez la CLI Mintlify pour prévisualiser la doc en local et exécuter les contrôles d'accessibilité, de liens et de validation avant déploiement."
+keywords: ["CLI", "mint", "développement local", "prévisualisation"]
+---
+
+<img
+  className="block dark:hidden my-0 pointer-events-none"
+  src="/images/installation/local-development-light.png"
+  alt="Graphique décoratif représentant la CLI."
+/>
+<img
+  className="hidden dark:block my-0 pointer-events-none"
+  src="/images/installation/local-development-dark.png"
+  alt="Graphique décoratif représentant la CLI."
+/>
+
+<div id="about-the-cli">
+  ## À propos de la CLI
+</div>
+
+Utilisez la [CLI](https://www.npmjs.com/package/mint) pour prévisualiser votre documentation localement, tester les modifications en temps réel et effectuer des contrôles de qualité avant le déploiement en production.
+
+La CLI s'exécute sur votre machine et se connecte à votre déploiement Mintlify lorsque vous avez besoin de données en direct.
+
+<div id="preview-locally">
+  ### Prévisualisation locale
+</div>
+
+Exécutez `mint dev` pour prévisualiser votre documentation sur `localhost:3000`. Au fur et à mesure que vous rédigez et modifiez votre contenu, les changements apparaissent en temps réel sans déploiement. Connectez-vous pour activer la recherche et l'assistant IA dans votre prévisualisation locale.
+
+<div id="run-quality-checks">
+  ### Effectuez des contrôles de qualité
+</div>
+
+Exécutez `mint broken-links` pour trouver les liens cassés, `mint a11y` pour vérifier l'accessibilité et `mint validate` pour valider la compilation de votre documentation avant la mise en production.
+
+<div id="check-agent-readiness">
+  ### Vérifiez la préparation pour les agents
+</div>
+
+Exécutez `mint score` pour évaluer dans quelle mesure les agents peuvent naviguer sur un site de documentation. Sans argument, la commande évalue votre sous-domaine configuré. Passez une URL pour évaluer tout autre site. La commande affiche un score global de préparation et les résultats des vérifications individuelles.
+
+<div id="detect-ai-sounding-prose">
+  ### Détectez la prose au style IA
+</div>
+
+Exécutez `mint deslop` pour vérifier vos pages à la recherche de prose générée par IA et obtenir des suggestions de réécriture au style humain. Sans argument, la commande vérifie les pages que vous avez modifiées. Elle signale les passages précis qui semblent générés par IA afin que vous puissiez les réviser.
+
+<div id="format-mdx-files">
+  ### Formatez les fichiers MDX
+</div>
+
+Exécutez `mint format` pour réécrire les fichiers MDX de votre projet selon le style canonique de Mintlify. La commande parcourt tous les sous-répertoires et reformate les fichiers sur place.
+
+<div id="manage-configuration">
+  ### Gérez la configuration
+</div>
+
+Exécutez `mint config` pour définir des valeurs par défaut persistantes comme votre sous-domaine de documentation.
+
+<Tip>
+  Vous travaillez sur votre documentation en local avec un outil de codage IA ? Installez le [skill](/fr/ai/skillmd) Mintlify et le [serveur MCP](/fr/ai/model-context-protocol) pour que votre éditeur dispose du contexte nécessaire pour rédiger du contenu adapté à Mintlify.
+</Tip>
+
+<Prompt description="Install the Mintlify skill and MCP servers for AI coding tools." actions={["copy", "cursor"]}>
+Install the Mintlify skill for context on project structure, components, and documentation best practices:
+
+npx skills add https://mintlify.com/docs
+
+Add the Mintlify Docs MCP server for documentation search:
+
+https://mintlify.com/docs/mcp
+
+Add the Mintlify MCP server for dashboard access and content management:
+
+https://mcp.mintlify.com
+</Prompt>
+
+<div id="next-steps">
+  ## Prochaines étapes
+</div>
+
+- [Installer la CLI](/fr/cli/install) : Installez la CLI et préparez-la à l'utilisation.
+- [Prévisualisation locale](/fr/cli/preview) : Lancez un serveur de développement local avec la recherche et l'assistant.
+- [Commandes](/fr/cli/commands) : Référence complète de toutes les commandes et options.

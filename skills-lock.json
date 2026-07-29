@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "mintlify": {
+      "source": "mintlify/docs",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "a13ab717eef10869041e7643edceb392a014159a6be8db7c1a8f3871f282b87a"
+    }
+  }
+}

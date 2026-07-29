@@ -1,0 +1,198 @@
+---
+title: "Créer et modifier des pages"
+description: "Créez des pages, modifiez le contenu, téléversez images et vidéos et gérez les fichiers dans l'éditeur web Mintlify en texte enrichi."
+keywords: ["editor", "content", "pages", "files", "create", "edit", "media", "images", "video"]
+---
+
+<div id="navigate-files">
+
+## Parcourir les fichiers
+
+</div>
+
+Le panneau de gauche propose deux vues : **Navigation** et **Files**.
+
+**Navigation** affiche la structure de votre barre latérale telle que les visiteurs la voient. Cliquez sur une page pour l'ouvrir.
+
+**Files** affiche l'arborescence complète des fichiers de votre référentiel, y compris les fichiers qui ne figurent pas dans votre navigation. Cliquez sur n'importe quel fichier pour l'ouvrir.
+
+Pour basculer entre les vues, cliquez sur l'icône de dossier <Icon icon="folder-open" /> ou appuyez sur <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> (macOS) ou <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> (Windows). Cliquez sur l'icône de recherche ou appuyez sur <kbd>Cmd</kbd> + <kbd>K</kbd> (macOS) ou <kbd>Ctrl</kbd> + <kbd>K</kbd> (Windows) pour rechercher par nom de fichier ou contenu de page.
+
+<div id="manage-files-and-folders">
+
+## Gérer les fichiers et les dossiers
+
+</div>
+
+Utilisez la vue Files pour organiser votre contenu :
+
+- **Créer un dossier** : Cliquez sur le bouton de nouveau dossier <Icon icon="folder-plus" /> en haut de l'arborescence des fichiers, ou faites un clic droit sur un dossier existant et sélectionnez **New folder**.
+- **Renommer un fichier ou un dossier** : Faites un clic droit sur l'élément et sélectionnez **Rename**.
+- **Ouvrir des fichiers non listés** : Cliquez sur n'importe quel fichier dans l'arborescence pour l'ouvrir, même s'il n'est pas inclus dans votre navigation.
+
+Les fichiers qui ne figurent pas dans votre navigation restent non listés. Ils existent dans votre référentiel mais n'apparaîtront pas dans la barre latérale publiée.
+
+<div id="create-new-pages">
+
+## Créer de nouvelles pages
+
+</div>
+
+<div id="add-a-page-to-navigation">
+
+### Ajouter une page à la navigation
+
+</div>
+
+1. Cliquez sur le bouton plus <Icon icon="plus" /> dans l'élément de navigation où vous souhaitez ajouter une page.
+1. Cliquez sur **Add a page**.
+1. Saisissez un nom de fichier. L'éditeur ajoute automatiquement l'extension `.mdx`.
+
+<div id="create-an-unlisted-page">
+
+### Créer une page non listée
+
+</div>
+
+Les pages non listées existent dans votre référentiel mais n'apparaissent pas dans la navigation. Elles sont utiles pour du contenu en brouillon, des snippets réutilisables ou des pages que vous prévoyez d'ajouter ultérieurement à la navigation.
+
+Faites un clic droit sur un dossier dans la vue Files et sélectionnez **New file**. Saisissez un nom de fichier ; l'éditeur crée la page sans l'ajouter à la navigation. Vous pourrez l'ajouter ultérieurement à la navigation depuis l'onglet **Navigation**.
+
+<div id="edit-content">
+
+## Modifier le contenu
+
+</div>
+
+Basculez entre le mode visuel et le mode source à l'aide du bouton de bascule de mode dans la barre d'outils sous la barre supérieure. Cliquez sur l'icône en forme d'œil <Icon icon="eye" /> ou appuyez sur <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> (macOS) ou <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> (Windows) pour passer en mode visuel. Cliquez sur l'icône de code <Icon icon="code" /> ou appuyez sur <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> (macOS) ou <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> (Windows) pour passer en mode source.
+
+**Le mode visuel** affiche un aperçu en temps réel pendant que vous tapez. Appuyez sur <kbd>/</kbd> pour ouvrir le menu des composants et insérer des composants, des images, des vidéos et d'autres contenus. Vous pouvez également faire glisser-déposer des fichiers multimédias directement sur la page depuis votre ordinateur ou depuis l'arborescence de navigation. Autres raccourcis :
+
+- **Insérer un lien** : Sélectionnez du texte et appuyez sur <kbd>Cmd</kbd> + <kbd>K</kbd> (macOS) ou <kbd>Ctrl</kbd> + <kbd>K</kbd> (Windows), ou faites glisser une page depuis l'arborescence de navigation dans l'éditeur pour créer un lien avec le titre de la page.
+- **Lier vers une autre page** : Faites un clic droit sur une page dans l'arborescence de navigation, cliquez sur **Copy link**, puis collez le lien dans votre contenu. L'éditeur reconnaît les liens internes vers d'autres pages et les convertit.
+- **Insérer un média de votre projet** : Faites glisser une image ou une vidéo depuis l'arborescence de navigation dans la page pour l'intégrer inline. Les formats pris en charge incluent PNG, JPG, JPEG, GIF, WebP, SVG, MP4 et WebM.
+- **Insérer un emoji** : Tapez <kbd>:</kbd> suivi d'un mot-clé pour ouvrir le sélecteur d'emojis.
+- **Modifier un tableau** : Lorsque votre curseur se trouve à l'intérieur d'un tableau, utilisez la barre d'outils flottante pour ajouter ou supprimer des lignes et des colonnes, ou fusionner des cellules.
+
+**Le mode source** vous donne un accès direct au code source MDX. Utilisez-le pour un contrôle précis des propriétés des composants et du frontmatter.
+
+Pour la liste complète des composants, consultez [Composants](/fr/components). Pour la syntaxe MDX, consultez [Mettre en forme le texte](/fr/create/text) et [Mettre en forme le code](/fr/create/code).
+
+<div id="diff-view">
+
+### Vue diff
+
+</div>
+
+Pour comparer votre page actuelle à la dernière version publiée, cliquez sur le bouton <Icon icon="file-diff" /> **View diff** dans la barre d'outils, ou appuyez sur <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>D</kbd> (macOS) ou <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>D</kbd> (Windows). En mode visuel, cela affiche un diff visuel. En mode source, cela affiche un diff textuel. Cliquez sur **Exit diff** ou appuyez à nouveau sur le raccourci pour revenir à l'édition.
+
+Vous pouvez également ouvrir un diff depuis le menu de publication. Cliquez sur **Publish** puis sur n'importe quel fichier modifié dans la liste.
+
+<div id="block-actions">
+
+### Actions sur les blocs
+
+</div>
+
+En mode visuel, survolez n'importe quel bloc pour faire apparaître une poignée de glissement à gauche. Cliquez sur la poignée pour ouvrir un menu contextuel avec les actions disponibles pour ce bloc :
+
+- **Turn into** : Convertit le bloc en un autre type : texte, titres, bloc de citation ou liste.
+- **Duplicate** : Insère une copie du bloc immédiatement à sa suite.
+- **Delete** : Supprime le bloc.
+
+<Frame>
+  <img src="/images/editor/block-actions-light.png" alt="Le menu d'actions sur les blocs en mode visuel." className="block dark:hidden" />
+  <img src="/images/editor/block-actions-dark.png" alt="Le menu d'actions sur les blocs en mode visuel." className="hidden dark:block" />
+</Frame>
+
+<div id="table-of-contents">
+
+### Table des matières
+
+</div>
+
+En mode visuel, l'éditeur affiche une minimap sur le côté droit de la page qui reflète la structure des titres de votre document. Survolez la minimap pour la développer en une table des matières complète. Cliquez sur n'importe quel titre pour faire défiler jusqu'à cette section.
+
+<div id="code-block-options">
+
+### Options des blocs de code
+
+</div>
+
+Lors de l'édition d'un bloc de code en mode visuel, vous pouvez :
+
+- **Surligner ou mettre en focus des lignes** : Sélectionnez du texte dans le bloc de code, puis utilisez la barre d'outils qui apparaît pour marquer les lignes comme surlignées ou en focus. Le surlignage met visuellement en valeur les lignes. La mise en focus atténue tout le reste.
+- **Marquer des lignes de diff** : Sélectionnez des lignes et utilisez la barre d'outils pour les marquer comme ajouts (`+`) ou suppressions (`-`).
+- **Wrap** : Activez le retour à la ligne dans les paramètres du bloc de code.
+- **Expandable** : Rendez le bloc de code repliable pour que les lecteurs puissent le développer à la demande.
+
+<div id="manage-pages">
+
+## Gérer les pages
+
+</div>
+
+- **Déplacer** : Faites glisser-déposer les pages pour les réorganiser dans la navigation.
+- **Renommer** : Faites un clic droit sur une page et sélectionnez **Rename**.
+- **Dupliquer** : Faites un clic droit sur une page et sélectionnez **Duplicate**.
+- **Supprimer** : Faites un clic droit sur une page et sélectionnez **Delete**. L'éditeur retire automatiquement la page de la navigation.
+
+<div id="pages-deleted-via-git">
+
+### Pages supprimées via Git
+
+</div>
+
+Si un coéquipier supprime une page via Git pendant que vous l'avez ouverte, l'éditeur passe en mode lecture seule et affiche une bannière. L'éditeur conserve votre contenu afin que vous puissiez le copier avant de quitter.
+
+<div id="configure-pages">
+
+## Configurer les pages
+
+</div>
+
+Survolez une page et cliquez sur l'icône d'engrenage, ou faites un clic droit et sélectionnez **Settings**, pour configurer :
+
+- **Title**, **Slug** et **Sidebar title** : Contrôlez la façon dont la page apparaît dans la navigation et son URL.
+- **Description** et **Keywords** : Améliorent la recherche et le SEO.
+- **Layout** : Choisissez entre standard, wide, centered ou custom.
+
+Pour plus de détails sur chaque paramètre, consultez [Pages](/fr/organize/pages).
+
+<div id="add-media">
+
+## Ajouter des médias
+
+</div>
+
+<div id="images-and-videos">
+
+### Images et vidéos
+
+</div>
+
+Tapez <kbd>/image</kbd> pour téléverser une nouvelle image ou en sélectionner une existante depuis votre référentiel. Tapez <kbd>/video</kbd> pour téléverser ou sélectionner une vidéo.
+
+Vous pouvez également faire glisser-déposer des fichiers de votre ordinateur directement sur une page. En mode visuel, le fichier s'insère inline. En mode source, l'éditeur insère le chemin du fichier à l'emplacement du curseur. Les images sont enregistrées dans votre dossier `images/` et les vidéos dans `videos/`.
+
+Pour réutiliser un média déjà présent dans votre projet, faites glisser un fichier image ou vidéo depuis l'arborescence de navigation sur la page. L'éditeur intègre l'élément inline.
+
+<div id="light-and-dark-image-variants">
+
+### Variantes d'images claires et sombres
+
+</div>
+
+Après avoir inséré une image en mode visuel, survolez-la pour faire apparaître la barre d'outils de l'image. Utilisez **Light/dark variants** pour téléverser des images distinctes pour les modes clair et sombre.
+
+<div id="embed-external-media">
+
+### Intégrer des médias externes
+
+</div>
+
+Tapez <kbd>/embed</kbd> et collez une URL YouTube, Loom ou Vimeo. L'éditeur détecte le fournisseur et génère l'iframe. La recherche dans le menu slash de `youtube`, `yt`, `loom` ou `vimeo` fait également apparaître la commande **Embed**.
+
+Pour les autres intégrations, tapez <kbd>/embed</kbd> et activez **Manual embed** pour écrire du HTML personnalisé.
+
+Pour en savoir plus sur la mise en forme des images et l'utilisation du composant Frame, consultez [Images et intégrations](/fr/create/image-embeds).

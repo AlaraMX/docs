@@ -1,0 +1,529 @@
+---
+title: "SEO"
+description: "Configura meta tags, propiedades Open Graph, URLs canónicas y ajustes SEO por página para mejorar el posicionamiento de tu documentación en motores de búsqueda."
+keywords: ["meta tags", "sitemap", "robots.txt", "SEO", "search engine optimization"]
+boost: 3
+---
+
+Mintlify gestiona automáticamente muchas prácticas recomendadas de SEO, entre ellas:
+
+* Generación de metaetiquetas
+* Generación de `sitemap` y del archivo `robots.txt`
+* Estructura HTML semántica
+* Optimización móvil
+
+Puedes personalizar por completo las metaetiquetas de tu sitio añadiendo el campo `metatags` a tu `docs.json` o al frontmatter de una página.
+
+<div id="automatically-generated-meta-tags">
+  ## Meta tags generados automáticamente
+</div>
+
+Mintlify genera las siguientes meta tags para cada página. Puedes sobrescribir estas meta tags especificándolas en tu `docs.json` o en el frontmatter de una página.
+
+**Metadatos básicos:**
+
+* `charset: utf-8` - Codificación de caracteres
+* `og:type: website` - Tipo de Open Graph
+* `og:site_name` - Nombre de tu sitio de documentación
+* `twitter:card: summary_large_image` - Tipo de tarjeta de Twitter
+
+**Metadatos específicos de la página:**
+
+* `title` - Título de la página, con el formato "Título de la página - Nombre del sitio"
+* `og:title` - Título de Open Graph, por defecto usa el título de la página
+* `twitter:title` - Título de Twitter, recurre a `og:title` y luego al título de la página
+* `description` - Descripción de la página
+* `og:description` - Descripción de Open Graph, recurre a la descripción de la página
+* `twitter:description` - Descripción de Twitter, recurre a `og:description` y luego a la descripción de la página
+
+**URL y canonical:**
+
+* `canonical` - Se genera automáticamente a partir de la URL de la página
+* `og:url` - Se establece en la URL canónica
+
+**SEO e indexación:**
+
+* `robots` - Generado a partir de los metadatos de la página
+* `noindex` - Generado a partir de los metadatos de la página
+* `keywords` - Generado a partir de los metadatos de la página
+
+**Imágenes:**
+
+* `og:image` - Imagen de Open Graph, `og:image:width` establecido en 1200 y `og:image:height` en 630
+* `twitter:image` - Imagen de Twitter, `twitter:image:width` establecido en 1200 y `twitter:image:height` en 630
+
+**Metadatos del navegador y la aplicación:**
+
+* `applicationName` - Nombre de tu sitio de documentación
+* `generator: Mintlify` - Identifica a Mintlify como el generador del sitio
+* `apple-mobile-web-app-title` - Nombre de la aplicación en la pantalla de inicio de iOS
+* `msapplication-TileColor` - Color del mosaico de Windows
+* Favicons e iconos de tu configuración
+* Enlace de referencia al mapa del sitio (sitemap)
+
+Cualquier meta tag en tu configuración `docs.json` `seo.metatags` también se inyecta automáticamente en cada página, como `google-site-verification` para la validación en Google Search Console.
+
+<div id="structured-data">
+  ## Datos estructurados
+</div>
+
+Mintlify añade datos estructurados de [schema.org](https://schema.org) a cada página indexable mediante un script JSON-LD. Estos datos estructurados ayudan a los motores de búsqueda a mostrar resultados enriquecidos para tus páginas.
+
+Cada página emite un `@graph` conectado de entidades con `@id`s estables:
+
+- `Organization`: el editor de tu sitio. Se deriva del nombre del sitio, el logo y la URL del sitio, o se configura explícitamente con [`seo.organization`](/es/organize/settings-seo#seo).
+- `WebSite`: tu sitio.
+- `WebPage`: la página actual, incluidas su descripción y fechas de modificación.
+- `BreadcrumbList`: la ubicación de la página en tu jerarquía de navegación, generada a partir de la navegación de `docs.json`.
+- La entidad principal de contenido: `TechArticle` para páginas de documentación o `APIReference` para páginas generadas a partir de especificaciones de API (páginas con frontmatter `api`, `openapi` o `asyncapi`).
+
+Mintlify genera los datos estructurados a partir del frontmatter de la página y de las configuraciones de `docs.json`, incluidos el título de la página, la descripción, las palabras clave, la URL canónica, la fecha de la última actualización, el nombre del sitio y el logo. Los datos estructurados no incluyen ningún campo sin un valor correspondiente. Las páginas con `noindex: true` no incluyen datos estructurados.
+
+Para cambiar los datos estructurados, actualiza los campos correspondientes del frontmatter o las configuraciones de `docs.json`. Para controlar la entidad editora, incluidos un `@id` estable, el nombre legal, el logo canónico y los enlaces de perfil `sameAs`, define [`seo.organization`](/es/organize/settings-seo#seo) en tu `docs.json`.
+
+<div id="og-images">
+  ## Imágenes OG
+</div>
+
+Mintlify genera automáticamente una imagen Open Graph (OG) para cada página. Esta imagen aparece como vista previa social cuando compartes un enlace en plataformas de redes sociales y aplicaciones de mensajería.
+
+Propiedades predeterminadas de la imagen OG:
+
+- Ancho: 1200px
+- Alto: 630px
+- El logo de tu sitio del campo `logo` en `docs.json`
+- El título de la página del frontmatter `title` de la página
+- La descripción de la página del frontmatter `description` de la página
+- El color primario de tu sitio del campo `colors` en `docs.json`
+
+<div id="custom-og-images">
+  ### Imágenes OG personalizadas
+</div>
+
+Hay tres formas de personalizar las imágenes OG, según el nivel de control que necesites.
+
+**Imagen de fondo personalizada**
+
+Para usar una imagen de fondo personalizada manteniendo la superposición autogenerada de logo, título y descripción, configura `thumbnails.background` en tu `docs.json`.
+
+```json Example docs.json
+"thumbnails": {
+  "background": "/images/og-background.png"
+}
+```
+
+Consulta [`thumbnails`](/es/organize/settings-appearance#thumbnails) para ver la lista completa de opciones de personalización.
+
+
+**Imagen OG estática para todas las páginas**
+
+Para reemplazar completamente la imagen autogenerada con una única imagen estática en todas las páginas, configura `og:image` en tus metaetiquetas globales.
+
+```json Example docs.json
+"seo": {
+  "metatags": {
+    "og:image": "https://example.com/og-image.png"
+  }
+}
+```
+
+**Imagen OG estática para una página específica**
+
+Para sobrescribir la imagen OG de una sola página, configura `og:image` en el frontmatter de esa página.
+
+```yaml Example frontmatter
+---
+title: "Your page title"
+description: "Your page description"
+"og:image": "https://example.com/custom-og.png"
+---
+```
+
+<Note>
+  Configurar `og:image` en las metaetiquetas, ya sea globalmente o por página, reemplaza la vista previa social autogenerada con una imagen estática. Si quieres que Mintlify superponga automáticamente tu logo, el título de la página y la descripción sobre un fondo personalizado, usa [`thumbnails.background`](/es/organize/settings-appearance#param-thumbnails-background) en su lugar.
+</Note>
+
+<div id="global-meta-tags">
+  ## Metadatos globales
+</div>
+
+Para establecer metadatos predeterminados para todas las páginas, agrega el campo `metatags` a tu `docs.json`.
+
+```json
+"seo": {
+    "metatags": {
+        "og:image": "enlace a tu imagen de meta etiqueta por defecto"
+    }
+}
+```
+
+<div id="verify-site-ownership">
+  ### Verificar la propiedad del sitio
+</div>
+
+Para verificar tu sitio con servicios como Google Search Console, Bing Webmaster Tools u otros motores de búsqueda, agrega la meta etiqueta de verificación a `seo.metatags` en tu `docs.json`. Mintlify inyecta la etiqueta en cada página.
+
+```json
+"seo": {
+    "metatags": {
+        "google-site-verification": "your_verification_token"
+    }
+}
+```
+
+<div id="set-a-canonical-url">
+  ### Configura una URL canónica
+</div>
+
+Una URL canónica indica a los motores de búsqueda qué versión de tu documentación es la principal. Esto mejora el SEO cuando tu documentación es accesible desde varias URL y evita problemas de contenido duplicado.
+
+**Canónica global**
+
+Si utilizas un dominio personalizado, configura la metaetiqueta `canonical` en tu `docs.json` para asegurarte de que los motores de búsqueda indexen tu dominio preferido. Mintlify añade la ruta de cada página a esta URL base.
+
+```json
+"seo": {
+    "metatags": {
+        "canonical": "https://www.your-custom-domain-here.com"
+    }
+}
+```
+
+**Canónica por página**
+
+Para establecer una URL canónica para una página específica, añade `canonical` al frontmatter de esa página. Esto anula la canónica global y cualquier canónica autogenerada para esa página. Es útil para documentación versionada en la que quieres que las páginas de versiones anteriores apunten a su equivalente en la versión más reciente.
+
+```yaml
+---
+title: "My Page"
+canonical: "https://docs.example.com/latest/my-page"
+---
+```
+
+<Note>
+  Verifica siempre el comportamiento de la URL canónica en tu sitio desplegado. Las compilaciones locales añaden `/src/_props` a las URL como un artefacto que no forma parte de la URL canónica.
+</Note>
+
+<div id="page-specific-meta-tags">
+  ## Metaetiquetas específicas de página
+</div>
+
+Para configurar metaetiquetas específicas de página, agrégalas al frontmatter de la página.
+
+Las metaetiquetas específicas de página incluyen:
+
+* `title` - Título de la página
+* `description` - La descripción de la página aparece debajo del título en la página y en algunos resultados de motores de búsqueda
+* `canonical` - URL canónica de esta página; anula la canónica autogenerada
+* `keywords` - Palabras clave separadas por comas
+* `og:title` - Título de Open Graph para compartir en redes sociales
+* `og:description` - Descripción de Open Graph, recurre a `description`
+* `og:image` - URL de la imagen de Open Graph
+* `og:url` - URL de Open Graph
+* `og:type` - Tipo de Open Graph como &quot;article&quot; o &quot;website&quot;
+* `og:image:width` - Ancho de la imagen de Open Graph
+* `og:image:height` - Altura de la imagen de Open Graph
+* `twitter:title` - Título de la tarjeta de Twitter, recurre a `og:title` y luego a `title`
+* `twitter:description` - Descripción de la tarjeta de Twitter, recurre a `og:description` y luego a `description`
+* `twitter:image` - Imagen de la tarjeta de Twitter
+* `twitter:card` - Tipo de tarjeta de Twitter como `summary` o `summary_large_image`
+* `twitter:site` - Cuenta del sitio en Twitter
+* `twitter:image:width` - Ancho de la imagen de Twitter
+* `twitter:image:height` - Altura de la imagen de Twitter
+* `noindex` - Establécelo en `true` para evitar que los motores de búsqueda indexen la página
+* `robots` - Valor de la metaetiqueta robots
+
+<Tip>
+Las metaetiquetas de Twitter heredan automáticamente de sus equivalentes de Open Graph. Por ejemplo, si configuras `og:title` pero no `twitter:title`, la tarjeta de Twitter usa el valor de `og:title`. Configura `twitter:title` o `twitter:description` explícitamente solo cuando quieras un texto diferente en Twitter que en otras plataformas.
+</Tip>
+
+```mdx
+---
+title: "Título de tu página de ejemplo"
+description: "Descripción específica de la página"
+"og:title": "Título para redes sociales"
+"og:description": "Descripción personalizada para compartir en redes sociales"
+"og:image": "enlace a tu imagen de meta tag"
+"twitter:title": "Título específico para Twitter"
+keywords: ["keyword1", "keyword2"]
+---
+```
+
+<Note>
+  Las metaetiquetas con dos puntos deben ir entre comillas. Por ejemplo, `og:title: "Social media title"`.
+
+  El campo `keywords` debe estar en formato de lista YAML. Por ejemplo, `keywords: ["keyword1", "keyword2", "keyword3"]`.
+</Note>
+
+<div id="common-meta-tags-reference">
+  ## Referencia de etiquetas meta comunes
+</div>
+
+A continuación encontrarás una lista completa de etiquetas meta que puedes añadir a tu `docs.json`. Estas etiquetas ayudan a mejorar el SEO de tu sitio, el rendimiento en redes sociales y la compatibilidad con navegadores.
+
+<Tip>
+  Configurar `og:image` en las metaetiquetas reemplaza la vista previa social generada automáticamente con una imagen estática. Si deseas una **imagen de fondo** personalizada sobre la que Mintlify superponga automáticamente tu logotipo, el título de la página y la descripción, usa [`thumbnails.background`](/es/organize/settings-reference#thumbnails-background) en tu `docs.json`.
+</Tip>
+
+Puedes previsualizar cómo se muestran tus etiquetas meta en diferentes plataformas usando [metatags.io](https://metatags.io/).
+
+```json expandable
+"seo": {
+    "metatags": {
+      "robots": "noindex",
+      "charset": "UTF-8",
+      "viewport": "width=device-width, initial-scale=1.0",
+      "description": "Descripción de la página",
+      "keywords": "palabra_clave1, palabra_clave2, palabra_clave3",
+      "author": "Nombre del Autor",
+      "robots": "index, follow",
+      "googlebot": "index, follow",
+      "google": "notranslate",
+      "google-site-verification": "verification_token",
+      "generator": "Mintlify",
+      "theme-color": "#000000",
+      "color-scheme": "light dark",
+      "canonical": "https://your-custom-domain-here.com",
+      "format-detection": "telephone=no",
+      "referrer": "origin",
+      "refresh": "30",
+      "rating": "general",
+      "revisit-after": "7 days",
+      "language": "en",
+      "copyright": "Copyright 2024",
+      "reply-to": "email@example.com",
+      "distribution": "global",
+      "coverage": "Mundial",
+      "category": "Tecnología",
+      "target": "all",
+      "HandheldFriendly": "True",
+      "MobileOptimized": "320",
+      "apple-mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-status-bar-style": "black",
+      "apple-mobile-web-app-title": "Título de la App",
+      "application-name": "Nombre de la App",
+      "msapplication-TileColor": "#000000",
+      "msapplication-TileImage": "path/to/tile.png",
+      "msapplication-config": "path/to/browserconfig.xml",
+      "og:title": "Título de Open Graph",
+      "og:type": "website",
+      "og:url": "https://example.com",
+      "og:image": "https://example.com/image.jpg",
+      "og:description": "Descripción de Open Graph",
+      "og:site_name": "Nombre del Sitio",
+      "og:locale": "en_US",
+      "og:video": "https://example.com/video.mp4",
+      "og:audio": "https://example.com/audio.mp3",
+      "twitter:card": "summary",
+      "twitter:site": "@username",
+      "twitter:creator": "@username",
+      "twitter:title": "Título de Twitter",
+      "twitter:description": "Descripción de Twitter",
+      "twitter:image": "https://example.com/image.jpg",
+      "twitter:image:alt": "Descripción de la Imagen",
+      "twitter:player": "https://example.com/player",
+      "twitter:player:width": "480",
+      "twitter:player:height": "480",
+      "twitter:app:name:iphone": "Nombre de la App",
+      "twitter:app:id:iphone": "12345",
+      "twitter:app:url:iphone": "app://",
+      "article:published_time": "2024-01-01T00:00:00+00:00",
+      "article:modified_time": "2024-01-02T00:00:00+00:00",
+      "article:expiration_time": "2024-12-31T00:00:00+00:00",
+      "article:author": "Nombre del Autor",
+      "article:section": "Tecnología",
+      "article:tag": "etiqueta1, etiqueta2, etiqueta3",
+      "book:author": "Nombre del Autor",
+      "book:isbn": "1234567890",
+      "book:release_date": "2024-01-01",
+      "book:tag": "etiqueta1, etiqueta2, etiqueta3",
+      "profile:first_name": "John",
+      "profile:last_name": "Doe",
+      "profile:username": "johndoe",
+      "profile:gender": "male",
+      "music:duration": "205",
+      "music:album": "Nombre del Álbum",
+      "music:album:disc": "1",
+      "music:album:track": "1",
+      "music:musician": "Nombre del Artista",
+      "music:song": "Nombre de la Canción",
+      "music:song:disc": "1",
+      "music:song:track": "1",
+      "video:actor": "Nombre del Actor",
+      "video:actor:role": "Nombre del Papel",
+      "video:director": "Nombre del Director",
+      "video:writer": "Nombre del Guionista",
+      "video:duration": "120",
+      "video:release_date": "2024-01-01",
+      "video:tag": "etiqueta1, etiqueta2, etiqueta3",
+      "video:series": "Nombre de la Serie"
+  }
+}
+```
+
+<div id="sitemaps-and-robotstxt-files">
+  ## Sitemaps y archivos robots.txt
+</div>
+
+Mintlify genera automáticamente un archivo `sitemap.xml` y un archivo `robots.txt`. Puedes ver tu sitemap añadiendo `/sitemap.xml` a la URL de tu sitio de documentación.
+
+Por defecto, Mintlify solo indexa las páginas que incluyes en la navegación de tu `docs.json`. Excluye las [páginas ocultas](/es/organize/hidden-pages) que existen en tu repositorio pero no están listadas en tu navegación de:
+  - Sitemaps para motores de búsqueda
+  - Búsqueda interna de documentación
+  - Contexto del [asistente de IA](/es/assistant/index)
+  - Resultados de búsqueda del [servidor MCP](/es/ai/model-context-protocol)
+
+Para incluir páginas ocultas en la indexación de búsqueda, añade `seo.indexing` a tu `docs.json`:
+
+```json
+"seo": {
+    "indexing": "all"
+}
+```
+
+Para incluir solo las páginas que están bajo una pestaña o un grupo oculto específico, establece `searchable: true` en esa pestaña o grupo. Consulta [Búsqueda, SEO e indexación de IA](/es/organize/hidden-pages#search-seo-and-ai-indexing) para más detalles.
+
+<Note>
+  Para sitios de documentación que requieren autenticación, los sitemaps y los archivos `robots.txt` también requieren autenticarse para acceder a ellos. Los sitemaps excluyen las páginas que pertenecen a [grupos de usuarios](/es/deploy/authentication-setup#control-access-with-groups).
+</Note>
+
+<div id="trailing-slash-urls">
+  ### URLs con barra final
+</div>
+
+Si tu alojamiento sirve todas las páginas con una barra final (por ejemplo, `/quickstart/` en lugar de `/quickstart`), habilita `seo.trailingSlash` en tu `docs.json` para que las URLs que Mintlify emite para SEO coincidan:
+
+```json
+"seo": {
+    "trailingSlash": true
+}
+```
+
+Cuando está habilitado, Mintlify añade una barra final a:
+
+- Etiquetas canónicas y metaetiquetas `og:url`
+- Entradas `<loc>` en el `sitemap.xml` generado automáticamente
+- Enlaces internos relativos a la raíz entre páginas, conservando cualquier cadena de consulta o fragmento
+
+Habilitar `trailingSlash` solo afecta cómo se emiten las URLs. No cambia las rutas de las páginas, no redirige URLs existentes ni se aplica a los valores explícitos de `canonical` por página que definas en el [frontmatter](/es/organize/pages). Deja `trailingSlash` sin definir o en `false` si tu sitio sirve URLs sin barra final.
+
+<div id="content-signal-directives">
+  ### Directivas Content-Signal
+</div>
+
+El `robots.txt` generado automáticamente incluye directivas [Content-Signal](https://contentsignals.org) que indican a los rastreadores de IA cómo pueden usar tu documentación. Estas señales siguen la política Content Signals de Cloudflare y se aplican a todos los agentes de usuario:
+
+```txt
+User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+```
+
+Las señales predeterminadas habilitan tu documentación para:
+
+- `ai-train=yes`—Entrenamiento de modelos de IA.
+- `search=yes`—Creación de índices de búsqueda.
+- `ai-input=yes`—Generación de respuestas con IA, incluyendo generación aumentada por recuperación y asistentes de IA.
+
+Estos valores por defecto ayudan a que herramientas de IA como ChatGPT, Claude y Perplexity descubran y citen tu documentación. Para cambiar las señales, [añade un `robots.txt` personalizado](#custom-sitemaps-and-robotstxt-files) en la raíz de tu proyecto. Mintlify sirve los archivos personalizados tal cual, sin las directivas Content-Signal predeterminadas.
+
+<div id="custom-sitemaps-and-robotstxt-files">
+  ### Sitemaps y archivos robots.txt personalizados
+</div>
+
+Para añadir un archivo `sitemap.xml` o `robots.txt` personalizado, crea un archivo `sitemap.xml` o `robots.txt` en la raíz de tu proyecto. Añadir un archivo personalizado sustituye al archivo generado automáticamente con el mismo nombre. Si eliminas un archivo personalizado, el archivo predeterminado se aplicará de nuevo automáticamente.
+
+<Tip>
+  Si tu archivo `robots.txt` personalizado bloquea agentes de usuario de IA como `GPTBot`, `ClaudeBot` o `PerplexityBot`, las herramientas de IA no pueden rastrear tu documentación ni citarla en sus respuestas. Consulta [Permitir agentes de IA en robots.txt](/es/guides/geo#allow-ai-agents-in-robotstxt) para más detalles.
+</Tip>
+
+<div id="disable-indexing">
+  ## Desactivar la indexación
+</div>
+
+Para evitar que los motores de búsqueda indexen una página, agrega `noindex: true` al [frontmatter](/es/organize/pages) de la página.
+
+```yaml
+---
+noindex: true
+---
+```
+
+<Tip>
+  Las páginas con `hidden: true` en su frontmatter se consideran automáticamente como `noindex: true`. Consulta [Páginas ocultas](/es/organize/hidden-pages) para más detalles.
+</Tip>
+
+También puedes especificar `noindex` para todas las páginas de tu documentación estableciendo el campo `metatags.robots` en `"noindex"` en tu `docs.json`:
+
+```json
+"seo": {
+    "metatags": {
+      "robots": "noindex"
+    }
+  }
+```
+
+<div id="disable-indexing-for-the-entire-project">
+  ### Desactivar la indexación de todo el proyecto
+</div>
+
+Para ocultar todo tu despliegue de los motores de búsqueda manteniéndolo públicamente accesible, activa **Don't index project** en tu panel, en **Settings > Deployment > Add-ons > Visibility**.
+
+Cuando se activa, Mintlify:
+
+- Renderiza todas las páginas con las metaetiquetas robots `noindex, nofollow`.
+- Devuelve un `sitemap.xml` vacío.
+- Devuelve `404` para `llms.txt` y `llms-full.txt`.
+- Borra tu índice de búsqueda para que las páginas dejen de aparecer en la búsqueda interna, el [Asistente de IA](/es/assistant/index) o el [servidor MCP](/es/ai/model-context-protocol).
+- Sirve un `robots.txt` que bloquea todo el sitio:
+
+  ```txt
+  User-agent: *
+  Content-Signal: ai-train=no, search=no, ai-input=no
+  Disallow: /
+  ```
+
+Usa esta opción cuando quieras mantener un despliegue en línea para revisión interna, pruebas o uso compartido limitado, pero no quieras que aparezca en los resultados públicos de búsqueda ni que se utilice como datos de entrenamiento o de recuperación para herramientas de IA.
+
+<Note>
+  Cambiar este ajuste desencadena un redespliegue de tu sitio. Los cambios surten efecto una vez completado el redespliegue.
+</Note>
+
+Esta opción funciona junto con otros controles de indexación:
+
+- **`noindex` por página**—Los ajustes `noindex: true` en el frontmatter de una página siguen aplicándose cuando la opción a nivel de proyecto está desactivada. La opción a nivel de proyecto anula los ajustes por página cuando está activada, por lo que todas las páginas se tratan como `noindex`.
+- **`robots.txt` personalizado**—Si tienes un [`robots.txt` personalizado](#custom-sitemaps-and-robotstxt-files) en la raíz de tu proyecto, Mintlify lo sirve sin modificaciones. La opción a nivel de proyecto no reemplaza un `robots.txt` personalizado, así que actualiza o elimina tu archivo personalizado por separado si necesitas que las reglas para rastreadores coincidan.
+
+<div id="seo-best-practices">
+  ## Mejores prácticas de SEO
+</div>
+
+<AccordionGroup>
+  <Accordion title="Redacta títulos y descripciones informativas">
+    * Usa títulos de página claros y descriptivos (50-60 caracteres)
+    * Redacta descripciones convincentes (150-160 caracteres)
+    * Incluye palabras clave relevantes
+    * Haz que cada título de página y cada descripción sean únicos
+  </Accordion>
+
+  <Accordion title="Optimiza la estructura de tu contenido">
+    * Utiliza una jerarquía de encabezados adecuada (H1 → H2 → H3)
+    * Escribe para personas primero y para motores de búsqueda después
+    * Incluye palabras clave relevantes en los encabezados y el contenido
+    * Mantén las URL cortas, descriptivas y organizadas jerárquicamente
+    * Divide el contenido extenso con subtítulos y listas
+  </Accordion>
+
+  <Accordion title="Estrategia de enlaces internos">
+    * Enlaza a páginas relacionadas dentro de tu documentación
+    * Usa texto de anclaje descriptivo en lugar de &quot;haz clic aquí&quot;
+    * Crea clústeres de temas enlazando conceptos relacionados
+    * Utiliza las funciones automáticas de referencias cruzadas
+  </Accordion>
+
+  <Accordion title="SEO de imágenes">
+    * Usa nombres de archivo descriptivos para las imágenes
+    * Incluye siempre texto alternativo por accesibilidad y SEO
+    * Optimiza el tamaño de los archivos de imagen para una carga más rápida
+    * Usa imágenes relevantes que respalden tu contenido
+  </Accordion>
+</AccordionGroup>

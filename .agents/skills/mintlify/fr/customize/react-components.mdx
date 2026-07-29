@@ -1,0 +1,216 @@
+---
+title: "React"
+description: "Créez des éléments interactifs et réutilisables avec des composants React personnalisés dans Mintlify via JSX, l’état et la logique côté client."
+keywords: ["Composants React", "Composants interactifs", "JSX", "Composants personnalisés"]
+boost: 3
+---
+
+import { ColorGenerator } from "/snippets/color-generator.jsx";
+
+Créez des éléments interactifs dans votre documentation à l'aide de [composants React](https://react.dev) et de [hooks](https://react.dev/reference/react/hooks) directement dans vos fichiers MDX.
+
+<div id="inline-components">
+  ## Composants en ligne
+</div>
+
+Déclarez des composants directement dans votre fichier MDX :
+
+export const Counter = () => {
+  const [count, setCount] = useState(0)
+
+  const increment = () => setCount(count + 1)
+  const decrement = () => setCount(count - 1)
+
+  return (
+  <div className="flex items-center justify-center">
+      <div className="flex items-center rounded-xl overflow-hidden border border-zinc-950/20 dark:border-white/20">
+        <button
+          onClick={decrement}
+          className="flex items-center justify-center h-8 w-8 text-zinc-950/80 dark:text-white/80 border-r border-zinc-950/20 dark:border-white/20"
+          aria-label="Decrease"
+        >
+          -
+        </button>
+
+        <div className="flex text-sm items-center justify-center h-8 px-6 text-zinc-950/80 dark:text-white/80 font-medium min-w-[4rem] text-center">
+          {count}
+        </div>
+
+        <button
+          onClick={increment}
+          className="flex items-center justify-center h-8 w-8 text-zinc-950/80 dark:text-white/80 border-l border-zinc-950/20 dark:border-white/20"
+          aria-label="Increase"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  )
+}
+
+<Counter />
+
+```mdx
+export const Counter = () => {
+  const [count, setCount] = useState(0)
+  const increment = () => setCount(count + 1)
+  const decrement = () => setCount(count - 1)
+
+  return (
+    <div>
+      <button onClick={decrement}>-</button>
+      <span>{count}</span>
+      <button onClick={increment}>+</button>
+    </div>
+  )
+}
+
+<Counter />
+```
+
+<div id="import-components">
+  ## Importer des composants
+</div>
+
+Les fichiers de composants doivent se trouver dans le dossier `/snippets/`. En savoir plus sur les [snippets réutilisables](/fr/create/reusable-snippets).
+
+<Note>
+  Les imports imbriqués ne sont pas pris en charge. Importez tous les composants référencés directement dans le fichier MDX parent.
+</Note>
+
+Créez un fichier de composant dans `snippets/` :
+
+```mdx /snippets/color-generator.jsx [expandable]
+export const ColorGenerator = () => {
+  const [hue, setHue] = useState(180)
+  const [saturation, setSaturation] = useState(50)
+  const [lightness, setLightness] = useState(50)
+  const [colors, setColors] = useState([])
+
+  useEffect(() => {
+    const newColors = []
+    for (let i = 0; i < 5; i++) {
+      const l = Math.max(10, Math.min(90, lightness - 20 + i * 10))
+      newColors.push(`hsl(${hue}, ${saturation}%, ${l}%)`)
+    }
+    setColors(newColors)
+  }, [hue, saturation, lightness])
+
+  const copyToClipboard = (color) => {
+    navigator.clipboard
+      .writeText(color)
+      .then(() => {
+        console.log(`Copied ${color} to clipboard!`)
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err)
+      })
+  }
+
+  return (
+    <div className="p-4 border dark:border-zinc-950/80 rounded-xl not-prose">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm text-zinc-950/70 dark:text-white/70">
+            Hue: {hue}°
+            <input
+              type="range"
+              min="0"
+              max="360"
+              value={hue}
+              onChange={(e) => setHue(Number.parseInt(e.target.value))}
+              className="w-full h-2 bg-zinc-950/20 rounded-lg appearance-none cursor-pointer dark:bg-white/20 mt-1"
+              style={{
+                background: `linear-gradient(to right, 
+                  hsl(0, ${saturation}%, ${lightness}%), 
+                  hsl(60, ${saturation}%, ${lightness}%), 
+                  hsl(120, ${saturation}%, ${lightness}%), 
+                  hsl(180, ${saturation}%, ${lightness}%), 
+                  hsl(240, ${saturation}%, ${lightness}%), 
+                  hsl(300, ${saturation}%, ${lightness}%), 
+                  hsl(360, ${saturation}%, ${lightness}%))`,
+              }}
+            />
+          </label>
+
+          <label className="block text-sm text-zinc-950/70 dark:text-white/70">
+            Saturation: {saturation}%
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={saturation}
+              onChange={(e) => setSaturation(Number.parseInt(e.target.value))}
+              className="w-full h-2 bg-zinc-950/20 rounded-lg appearance-none cursor-pointer dark:bg-white/20 mt-1"
+              style={{
+                background: `linear-gradient(to right, 
+                  hsl(${hue}, 0%, ${lightness}%), 
+                  hsl(${hue}, 50%, ${lightness}%), 
+                  hsl(${hue}, 100%, ${lightness}%))`,
+              }}
+            />
+          </label>
+
+          <label className="block text-sm text-zinc-950/70 dark:text-white/70">
+            Lightness: {lightness}%
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={lightness}
+              onChange={(e) => setLightness(Number.parseInt(e.target.value))}
+              className="w-full h-2 bg-zinc-950/20 rounded-lg appearance-none cursor-pointer dark:bg-white/20 mt-1"
+              style={{
+                background: `linear-gradient(to right, 
+                  hsl(${hue}, ${saturation}%, 0%), 
+                  hsl(${hue}, ${saturation}%, 50%), 
+                  hsl(${hue}, ${saturation}%, 100%))`,
+              }}
+            />
+          </label>
+        </div>
+
+        <div className="flex space-x-1">
+          {colors.map((color, idx) => (
+            <div
+              key={idx}
+              className="h-16 rounded flex-1 cursor-pointer transition-transform hover:scale-105"
+              style={{ backgroundColor: color }}
+              title={`Click to copy: ${color}`}
+              onClick={() => copyToClipboard(color)}
+            />
+          ))}
+        </div>
+
+        <div className="text-sm font-mono text-zinc-950/70 dark:text-white/70">
+          <p>
+            Base color: hsl({hue}, {saturation}%, {lightness}%)
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+Puis importez-le et utilisez-le :
+
+```mdx
+import { ColorGenerator } from "/snippets/color-generator.jsx"
+
+<ColorGenerator />
+```
+
+<ColorGenerator />
+
+<div id="considerations">
+  ## Considérations
+</div>
+
+- **SEO** : Les moteurs de recherche peuvent ne pas indexer complètement le contenu dynamique rendu côté client.
+- **Chargement initial** : Les visiteurs peuvent voir un flash avant que les composants ne s'affichent.
+- **Accessibilité** : Assurez-vous que les lecteurs d'écran annoncent les changements de contenu dynamique.
+- **Optimisez les tableaux de dépendances** : N'incluez que les dépendances nécessaires dans `useEffect`.
+- **Mémoïsez les opérations coûteuses** : Utilisez `useMemo` ou `useCallback` lorsque cela est pertinent.
+- **Réduisez les re-rendus** : Décomposez les grands composants en composants plus petits.
+- **Lazy loading** : Le code des composants ne peut pas être chargé de façon différée. Tous les composants sont chargés avec la page. Si un composant effectue des opérations gourmandes en ressources lorsqu'il est monté, comme la récupération de données ou des calculs lourds, utilisez le rendu conditionnel pour différer son montage jusqu'à une interaction de l'utilisateur.

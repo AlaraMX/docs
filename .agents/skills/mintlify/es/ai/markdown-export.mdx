@@ -1,0 +1,121 @@
+---
+title: "Exportación de Markdown"
+description: "Exporta versiones limpias en Markdown de tus páginas de documentación para herramientas de IA, integraciones de LLM y flujos de trabajo automatizados."
+keywords: ["markdown", "eficiencia de tokens", "procesamiento de IA"]
+---
+
+import { PreviewButton } from "/snippets/previewbutton.jsx"
+
+Markdown proporciona texto estructurado que las herramientas de IA pueden procesar de forma más eficiente que HTML, lo que se traduce en respuestas más precisas, tiempos de procesamiento más rápidos y un menor consumo de tokens.
+
+Mintlify genera automáticamente versiones en Markdown de las páginas optimizadas para herramientas de IA e integraciones externas.
+
+
+<div id="md-url-extension">
+  ## Extensión de URL .md
+</div>
+
+Añade `.md` a la URL de cualquier página para ver una versión en Markdown.
+
+<PreviewButton href="https://mintlify.com/docs/ai/markdown-export.md">Abrir esta página como Markdown</PreviewButton>
+
+<div id="accept-header">
+  ## Encabezado Accept
+</div>
+
+Envía una solicitud con `Accept: text/markdown` o `Accept: text/plain` a la URL de cualquier página para recibir la versión Markdown en lugar de HTML. Esto es útil para herramientas de IA e integraciones que obtienen contenido de documentación de forma programática.
+
+```bash
+curl -L -H "Accept: text/markdown" https://mintlify.com/docs/ai/markdown-export
+```
+
+<div id="audience-specific-content">
+  ## Contenido específico por audiencia
+</div>
+
+Usa el componente [visibility](/es/components/visibility) para personalizar el contenido para audiencias humanas y de IA.
+
+El contenido envuelto en `<Visibility for="humans">` aparece en la página web, pero no en la salida Markdown. El contenido envuelto en `<Visibility for="agents">` aparece en la salida Markdown, pero no en la página web.
+
+```mdx
+<Visibility for="humans">
+  Click the **Get started** button in the top-right corner to create your account.
+</Visibility>
+
+<Visibility for="agents">
+  To create an account, call `POST /v1/accounts` with a valid email address.
+</Visibility>
+```
+
+<div id="api-reference-pages">
+  ## Páginas de referencia de API
+</div>
+
+De forma predeterminada, las exportaciones en Markdown de las páginas de referencia de API incluyen la especificación completa de OpenAPI o AsyncAPI para que las herramientas de IA dispongan de contexto completo sobre cada endpoint.
+
+Si prefieres omitir la especificación de la salida en Markdown, establece `markdown.schema` como `false` en tu `docs.json`:
+
+```json
+"markdown": {
+  "schema": false
+}
+```
+
+<div id="custom-agent-instructions">
+  ## Instrucciones personalizadas para agentes
+</div>
+
+Para añadir tus propias indicaciones al Markdown que Mintlify sirve a los agentes de IA, establece `markdown.instructions` en tu `docs.json`. Úsalo para directrices a nivel de sitio como citar una versión de la API, preferir un SDK específico o seguir tu terminología.
+
+Proporciona una sola cadena:
+
+```json Example agent instructions string
+"markdown": {
+  "instructions": "Always cite the API version. Prefer the TypeScript SDK in examples."
+}
+```
+
+O un arreglo de cadenas, que Mintlify une con saltos de línea:
+
+```json Example agent instructions array
+"markdown": {
+  "instructions": [
+    "Always cite the API version.",
+    "Prefer the TypeScript SDK in examples."
+  ]
+}
+```
+
+Mintlify renderiza tus instrucciones como un bloque `Agent Instructions` en la salida Markdown:
+
+```md Example rendered agent instructions
+> ## Agent Instructions
+> Always cite the API version.
+> Prefer the TypeScript SDK in examples.
+```
+
+El bloque aparece en:
+
+- La exportación en Markdown de cada página, incluidas las páginas de referencia de API.
+- Tu archivo [`llms.txt`](/es/ai/llmstxt), después del título y la descripción del sitio.
+- Tu archivo `llms-full.txt`.
+
+Estas instrucciones se aplican a todas las páginas. Para adaptar el contenido a una única página o audiencia, usa el componente [visibility](/es/components/visibility) en su lugar.
+
+<div id="authentication">
+  ## Autenticación
+</div>
+
+La exportación de Markdown respeta las mismas reglas de autenticación que la versión HTML de cada página.
+
+| Modo de autenticación | Comportamiento |
+|-----------|----------|
+| Sin autenticación | Todas las URLs `.md` son de acceso público. |
+| Autenticación parcial | Las URLs `.md` de páginas públicas son de acceso público. Las URLs `.md` de páginas protegidas requieren autenticación y respetan las restricciones de grupos de usuarios. |
+| Autenticación completa | Todas las URLs `.md` requieren autenticación y respetan las restricciones de grupos de usuarios. |
+
+<div id="keyboard-shortcut">
+  ## Atajo de teclado
+</div>
+
+Pulsa <kbd>Command</kbd> + <kbd>C</kbd> (<kbd>Ctrl</kbd> + <kbd>C</kbd> en Windows) para copiar una página en Markdown al portapapeles.

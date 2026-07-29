@@ -1,0 +1,606 @@
+---
+title: "Referencia de comandos de la CLI de Mintlify"
+sidebarTitle: "Comandos"
+description: "Referencia completa de todos los comandos y flags de la CLI de Mintlify, incluyendo mint dev, mint build, mint validate, mint broken-links y más."
+keywords: ["CLI", "mint", "comandos", "flags", "referencia"]
+boost: 3
+---
+
+<div id="global-flags">
+  ## Flags globales
+</div>
+
+Estos flags están disponibles en todos los comandos.
+
+| Flag | Descripción |
+| --- | --- |
+| `--telemetry`, `-t` | Habilitar o deshabilitar la telemetría anónima de uso. |
+| `--help`, `-h` | Mostrar la ayuda del comando. |
+| `--version`, `-v` | Mostrar la versión de la CLI. Alias de `mint version`. |
+
+<div id="mint-dev">
+  ## `mint dev`
+</div>
+
+Inicia una previsualización local de tu documentación.
+
+```bash
+mint dev [flags]
+```
+
+| Flag | Descripción |
+| --- | --- |
+| `--port` | Puerto para ejecutar la previsualización local. Por defecto `3000`. |
+| `--no-open` | No abrir el navegador automáticamente. |
+| `--groups` | Lista separada por comas de grupos de usuarios a simular para la previsualización. |
+| `--disable-openapi` | Omitir el procesamiento de archivos OpenAPI para mejorar el rendimiento. |
+| `--local-schema` | Permitir archivos OpenAPI alojados localmente servidos por HTTP. |
+
+---
+
+<div id="mint-signup">
+  ## `mint signup`
+</div>
+
+Crea una nueva cuenta de Mintlify desde la terminal.
+
+```bash
+mint signup [flags]
+```
+
+| Flag | Descripción |
+| --- | --- |
+| `--firstName` | Tu nombre. |
+| `--lastName` | Tus apellidos. |
+| `--company` | El nombre de tu empresa. |
+| `--email` | Dirección de correo electrónico para la cuenta. |
+
+Ejecuta el comando sin flags para introducir tus datos de forma interactiva. La CLI te pedirá cualquier valor que no pases como flag.
+
+Después de enviar tus datos, Mintlify envía un enlace de verificación a tu correo electrónico. El comando espera hasta que haces clic en el enlace, luego crea tu cuenta, inicia sesión y almacena tus credenciales. Cuando termina, abre el [panel de control](https://app.mintlify.com) para conectar tu repositorio y empezar a construir.
+
+<Note>
+  `mint signup` no finaliza hasta que hagas clic en el enlace de verificación, lo que puede tardar varios minutos. En scripts o automatizaciones, ejecútalo como un proceso en segundo plano en lugar de esperarlo de forma sincrónica.
+</Note>
+
+<div id="examples">
+  ### Ejemplos
+</div>
+
+```bash
+# Registro interactivo
+mint signup
+
+# Registro con todos los datos proporcionados
+mint signup \
+  --firstName Jane \
+  --lastName Doe \
+  --company Acme \
+  --email jane@acme.com
+```
+
+---
+
+<div id="mint-login">
+  ## `mint login`
+</div>
+
+Autenticarse con tu cuenta de Mintlify.
+
+```bash
+mint login
+```
+
+Abre una ventana del navegador para completar la autenticación. Si el navegador no se abre, la CLI muestra una URL para abrir manualmente y un campo para pegar el código de autorización. Las credenciales se guardan en `~/.config/mintlify/config.json`.
+
+Si tienes más de un despliegue, la CLI te solicita que selecciones uno predeterminado después de iniciar sesión. Puedes cambiar el proyecto predeterminado más tarde con `mint config set subdomain <subdomain>`.
+
+---
+
+<div id="mint-logout">
+  ## `mint logout`
+</div>
+
+Eliminar las credenciales almacenadas.
+
+```bash
+mint logout
+```
+
+---
+
+<div id="mint-status">
+  ## `mint status`
+</div>
+
+Muestra los detalles de tu sesión actual, incluyendo la versión de la CLI, el correo electrónico de la cuenta, la organización y el subdominio configurado.
+
+```bash
+mint status
+```
+
+---
+
+<div id="mint-add-domain">
+  ## `mint add-domain`
+</div>
+
+Añade un [dominio personalizado](/es/customize/custom-domain) a tu implementación desde la terminal. Requiere autenticación con `mint login`.
+
+```bash
+mint add-domain <domain>
+```
+
+| Argumento | Descripción |
+| --- | --- |
+| `domain` | El dominio personalizado que quieres añadir, como `docs.example.com`. Debe ser un nombre de host simple. |
+
+El comando usa el subdominio configurado con `mint config`. Si no hay ninguno configurado, usa el primer subdominio de tu cuenta.
+
+Una vez registrado el dominio, la CLI espera hasta 10 segundos a que se generen los registros DNS y luego imprime los registros `TXT` y `CNAME` que debes añadir en tu proveedor de dominio:
+
+```text
+TXT _acme-challenge → <value>
+TXT _cf-custom-hostname → <value>
+CNAME @ → cname.mintlify.builders
+```
+
+Añade primero los registros `TXT` y, una vez validados, añade el `CNAME`. Consulta [Dominio personalizado](/es/customize/custom-domain) para ver las instrucciones completas de configuración de DNS, los requisitos para dominios apex y los detalles del aprovisionamiento de TLS.
+
+<Note>
+  Si algunos registros `TXT` aún se están generando cuando el comando finaliza, revisa la página de [Configuración de dominio personalizado](https://app.mintlify.com/settings/deployment/custom-domain) en tu panel para ver los valores restantes.
+</Note>
+
+### Ejemplo
+
+```bash
+mint add-domain docs.example.com
+```
+
+---
+
+<div id="mint-automations">
+  ## `mint automations`
+</div>
+
+Crea, lista y elimina [automatizaciones](/es/automations) desde la terminal. Requiere autenticación con `mint login`.
+
+```bash
+mint automations <subcommand> [flags]
+```
+
+<Note>
+  `mint workflow` y `mint workflows` siguen funcionando como alias de `mint automations`, por lo que los scripts existentes seguirán ejecutándose. Los scripts nuevos deben usar `mint automations`.
+</Note>
+
+Todos los subcomandos aceptan estos flags compartidos:
+
+| Flag | Descripción |
+| --- | --- |
+| `--subdomain` | Subdominio de la documentación. Por defecto usa el valor establecido con `mint config set subdomain`, o el primer proyecto de tu cuenta. |
+| `--format` | Formato de salida: `table` (por defecto, en formato legible) o `json` (sin procesar, legible por máquinas). |
+
+Cuando se establece `--format json`, los errores se imprimen en stderr como `Error: <message>` y el comando sale con un estado distinto de cero, para que puedas canalizar la salida exitosa a otras herramientas.
+
+<div id="mint-automations-create">
+  ### `mint automations create`
+</div>
+
+Crea una nueva automatización. Puedes pasar la definición de la automatización en línea con flags, o apuntar a un archivo JSON o YAML con `--file`.
+
+```bash
+mint automations create [flags]
+```
+
+| Flag | Descripción |
+| --- | --- |
+| `--name` | Nombre de la automatización. Obligatorio salvo que se proporcione `--file`. |
+| `--prompt` | Instrucciones que se añaden al prompt base de la automatización en cada ejecución. |
+| `--type` | Tipo de automatización. Uno de `changelog`, `source-code-agent`, `translations`, `writing-style`, `typo-check`, `broken-link-detection`, `seo-metadata-audit`, `assistant-docs-updates` o `contextual-feedback-docs-updates`. Omítelo para una automatización personalizada. |
+| `--cron` | Expresión cron para un trigger programado. Mutuamente excluyente con `--push-repo`. |
+| `--push-repo` | Repositorio (`owner/repo`) para un trigger de push. Repetible para escuchar varios repositorios. Mutuamente excluyente con `--cron`. |
+| `--context-repo` | Repositorio de contexto adicional (`owner/repo`) que el agente lee cuando se ejecuta la automatización. Repetible, hasta 10 en total. |
+| `--automerge` | Fusiona automáticamente las pull requests abiertas por esta automatización. Consulta [Configurar automerge](/es/guides/configure-automerge) para los requisitos de configuración. |
+| `--file` | Ruta a un archivo JSON o YAML con el cuerpo completo de la automatización. Anula los flags en línea. |
+
+Proporciona exactamente un trigger: pasa `--cron` para una automatización programada o uno o más flags `--push-repo` para una automatización activada por push.
+
+<div id="examples">
+  #### Ejemplos
+</div>
+
+```bash
+# Automatización de traducciones programada
+mint automations create \
+  --name "Translate content" \
+  --type translations \
+  --cron "0 6 * * *"
+
+# Automatización activada por push con contexto adicional
+mint automations create \
+  --name "Sync API reference" \
+  --type source-code-agent \
+  --push-repo my-org/api \
+  --context-repo my-org/shared-types \
+  --automerge
+
+# Crear desde un archivo
+mint automations create --file automation.yaml
+```
+
+Un archivo de automatización usa la misma forma que los flags en línea. El campo `on` contiene el trigger:
+
+```yaml
+name: Translate content
+type: translations
+on:
+  cron: "0 6 * * *"
+prompt: Prefer formal tone in French translations.
+automerge: false
+context:
+  - repo: my-org/shared-content
+```
+
+<div id="mint-automations-list">
+  ### `mint automations list`
+</div>
+
+Lista las automatizaciones del despliegue actual.
+
+```bash
+mint automations list [flags]
+```
+
+La salida en formato tabla por defecto muestra el ID, nombre, tipo, trigger y estado de cada automatización. Usa `--format json` para obtener los objetos completos de la automatización.
+
+<div id="mint-automations-delete">
+  ### `mint automations delete`
+</div>
+
+Elimina una automatización por ID. Usa `mint automations list` para obtener el ID.
+
+```bash
+mint automations delete <id> [flags]
+```
+
+| Argumento | Descripción |
+| --- | --- |
+| `id` | ID del esquema de la automatización que se va a eliminar. |
+
+---
+
+<div id="mint-config">
+  ## `mint config`
+</div>
+
+Gestiona valores predeterminados persistentes para los comandos de la CLI. La configuración se guarda en `~/.config/mintlify/config.json`.
+
+```bash
+mint config <subcommand> <key> [value]
+```
+
+| Subcomando | Descripción |
+| --- | --- |
+| `set <key> <value>` | Establecer un valor de configuración. |
+| `get <key>` | Mostrar un valor de configuración. |
+| `clear <key>` | Eliminar un valor de configuración. |
+
+<div id="configuration-keys">
+  ### Claves de configuración
+</div>
+
+| Clave | Descripción | Usado por |
+| --- | --- | --- |
+| `subdomain` | Subdominio predeterminado de la documentación. | `mint automations` |
+
+---
+
+<div id="mint-broken-links">
+  ## `mint broken-links`
+</div>
+
+Verifica enlaces rotos internos en tu documentación.
+
+```bash
+mint broken-links [flags]
+```
+
+El comando excluye los archivos que coinciden con los patrones de [.mintignore](/es/organize/mintignore). Los enlaces que apuntan a archivos ignorados se reportan como rotos.
+
+| Flag | Descripción |
+| --- | --- |
+| `--files` | Una o más rutas de archivo o globs a verificar. Por defecto, se verifica todo el sitio. |
+| `--check-anchors` | También validar enlaces de ancla (por ejemplo, `/page#section`) contra los slugs de encabezados. |
+| `--check-external` | También verificar URLs externas en busca de enlaces rotos. |
+| `--check-redirects` | También verificar que los destinos de redirección en `docs.json` se resuelvan a rutas válidas. |
+| `--check-snippets` | También verificar enlaces dentro de componentes `<Snippet>`. |
+
+Usa `--files` para limitar la verificación a páginas específicas. Es útil para validar una sola página que acabas de editar o para acotar las verificaciones a un directorio en CI. Cuando se combina `--files` con `--check-external`, solo se comprueban las URLs externas de las páginas seleccionadas.
+
+```bash
+# Verificar una página específica
+mint broken-links --files introduction.mdx
+
+# Verificar páginas que coincidan con un glob
+mint broken-links --files "guides/**/*.mdx"
+
+# Pasar varias rutas
+mint broken-links --files introduction.mdx --files "guides/**/*.mdx"
+```
+
+---
+
+<div id="mint-a11y">
+  ## `mint a11y`
+</div>
+
+Verifica problemas de accesibilidad en tu documentación.
+
+```bash
+mint a11y [flags]
+```
+
+Verifica las relaciones de contraste de color y la falta de texto alternativo en imágenes y videos.
+
+| Flag | Descripción |
+| --- | --- |
+| `--skip-contrast` | Omitir las verificaciones de contraste de color. |
+| `--skip-alt-text` | Omitir las verificaciones de texto alternativo faltante. |
+
+---
+
+<div id="mint-validate">
+  ## `mint validate`
+</div>
+
+Valida la compilación de tu documentación en modo estricto. Finaliza con error si hay advertencias o errores. Incluye validación automática de las especificaciones OpenAPI referenciadas en tu `docs.json`.
+
+```bash
+mint validate [flags]
+```
+
+| Flag | Descripción |
+| --- | --- |
+| `--groups` | Lista separada por comas de grupos de usuarios a simular para la validación. |
+| `--disable-openapi` | Omitir el procesamiento y validación de archivos OpenAPI. |
+| `--local-schema` | Permitir la validación de archivos OpenAPI alojados localmente servidos por HTTP. Solo admite HTTPS en producción. |
+
+<Note>
+  Usa `mint validate` en lugar del comando independiente `mint openapi-check`, que está obsoleto.
+</Note>
+
+---
+
+<div id="mint-export">
+  ## `mint export`
+</div>
+
+Exporta tu documentación como un archivo zip autónomo para visualización y distribución sin conexión.
+
+```bash
+mint export [flags]
+```
+
+| Flag | Descripción |
+| --- | --- |
+| `--output` | Nombre del archivo de salida. Por defecto `export.zip`. |
+| `--groups` | Lista separada por comas de grupos de usuarios para incluir páginas restringidas. |
+| `--disable-openapi` | Omitir el procesamiento de OpenAPI. |
+
+Consulta [Exportación offline](/es/deploy/export) para más detalles.
+
+---
+
+<div id="mint-score">
+  ## `mint score`
+</div>
+
+Ejecuta verificaciones de preparación para agentes en un sitio de documentación público. Requiere autenticación con `mint login`.
+
+```bash
+mint score [url] [flags]
+```
+
+| Argumento | Descripción |
+| --- | --- |
+| `url` | Opcional. URL del sitio de documentación que se va a comprobar. Si se omite, el comando evalúa tu subdominio configurado (de `mint config` o el subdominio asociado a tu cuenta con sesión iniciada). |
+
+| Flag | Descripción |
+| --- | --- |
+| `--format` | Formato de salida: `table` (predeterminado, con colores), `plain` (TSV para redirección) o `json`. |
+
+El comando muestra una puntuación general de preparación y un desglose de verificaciones individuales con indicadores de aprobado/reprobado.
+
+<div id="examples">
+  ### Ejemplos
+</div>
+
+```bash
+# Evaluar tu subdominio por defecto
+mint score
+
+# Evaluar un sitio específico
+mint score docs.example.com
+```
+
+<div id="checks">
+  ### Verificaciones
+</div>
+
+La puntuación evalúa las siguientes áreas:
+
+| Verificación | Qué comprueba |
+| --- | --- |
+| `llmsTxtExists` | Los agentes pueden acceder a un archivo [llms.txt](/es/ai/llmstxt) en la raíz del sitio. |
+| `llmsTxtValid` | El archivo `llms.txt` sigue el formato esperado con encabezados, resumen en bloque de cita y enlaces Markdown. |
+| `llmsTxtSize` | El archivo `llms.txt` está dentro del umbral de tamaño para que los agentes puedan consumirlo sin truncamiento. |
+| `llmsTxtLinksResolve` | Los enlaces dentro de `llms.txt` apuntan a páginas activas. |
+| `llmsTxtLinksMarkdown` | Los enlaces dentro de `llms.txt` usan sintaxis Markdown. |
+| `llmsTxtDirective` | El archivo `llms.txt` contiene directivas de uso. |
+| `llmsTxtFullExists` | Un archivo [llms-full.txt](/es/ai/llmstxt/#llms-full-txt) está disponible para agentes que necesitan el contenido completo. Se ejecuta independientemente de `llmsTxtExists`. |
+| `llmsTxtFullSize` | El archivo `llms-full.txt` tiene un tamaño razonable para que los agentes lo procesen. |
+| `llmsTxtFullValid` | El archivo `llms-full.txt` contiene contenido válido con encabezados. |
+| `llmsTxtFullLinksResolve` | Los enlaces dentro de `llms-full.txt` apuntan a páginas activas. |
+| `skillMd` | Los agentes pueden acceder a un archivo [skill.md](https://www.mintlify.com/docs/ai/skillmd) para el uso de herramientas por agentes. |
+| `contentNegotiationMarkdown` | El sitio devuelve Markdown cuando los agentes lo solicitan mediante negociación de contenido. |
+| `contentNegotiationPlaintext` | El sitio devuelve texto plano cuando los agentes lo solicitan mediante negociación de contenido. |
+| `mcpServerDiscoverable` | Los agentes pueden descubrir un [servidor MCP](/es/ai/model-context-protocol) para agentes basados en herramientas. |
+| `mcpToolCount` | El servidor MCP expone al menos una herramienta. |
+| `openApiSpec` | Hay una especificación OpenAPI o Swagger disponible en una ruta estándar. |
+| `robotsTxtAllowsAI` | El archivo `robots.txt` no bloquea los rastreadores de IA. |
+| `sitemapExists` | Hay un mapa del sitio disponible para el descubrimiento de páginas. |
+| `structuredData` | La página principal contiene datos estructurados [JSON-LD](https://json-ld.org/) (`<script type="application/ld+json">`). Informa el número de bloques JSON-LD y los tipos de esquema encontrados. |
+| `responseLatency` | El sitio responde en un tiempo aceptable para los agentes. |
+
+Algunas verificaciones solo se ejecutan si una verificación de la que dependen pasa. Si una verificación falla, ninguna de las verificaciones que dependen de ella se ejecuta. Fallan automáticamente. Por ejemplo, `llmsTxtValid` solo pasa si `llmsTxtExists` pasa primero.
+
+La puntuación general utiliza puntuación ponderada, por lo que las verificaciones de mayor impacto contribuyen más a su puntuación.
+
+---
+
+<div id="mint-deslop">
+  ## `mint deslop`
+</div>
+
+Comprueba las páginas de documentación para detectar prosa que suena a IA y obtén sugerencias de reescritura. Requiere autenticación con `mint login`.
+
+```bash
+mint deslop [files...] [flags]
+```
+
+| Argumento | Descripción |
+| --- | --- |
+| `files` | Opcional. Rutas o globs a comprobar. Si se omite, el comando comprueba las páginas `.md` y `.mdx` que han cambiado en tu directorio de trabajo (diff de Git más archivos sin seguimiento). |
+
+| Flag | Descripción |
+| --- | --- |
+| `--format` | Formato de salida: `table` (predeterminado, con colores), `plain` (redirigible) o `json`. |
+| `--subdomain` | Subdominio de documentación con el que comparar. Por defecto, tu subdominio configurado. |
+| `--threshold` | Marca una página como fallida cuando la suma de sus fracciones generada por IA y asistida por IA sea mayor que este valor, de `0` a `1`. Por defecto, `0.5`. |
+| `--fix-whitespace` | Normaliza los espacios en blanco de la prosa en los archivos comprobados (espacios finales, secuencias de líneas en blanco y caracteres Unicode invisibles). Omite los bloques de código y el frontmatter. |
+
+Para cada página marcada, el comando informa la fracción escrita por IA, los pasajes específicos que se detectan como generados por IA con sus números de línea, y sugerencias de reescritura en estilo humano.
+
+Cada página comprobada consume un crédito de IA. Las páginas con menos de 50 palabras se omiten y no se cobran. Si alguna página alcanza el umbral o lo supera, o si una comprobación devuelve un error, el comando termina con el código `1`. Si todas las páginas están limpias, el comando termina con el código `0`. Esto te permite ejecutarlo en un bucle de reescritura o en CI.
+
+<div id="examples">
+  ### Ejemplos
+</div>
+
+```bash
+# Comprobar las páginas modificadas en tu directorio de trabajo
+mint deslop
+
+# Comprobar una página específica
+mint deslop docs/guide.mdx
+
+# Comprobar todas las páginas MDX y emitir JSON para scripting
+mint deslop "docs/**/*.mdx" --format json
+
+# Además, limpiar los espacios en blanco en los archivos comprobados
+mint deslop docs/guide.mdx --fix-whitespace
+```
+
+---
+
+<div id="mint-format">
+  ## `mint format`
+</div>
+
+Formatea todos los archivos `.mdx` del directorio actual siguiendo el estilo canónico de Mintlify. El comando analiza cada archivo con el mismo analizador MDX que utiliza el editor web y luego lo reescribe in situ si la salida canónica difiere.
+
+```bash
+mint format
+```
+
+Ejecuta el comando desde la raíz de tu proyecto de documentación. Recorre cada subdirectorio, omitiendo las rutas que coincidan con `.gitignore` y cualquier regla de exclusión de Mintlify. Los archivos que ya coincidan con la salida canónica se dejan intactos.
+
+<Warning>
+  `mint format` reescribe los archivos in situ. Confirma o guarda tus cambios antes de ejecutarlo para que puedas revisar el diff.
+</Warning>
+
+Cuando termina, el comando muestra cuántos archivos MDX se reformatearon y cuántos no se pudieron analizar. Si algún archivo falla, el comando termina con el código `1` e imprime la ruta del archivo y el error, de modo que puedas ejecutarlo en CI para exigir un formato coherente.
+
+---
+
+<div id="mint-new">
+  ## `mint new`
+</div>
+
+Crea un nuevo proyecto de documentación eligiendo un tema o clonando una plantilla predefinida del repositorio [mintlify/templates](https://github.com/mintlify/templates).
+
+```bash
+mint new [directory] [flags]
+```
+
+| Flag | Descripción |
+| --- | --- |
+| `--name` | Nombre del proyecto. La CLI lo solicita si no se proporciona en modo interactivo. |
+| `--theme` | [Tema](/es/customize/themes) del proyecto. La CLI lo solicita si no se proporciona en modo interactivo. |
+| `--template` | Plantilla predefinida. La CLI la solicita si no se proporciona en modo interactivo. |
+| `--force` | Sobrescribir el directorio sin solicitar confirmación. |
+
+---
+
+<div id="mint-update">
+  ## `mint update`
+</div>
+
+Actualiza la CLI a la última versión.
+
+```bash
+mint update
+```
+
+---
+
+<div id="mint-version">
+  ## `mint version`
+</div>
+
+Muestra las versiones actuales de la CLI y del cliente.
+
+```bash
+mint version
+```
+
+---
+
+<div id="coming-soon">
+  ## Próximamente
+</div>
+
+Estos comandos están disponibles para ejecutar pero aún no son funcionales. Ejecutarlos registra tu interés a través de la telemetría de la CLI y ayuda a priorizar qué se lanza a continuación.
+
+| Comando | Descripción |
+| --- | --- |
+| `mint ai` | Herramientas de documentación con IA. |
+| `mint test` | Pruebas de documentación. |
+| `mint mcp` | Servidor MCP para documentación. |
+
+---
+
+<div id="telemetry">
+  ## Telemetría
+</div>
+
+La CLI recopila telemetría anónima de uso para ayudar a mejorar Mintlify. Los datos de telemetría incluyen el nombre del comando, la versión de la CLI, el sistema operativo y la arquitectura. Mintlify **no** recopila información de identificación personal, contenido del proyecto ni rutas de archivos.
+
+Por defecto, la CLI recopila datos de telemetría. Puedes desactivarla en cualquier momento usando el flag `--telemetry`:
+
+```bash
+# Deshabilitar telemetría
+mint --telemetry false
+
+# Volver a habilitar telemetría
+mint --telemetry true
+```
+
+También puedes deshabilitar la telemetría configurando una de estas variables de entorno:
+
+| Variable | Valor | Descripción |
+| --- | --- | --- |
+| `MINTLIFY_TELEMETRY_DISABLED` | `1` | Deshabilitar la telemetría de la CLI de Mintlify. |
+| `DO_NOT_TRACK` | `1` | Deshabilitar la telemetría usando el estándar [Console Do Not Track](https://consoledonottrack.com/). |
+
+Tu preferencia se guarda en `~/.config/mintlify/config.json` y persiste entre sesiones de la CLI.

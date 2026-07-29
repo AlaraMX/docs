@@ -1,0 +1,98 @@
+---
+title: "Tuiles"
+description: "Utilisez le composant tiles pour afficher des aperçus visuels avec miniatures d'images, titres et descriptions dans une mise en page en grille responsive."
+keywords: ["tuiles", "aperçu visuel", "grille", "vitrine"]
+boost: 3
+---
+
+Utilisez des tuiles pour créer des éléments de présentation visuelle avec un arrière-plan à motifs, un titre et une description. Les tuiles sont idéales pour afficher des aperçus de composants, des mises en avant de fonctionnalités ou des éléments de navigation dans une mise en page en grille.
+
+<Tile href="/fr/components/tiles" title="Titre de la tuile" description="Brève description">
+  <img src="/images/tiles/placeholder-light.svg" alt="Espace réservé pour l'aperçu de la tuile" className="block dark:hidden" />
+
+  <img src="/images/tiles/placeholder-dark.svg" alt="Espace réservé pour l'aperçu de la tuile (mode sombre)" className="hidden dark:block" />
+</Tile>
+
+```mdx Tile example
+<Tile href="/your-link" title="Tile title" description="Short description">
+  <img src="/images/your-preview-light.svg" alt="Tile preview" className="block dark:hidden" />
+  <img src="/images/your-preview-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+</Tile>
+```
+
+Le contenu (`children`) d'une tuile peut être n'importe quelle image, SVG ou autre nœud React que vous souhaitez afficher dans la zone d'aperçu. Fournissez des ressources distinctes pour les modes clair et sombre en utilisant les classes utilitaires `block dark:hidden` et `hidden dark:block` afin que l'aperçu corresponde au thème actif.
+
+<div id="image-guidelines">
+  ### Recommandations pour les images
+</div>
+
+La zone d'aperçu de la tuile est un conteneur responsive de hauteur fixe. Pour des résultats homogènes entre les tuiles et les mises en page en grille :
+
+- **Ratio d'aspect** : Utilisez un ratio paysage 16:9 ou 4:3. Les images en portrait sont rognées de manière peu esthétique.
+- **Dimensions** : Concevez pour au moins 800×450 pixels afin que les aperçus restent nets sur les écrans Retina.
+- **Format** : Préférez le SVG pour les illustrations, les maquettes d'interface et les diagrammes. Utilisez WebP ou PNG pour les photographies et les captures d'écran.
+- **Taille de fichier** : Gardez chaque ressource sous 200 Ko pour préserver les performances de chargement de page, en particulier dans les grilles multi-tuiles.
+- **Marges internes** : Intégrez toute marge intérieure directement dans la ressource. La tuile n'ajoute pas de marge interne autour de l'image enfant.
+
+<div id="grid-layout">
+  ## Mise en page en grille
+</div>
+
+Combinez les tuiles avec le [composant Columns](/fr/components/columns) pour créer une grille responsive d'aperçus visuels.
+
+<Columns cols={3}>
+  <Tile href="/fr/components/tiles" title="Tuile un" description="Brève description">
+    <img src="/images/tiles/placeholder-light.svg" alt="Espace réservé pour l'aperçu de la tuile" className="block dark:hidden" />
+
+    <img src="/images/tiles/placeholder-dark.svg" alt="Espace réservé pour l'aperçu de la tuile (mode sombre)" className="hidden dark:block" />
+  </Tile>
+
+  <Tile href="/fr/components/tiles" title="Tuile deux" description="Brève description">
+    <img src="/images/tiles/placeholder-light.svg" alt="Espace réservé pour l'aperçu de la tuile" className="block dark:hidden" />
+
+    <img src="/images/tiles/placeholder-dark.svg" alt="Espace réservé pour l'aperçu de la tuile (mode sombre)" className="hidden dark:block" />
+  </Tile>
+
+  <Tile href="/fr/components/tiles" title="Tuile trois" description="Brève description">
+    <img src="/images/tiles/placeholder-light.svg" alt="Espace réservé pour l'aperçu de la tuile" className="block dark:hidden" />
+
+    <img src="/images/tiles/placeholder-dark.svg" alt="Espace réservé pour l'aperçu de la tuile (mode sombre)" className="hidden dark:block" />
+  </Tile>
+</Columns>
+
+```mdx Grid layout example
+<Columns cols={3}>
+  <Tile href="/link-one" title="Tile one" description="Short description">
+    <img src="/images/preview-one-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-one-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/link-two" title="Tile two" description="Short description">
+    <img src="/images/preview-two-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-two-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/link-three" title="Tile three" description="Short description">
+    <img src="/images/preview-three-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-three-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+</Columns>
+```
+
+<div id="properties">
+  ## Propriétés
+</div>
+
+<ResponseField name="href" type="string" required>
+  URL vers laquelle accéder lorsque la tuile est cliquée.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Le titre affiché sous l'aperçu de la tuile.
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Une brève description affichée sous le titre.
+</ResponseField>
+
+<ResponseField name="children" type="React.ReactNode" required>
+  Contenu affiché dans la zone d'aperçu de la tuile, généralement des images ou des SVG.
+</ResponseField>

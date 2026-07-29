@@ -1,0 +1,98 @@
+---
+title: "磁贴"
+description: "使用 tiles 组件在响应式网格布局中展示带有图片缩略图、标题和描述的视觉预览。"
+keywords: ["磁贴", "视觉预览", "网格", "展示"]
+boost: 3
+---
+
+使用磁贴来创建带有图案背景、标题和说明的视觉展示元素。磁贴非常适合在网格布局中展示组件预览、功能亮点或导航项。
+
+<Tile href="/zh/components/tiles" title="磁贴标题" description="简短描述">
+  <img src="/images/tiles/placeholder-light.svg" alt="磁贴预览占位图" className="block dark:hidden" />
+
+  <img src="/images/tiles/placeholder-dark.svg" alt="磁贴预览占位图（深色模式）" className="hidden dark:block" />
+</Tile>
+
+```mdx Tile example
+<Tile href="/your-link" title="Tile title" description="Short description">
+  <img src="/images/your-preview-light.svg" alt="Tile preview" className="block dark:hidden" />
+  <img src="/images/your-preview-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+</Tile>
+```
+
+磁贴的 `children` 可以是任何你想在预览区域中显示的图片、SVG 或其他 React 节点。使用 `block dark:hidden` 和 `hidden dark:block` 工具类分别提供浅色和深色模式资源，使预览与当前主题相匹配。
+
+<div id="image-guidelines">
+  ### 图片指南
+</div>
+
+磁贴的预览区域是一个高度固定的响应式容器。为了在不同磁贴和网格布局中获得一致的效果：
+
+- **宽高比**：使用 16:9 或 4:3 的横向比例。竖向图片裁剪效果不佳。
+- **尺寸**：以至少 800×450 像素进行设计，以便在 retina 显示屏上保持清晰。
+- **格式**：插画、UI 稿和示意图优先使用 SVG。照片和截图使用 WebP 或 PNG。
+- **文件大小**：将每个资源保持在 200 KB 以下，以保证页面加载性能，尤其是在多磁贴网格中。
+- **内边距**：将周围的任何内边距烘焙进资源本身。磁贴不会在子图片周围额外添加内边距。
+
+<div id="grid-layout">
+  ## 网格布局
+</div>
+
+将磁贴与 [Columns 组件](/zh/components/columns) 组合使用，以创建响应式的视觉预览网格。
+
+<Columns cols={3}>
+  <Tile href="/zh/components/tiles" title="磁贴一" description="简短描述">
+    <img src="/images/tiles/placeholder-light.svg" alt="磁贴预览占位图" className="block dark:hidden" />
+
+    <img src="/images/tiles/placeholder-dark.svg" alt="磁贴预览占位图（深色模式）" className="hidden dark:block" />
+  </Tile>
+
+  <Tile href="/zh/components/tiles" title="磁贴二" description="简短描述">
+    <img src="/images/tiles/placeholder-light.svg" alt="磁贴预览占位图" className="block dark:hidden" />
+
+    <img src="/images/tiles/placeholder-dark.svg" alt="磁贴预览占位图（深色模式）" className="hidden dark:block" />
+  </Tile>
+
+  <Tile href="/zh/components/tiles" title="磁贴三" description="简短描述">
+    <img src="/images/tiles/placeholder-light.svg" alt="磁贴预览占位图" className="block dark:hidden" />
+
+    <img src="/images/tiles/placeholder-dark.svg" alt="磁贴预览占位图（深色模式）" className="hidden dark:block" />
+  </Tile>
+</Columns>
+
+```mdx Grid layout example
+<Columns cols={3}>
+  <Tile href="/link-one" title="Tile one" description="Short description">
+    <img src="/images/preview-one-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-one-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/link-two" title="Tile two" description="Short description">
+    <img src="/images/preview-two-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-two-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+  <Tile href="/link-three" title="Tile three" description="Short description">
+    <img src="/images/preview-three-light.svg" alt="Tile preview" className="block dark:hidden" />
+    <img src="/images/preview-three-dark.svg" alt="Tile preview (dark mode)" className="hidden dark:block" />
+  </Tile>
+</Columns>
+```
+
+<div id="properties">
+  ## 属性
+</div>
+
+<ResponseField name="href" type="string" required>
+  点击卡片时要跳转到的 URL。
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  显示在卡片预览下方的标题。
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  显示在标题下方的简短说明。
+</ResponseField>
+
+<ResponseField name="children" type="React.ReactNode" required>
+  显示在卡片预览区域的内容，通常为图片或 SVG 图像。
+</ResponseField>

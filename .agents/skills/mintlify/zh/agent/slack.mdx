@@ -1,0 +1,146 @@
+---
+title: "将 agent 添加到 Slack"
+description: "在 Slack 中安装 Mintlify agent，用于询问产品相关问题、根据团队对话创建内容更新，并将知识沉淀到 pull request 中。"
+keywords: ["Slack 集成", "Slack 机器人", "团队协作", "agent 集成", "知识沉淀"]
+---
+
+<Note>
+  如果你的 Slack 工作区所有者要求安装应用需先经管理员批准，请先请他们批准 Mintlify 应用，然后再进行连接。
+</Note>
+
+在 Slack 中使用 agent 可更新内容、提出问题并沉淀团队知识。在频道中 @ 该 agent 即可协作使用，或通过私信单独使用。
+
+<Tip>
+  Slack 应用与第三方集成协同工作。安装 Slack 应用后，你可以与 agent 对话，并让它访问获准读取的 Slack 内容。然后连接[集成](/zh/automations/integrations)，让 agent 还可以使用 Notion、Jira、Linear 或 Google Drive 等应用中的上下文。
+</Tip>
+
+<div id="connect-your-slack-workspace">
+  ## 连接你的 Slack 工作区
+</div>
+
+1. 在控制台中进入 [Agent](https://dashboard.mintlify.com/products/agent) 页面。
+2. 在 "Agent settings" 部分，点击 **Install Slack app**。
+3. 按照 Slack 的提示将 `mintlify` 应用安装到你的工作区。
+4. 按照 Slack 的提示将你的 Mintlify 账户关联到你的 Slack 工作区。
+5. 测试 agent 是否正常工作，并在你执行以下操作时是否会响应：
+   - 向 agent 发送一条私信。
+    - 在频道中使用 `@mintlify` 提及 agent。
+
+<Note>
+  每个 Slack 工作区一次只能连接到一个 Mintlify 组织。如果你尝试将 agent 安装到已经连接到其他组织的工作区，安装会失败并提示 “wrong organization” 错误。请先从其他组织卸载该应用，或使用其他 Slack 工作区。
+</Note>
+
+<div id="reconnect-or-reinstall-the-agent">
+  ### 重新连接或重新安装 agent
+</div>
+
+如果你需要重新授权 agent —— 例如，在 Slack 范围更新后授予新的权限，或在 token 被撤销后进行恢复 —— 请从你的 Mintlify dashboard 重新安装该应用。
+
+当你将 agent 重新安装到已经连接到你组织的工作区时，Mintlify 会原地刷新已存储的 bot token。你现有的频道和线程都会保持不变。
+
+<Tip>
+如果你的组织有多个部署，agent 会在你首次发送请求时要求你选择要使用的部署。
+
+你的首选部署仅与你的 Slack 账户关联，不会影响其他团队成员。你可以在对话过程中随时切换到其他部署，只需点击线程中 agent 状态消息上的
+**Switch deployment** 按钮。Agent 会保留你的对话历史记录，以便你在新部署上从之前中断的地方继续。
+</Tip>
+
+<div id="use-the-agent-in-slack">
+  ## 在 Slack 中使用智能体
+</div>
+
+连接完成后，你可以：
+
+- 向智能体发送私信，在私密环境中使用它来更新文档。
+- 在频道中提及 `@mintlify`，在公开场景中与团队协作使用它。
+- 在消息中直接附加文件和图片，让智能体处理并将其纳入文档。
+- 在线程中继续对话，对修改内容持续迭代或提出后续问题。智能体会将该线程中先前共享的文件和图片作为后续请求的上下文重复使用，因此你无需再次上传。
+- 将拉取请求（PR；亦称"合并请求"/Merge Request）链接分享给智能体，以更新相关文档。
+
+<div id="ask-questions-about-your-docs">
+  ## 就你的文档提问
+</div>
+
+向智能体询问关于你的产品或文档的问题，并在线程中收到回答。
+
+- **新问题**：直接给智能体发送私信，或在频道中通过 `@mintlify` 提及智能体并附上你的问题。
+- **已有线程**：在线程中回复并使用 `@mintlify` 提出后续问题。
+
+示例问题：
+- "哪些页面提到了 API 速率限制？"
+- "如何设置身份验证？"
+- "我们的导航是如何组织的？"
+
+<div id="use-connected-integrations">
+  ## 使用已连接的集成
+</div>
+
+Slack agent 在回答问题或更新文档时，可以将已连接的第三方应用作为只读工具使用。
+
+- **共享集成**可供整个组织使用。
+- **个人集成**使用正在与 agent 对话的团队成员所连接的账户。
+
+你不需要为每次 Slack 对话选择集成。只需在请求中自然提及应用，例如：“将这个 Linear issue 与我 Google Drive 中的发布计划进行比较。”
+
+如果应用尚未连接，请让 agent 连接它。完成 agent 返回的授权链接，然后在同一线程中再次发送消息，让 agent 确认并使用该连接。
+
+有关支持的应用、连接范围和权限，请参见[集成](/zh/automations/integrations)。
+
+<div id="update-documentation">
+  ## 更新文档
+</div>
+
+使用智能体在新请求或现有线程中更新你的文档。
+
+- **新请求**：向智能体发送直接消息，或在频道中提及 `@mintlify`，并说明需要更新的内容。
+- **现有线程**：在该线程中回复并提及 `@mintlify`，并说明需要更新的内容。
+- **包含附件**：在消息中上传图片、图表、PDF、SVG、代码文件或其他文档。智能体会自动处理这些附件，并将其内容纳入你的文档中。在线程中，智能体可以访问较早消息中共享的图片和文件，因此你可以在后续请求中引用它们，无需再次上传。
+
+智能体会读取请求或线程的上下文，并更新你已连接的存储库。根据你的[审核流程设置](/zh/agent/index#choose-how-the-agent-publishes-changes)，智能体会打开拉取请求（PR；亦称"合并请求"/Merge Request）或直接向你的部署 branch 提交。
+
+<div id="reference-other-repositories">
+  ## 引用其他仓库
+</div>
+
+智能体可以读取任何已安装 Mintlify GitHub 应用的仓库中的源代码，即使该仓库不是你的文档仓库。这让智能体能够构建更深入的上下文，以指导文档更新。
+
+当你在请求中提到其他仓库时，智能体会按需克隆该仓库，并在起草更改之前检查相关文件。
+
+示例提示词：
+
+- "根据 `acme/api-server/src/auth.ts` 中的更改，更新身份验证指南。"
+- "为 `acme/backend#1234` 中新增的端点编写文档。"
+- "你可以访问哪些仓库？"
+
+克隆的仓库为只读。智能体将它们用作上下文，但只会将更改写入你的文档仓库。
+
+<div id="track-progress-in-real-time">
+  ## 实时跟踪进度
+</div>
+
+当智能体处理你的请求时，它会在 Slack 线程中提供实时反馈。
+
+- **状态更新**：一条实时更新的消息会显示智能体正在执行的操作，例如已搜索、读取和编辑了多少文件。
+- **任务进度**：当智能体将你的请求拆分为多个任务时，它会显示一个清单，以便你跟踪每个任务的进度。
+- **提问**：如果智能体需要更多信息，它会列出选项供你选择，或者你可以在线程中回复自定义答案。
+- **中断**：如果你在智能体仍在工作时发送后续消息，它会停止当前任务并开始处理新任务。
+- **完成**：当智能体完成后，它会发布一份摘要，其中包含指向拉取请求（PR）或提交的链接和在 Web 编辑器中打开更改的链接。
+
+<div id="roles-and-permissions">
+  ## 角色与权限
+</div>
+
+智能体在 Slack 中的能力与已关联的 Mintlify 账号的[角色](/zh/dashboard/roles)保持一致：
+
+- **管理员和编辑者**：可以提问并对文档进行修改。智能体可以使用文件编辑和拉取请求工具。
+- **查看者**：仅能提问。智能体以只读模式运行，无法使用文件编辑、提交和拉取请求工具。如果查看者请求智能体进行修改，智能体会说明该限制，并建议联系编辑者或管理员同事。
+
+如需更改同事的权限，请在控制台的 [成员](https://dashboard.mintlify.com/settings/organization/members) 页面更新其角色。
+
+<div id="best-practices">
+  ## 最佳实践
+</div>
+
+- **具体说明**：清楚地告诉 agent 你希望文档记录哪些内容，以及它应该放在哪里。
+- **添加上下文信息**：如果一个对话中不包含所有必要信息，请在发给 agent 的消息中补充更多细节。
+- **仔细审查**：在合并之前，你应始终审查 agent 创建的拉取请求（PR；亦称"合并请求"/Merge Request）。

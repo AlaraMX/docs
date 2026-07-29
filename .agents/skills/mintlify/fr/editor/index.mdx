@@ -1,0 +1,98 @@
+---
+title: "Aperçu de l'éditeur"
+sidebarTitle: "Vue d'ensemble"
+description: "Créez, modifiez et publiez du contenu dans votre navigateur avec collaboration en temps réel, sauvegarde automatique, aperçus en direct et sync Git."
+keywords: ["editor", "visual", "collaborative", "web editor"]
+---
+
+<Card title="Vous découvrez l'éditeur ? Commencez par le tutoriel." icon="graduation-cap" horizontal href="/fr/editor/tutorial">
+  Un guide pas à pas : créer une branche, faire une modification, partager un aperçu et publier.
+</Card>
+
+<div id="open-the-editor">
+  ## Ouvrir l'éditeur
+</div>
+
+Ouvrez l'éditeur depuis l'onglet [Editor](https://app.mintlify.com/editor) de votre dashboard Mintlify. Tout membre de votre organisation peut ouvrir l'éditeur ; ce que vous pouvez y faire dépend de votre [rôle](/fr/dashboard/roles). Les admins et editors peuvent éditer et publier, et les viewers peuvent parcourir le contenu et laisser des [commentaires](/fr/editor/comments) ou des [suggestions](/fr/editor/suggestions).
+
+<div id="how-the-editor-works">
+
+## Fonctionnement de l'éditeur
+
+</div>
+
+**Les modifications sont enregistrées automatiquement.** Au fur et à mesure que vous tapez, l'éditeur enregistre votre travail. Vos modifications sont conservées entre les onglets, les appareils et les coupures réseau. Les modifications ne sont mises en ligne que lorsque vous les publiez.
+
+**Git reste synchronisé.** Lorsqu'une autre personne pousse des modifications vers votre référentiel depuis l'extérieur de l'éditeur, ces modifications apparaissent automatiquement dans l'éditeur. Vous n'avez pas besoin de faire un pull ni d'actualiser. L'éditeur fusionne les modifications sans conflit et met en évidence les éléments nécessitant votre attention.
+
+<Tip>
+  Si l'éditeur semble désynchronisé avec votre référentiel, utilisez [Reset editor](/fr/editor/settings#reset-editor) pour forcer une resynchronisation depuis Git. Par exemple, l'arborescence des fichiers est vide ou affiche `Unable to find docs.json` alors que le fichier est présent sur votre branche de déploiement.
+</Tip>
+
+**La publication écrit dans Git.** Lorsque vous publiez, l'éditeur valide vos modifications dans votre référentiel. Sur une branche de déploiement, cela met immédiatement à jour votre site en production. Sur une branche de fonctionnalité, cela crée une pull request.
+
+**Votre équipe édite ensemble.** Plusieurs personnes peuvent modifier la même page simultanément. Les curseurs en direct indiquent qui édite et à quel endroit.
+
+<div id="the-editor-layout">
+
+## La disposition de l'éditeur
+
+</div>
+
+<Frame>
+  <img src="/images/editor/editor-layout-light.png" alt="Capture d'écran de l'éditeur montrant le sélecteur de branche, le bouton Ask agent, le bouton Publish, la barre latérale de navigation et la barre supérieure." className="block dark:hidden" />
+  <img src="/images/editor/editor-layout-dark.png" alt="Capture d'écran de l'éditeur montrant le sélecteur de branche, le bouton Ask agent, le bouton Publish, la barre latérale de navigation et la barre supérieure." className="hidden dark:block" />
+</Frame>
+
+- **Barre supérieure** : Utilisez la barre supérieure pour contrôler la branche sur laquelle vous travaillez, accéder à l'agent, prévisualiser et publier les modifications.
+- **Barre latérale de navigation** : Sélectionnez une page à modifier, créez de nouvelles pages et gérez la structure du site.
+
+<div id="explore-the-editor">
+
+## Découvrir l'éditeur
+
+</div>
+
+<Card title="Branches et publication" icon="git-branch" horizontal href="/fr/editor/branching-and-publishing">
+  Comment les branches et les règles de protection déterminent ce qui se passe lorsque vous publiez, et comment gérer le processus de revue par pull request.
+</Card>
+
+<Card title="Commentaires" icon="message-square" horizontal href="/fr/editor/comments">
+  Laissez des retours, posez des questions et discutez des modifications avec votre équipe.
+</Card>
+
+<Card title="Suggestions" icon="pen-line" horizontal href="/fr/editor/suggestions">
+  Proposez des modifications que vos coéquipiers peuvent examiner, accepter ou rejeter.
+</Card>
+
+<Card title="Demander à l'agent" icon="sparkles" horizontal href="/fr/editor/agent">
+  Modifier des pages, rechercher dans votre contenu, ajuster les paramètres et configurer votre site depuis une interface de chat.
+</Card>
+
+<Card title="Créer et modifier des pages" icon="notebook-pen" horizontal href="/fr/editor/pages">
+  Ajoutez de nouvelles pages et mettez à jour celles existantes.
+</Card>
+
+<Card title="Organiser la navigation" icon="list-tree" horizontal href="/fr/editor/navigation">
+  Réordonnez les pages et gérez la structure du site.
+</Card>
+
+<Card title="Aperçu en direct" icon="play" horizontal href="/fr/editor/live-preview">
+  Prévisualisez votre site en temps réel pendant que vous éditez, sans attendre de build.
+</Card>
+
+<Card title="Configurations" icon="sliders-horizontal" horizontal href="/fr/editor/configurations">
+  Configurez le branding, les couleurs et les fonctionnalités de votre site.
+</Card>
+
+<Card title="Paramètres" icon="settings" horizontal href="/fr/editor/settings">
+  Configurez les instructions IA et les valeurs par défaut de publication pour votre deployment.
+</Card>
+
+<Card title="Concepts essentiels de Git" icon="git-merge" horizontal href="/fr/editor/git-essentials">
+  Comprenez les concepts Git qui sous-tendent l'éditeur : branches, commits, pull requests et merges.
+</Card>
+
+<Card title="Raccourcis clavier" icon="keyboard" horizontal href="/fr/editor/keyboard-shortcuts">
+  Gagnez du temps avec les raccourcis clavier.
+</Card>

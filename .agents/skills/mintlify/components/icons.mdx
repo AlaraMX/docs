@@ -1,0 +1,50 @@
+---
+title: "Icons"
+description: "Add icons from Font Awesome, Lucide, Tabler, or custom sources to your documentation pages using the icon component with size and color options."
+keywords: ["Font Awesome", "Lucide", "Tabler", "SVGs"]
+boost: 3
+---
+
+import IconsRequired from "/snippets/icons-required.mdx";
+
+Use icons from Font Awesome, Lucide, Tabler, SVGs, external URLs, or files in your project to enhance your documentation.
+
+<Icon icon="flag" size={32} />
+
+```mdx Icon example
+<Icon icon="flag" size={32} />
+```
+
+## Custom image icons
+
+Use the `src` prop to display a custom image as an icon. The image can be a file in your project or an externally hosted URL.
+
+```mdx Custom image icon examples
+<Icon src="/images/my-icon.svg" />
+
+<Icon src="https://example.com/icon.png" />
+```
+
+## Inline icons
+
+Icons appear inline when used within a sentence, paragraph, or heading. <Icon icon="flag" iconType="solid" /> Use icons for decoration or to add visual emphasis.
+
+```markdown Inline icon example
+Icons appear inline when used within a sentence, paragraph, or heading. <Icon icon="flag" iconType="solid" /> Use icons for decoration or to add visual emphasis.
+```
+
+## Properties
+
+<IconsRequired />
+
+<ResponseField name="color" type="string">
+  The color of the icon as a hex code (for example, `#FF5733`).
+</ResponseField>
+
+<ResponseField name="size" type="number">
+  The size of the icon in pixels.
+</ResponseField>
+
+<ResponseField name="className" type="string">
+  Custom CSS class name to apply to the icon.
+</ResponseField>
