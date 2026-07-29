@@ -105,10 +105,27 @@ Ejemplos típicos:
       Cada cuánto se repite: `daily`, `weekly`, `monthly`, `yearly` u `once`.
     </ParamField>
 
+    <ParamField body="offset_days" type="integer" default="0">
+      Días de anticipación respecto a la fecha del campo. Cada día la regla busca los pases cuya fecha cae dentro de `offset_days` días, así que `3` la dispara **tres días antes** y `-1` un día después. Debe ser un número entero.
+    </ParamField>
+
+    <ParamField body="ignore_year" type="boolean" default="false">
+      Con `true` compara solo día y mes, ignorando el año guardado. Es lo habitual para cumpleaños y aniversarios.
+    </ParamField>
+
     ```json
     {
       "field_name": "cumpleanos",
-      "recurrence": "yearly"
+      "recurrence": "yearly",
+      "ignore_year": true
+    }
+    ```
+
+    ```json
+    {
+      "field_name": "vencimiento_membresia",
+      "recurrence": "once",
+      "offset_days": 3
     }
     ```
   </Accordion>
@@ -318,6 +335,59 @@ GET /v1/trigger-rules/{rule_id}
 </ParamField>
 
 Devuelve `200 OK` con la regla.
+
+---
+
+## Previsualizar una regla
+
+```http
+GET /v1/trigger-rules/{rule_id}/preview
+```
+
+Devuelve los pases que **cumplen la condición en este momento**, sin ejecutar ninguna acción. Sirve para comprobar el alcance de una regla antes de activarla: si te devuelve miles de pases o ninguno, seguramente la condición no es la que querías.
+
+<ParamField path="rule_id" type="string" required>
+  UUID de la regla. Un valor que no sea UUID devuelve `400 INVALID_RULE_ID`.
+</ParamField>
+
+<ResponseField name="pass_ids" type="array">
+  Identificadores de los pases que cumplen la condición ahora mismo. Viene vacío si ninguno la cumple.
+</ResponseField>
+
+Funciona con la regla **tal como está guardada**, así que primero guarda los cambios y luego previsualiza. La previsualización no consume el límite de una ejecución por pase: puedes llamarla las veces que quieras.
+
+<Note>
+  La previsualización evalúa la condición contra el estado actual, no contra el futuro. En `date_field` y `datetime_field` te dice qué pases se dispararían **hoy**, no los que se dispararán más adelante.
+</Note>
+
+<Warning>
+  Las reglas de tipo `stamp_threshold` no admiten previsualización y devuelven `400 RULE_PREVIEW_UNSUPPORTED`. Se disparan por un evento —el sellado— en el momento en que ocurre, no sobre un conjunto de pases que se pueda consultar de antemano.
+</Warning>
+
+<CodeGroup>
+```bash Petición
+curl "https://api.alaramx.com/v1/trigger-rules/8f7e6d5c-4b3a-4291-8807-6f5e4d3c2b1a/preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+```json Respuesta 200
+{
+  "pass_ids": [
+    "cliente-001",
+    "cliente-047",
+    "cliente-183"
+  ]
+}
+```
+
+```json Respuesta 400
+{
+  "error": "preview trigger rule failed",
+  "code": "RULE_PREVIEW_UNSUPPORTED",
+  "message": "Preview is not available for event-driven trigger rules"
+}
+```
+</CodeGroup>
 
 ---
 
