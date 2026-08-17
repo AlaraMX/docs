@@ -85,11 +85,16 @@ Ejemplos típicos:
       Obligatorio solo con `reader_scope: "specific"`.
     </ParamField>
 
+    <ParamField body="reset_on_milestone" type="boolean" default="false">
+      Cambia cada cuándo vuelve a dispararse dentro de una misma racha. Con `false`, la regla se dispara una vez por cada escaneo que mantiene la racha una vez alcanzada. Con `true`, se dispara solo al completar cada múltiplo de `consecutive_days`: con `consecutive_days: 5`, en el día 5, el 10, el 15.
+    </ParamField>
+
     ```json
     {
       "consecutive_days": 5,
       "reader_scope": "specific",
-      "reader": "sucursal-centro-01"
+      "reader": "sucursal-centro-01",
+      "reset_on_milestone": true
     }
     ```
   </Accordion>
@@ -105,10 +110,29 @@ Ejemplos típicos:
       Cada cuánto se repite: `daily`, `weekly`, `monthly`, `yearly` u `once`.
     </ParamField>
 
+    <ParamField body="offset_days" type="integer" default="0">
+      Días de anticipación. Con `3`, la regla se dispara cuando la fecha del campo cae dentro de 3 días; con `-1`, un día después. Úsalo para recordatorios previos a un vencimiento.
+    </ParamField>
+
+    <ParamField body="ignore_year" type="boolean" default="false">
+      Compara solo día y mes, ignorando el año. Actívalo para cumpleaños y aniversarios.
+    </ParamField>
+
     ```json
     {
       "field_name": "cumpleanos",
-      "recurrence": "yearly"
+      "recurrence": "yearly",
+      "ignore_year": true
+    }
+    ```
+
+    Para avisar tres días antes de que venza una membresía:
+
+    ```json
+    {
+      "field_name": "vence_membresia",
+      "recurrence": "once",
+      "offset_days": 3
     }
     ```
   </Accordion>
@@ -318,6 +342,53 @@ GET /v1/trigger-rules/{rule_id}
 </ParamField>
 
 Devuelve `200 OK` con la regla.
+
+---
+
+## Previsualizar una regla
+
+```http
+GET /v1/trigger-rules/{rule_id}/preview
+```
+
+Evalúa la condición de la regla **en este momento** y devuelve los pases que la cumplen. No ejecuta las acciones, no envía nada al cliente y no cuenta como una activación: úsalo para verificar el alcance de una regla antes de habilitarla.
+
+<ParamField path="rule_id" type="string" required>
+  UUID de la regla. Un valor que no sea UUID devuelve `400 INVALID_RULE_ID`.
+</ParamField>
+
+Devuelve `200 OK`.
+
+<ResponseField name="pass_ids" type="array">
+  `pass_id` de cada pase que cumple la condición ahora mismo.
+</ResponseField>
+
+<Note>
+  La previsualización funciona aunque la regla esté deshabilitada, y no descarta los pases sobre los que la regla ya se activó antes. Es una foto de la condición, no una predicción de los envíos pendientes.
+</Note>
+
+<Warning>
+  Las reglas de tipo `stamp_threshold` no admiten previsualización y devuelven `400 RULE_PREVIEW_UNSUPPORTED`: se evalúan al momento de escribir el saldo de lealtad, no sobre el padrón de pases.
+</Warning>
+
+En las reglas `datetime_field` la previsualización solo considera el último minuto, así que lo normal es recibir una lista vacía salvo que algún pase caiga justo en esa ventana.
+
+<CodeGroup>
+```bash Petición
+curl "https://api.alaramx.com/v1/trigger-rules/8f7e6d5c-4b3a-4291-8807-6f5e4d3c2b1a/preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+```json Respuesta 200
+{
+  "pass_ids": [
+    "cliente-001",
+    "cliente-048",
+    "cliente-112"
+  ]
+}
+```
+</CodeGroup>
 
 ---
 
