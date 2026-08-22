@@ -1,0 +1,210 @@
+---
+title: "Servidor MCP"
+description: "Conecta tu asistente de IA a tu cuenta de Alara para consultar pases, escaneos y métricas en lenguaje natural."
+---
+
+# Servidor MCP
+
+El Model Context Protocol (MCP) es un estándar abierto para conectar asistentes de IA con servicios externos. El servidor MCP de Alara le da a tu asistente acceso de lectura a tu cuenta. Puedes preguntarle cuántos pases activos tienes o qué escaneos fallaron ayer, y responde con los datos de tu cuenta.
+
+```
+https://mcp.alaramx.com/mcp
+```
+
+Esa URL es lo único que necesitas. Autorizas la conexión con tu usuario del Dashboard, no con una API key.
+
+<Info>
+  El servidor MCP es **solo de lectura**. Un asistente conectado puede consultar pases, escaneos y métricas, pero no puede emitir ni desactivar pases, mover saldos ni enviar notificaciones. Para eso está la [API](/api/introduccion).
+</Info>
+
+---
+
+## Pídeselo a tu asistente
+
+Si tu asistente puede editar su propia configuración, como Claude Code o los agentes que viven dentro de un editor de código, no configures nada a mano. Copia este texto, pégaselo y deja que él se encargue.
+
+```text Prompt para tu asistente
+Conéctame al servidor MCP de Alara.
+
+URL: https://mcp.alaramx.com/mcp
+Transporte: HTTP
+Autenticación: OAuth. Se abre el navegador y no hay ninguna API key que copiar.
+
+Agrégalo a tu configuración con el nombre "alara" y dime qué tengo que hacer
+en el navegador. Cuando termine, comprueba que quedó bien llamando a la
+herramienta alara_get_metrics y dime cuántos pases activos tengo.
+```
+
+Al final verás un conteo de tus pases. Esa es la señal de que la conexión quedó lista.
+
+Los asistentes que viven en una aplicación de chat no pueden agregarse conectores a sí mismos. Ahí el conector se agrega desde la configuración de la aplicación, con los pasos de abajo.
+
+---
+
+## Conectar a mano
+
+<Tabs>
+  <Tab title="Aplicación de Claude">
+    1. Abre **Configuración** y entra a **Conectores**.
+    2. Elige **Agregar conector personalizado**.
+    3. Pon `Alara` como nombre y pega la URL del servidor:
+
+       ```
+       https://mcp.alaramx.com/mcp
+       ```
+
+    4. Guarda y presiona **Conectar**. Claude abrirá el navegador para que autorices la conexión.
+
+    {/* TODO: confirmar las etiquetas exactas del menú contra la interfaz en español. */}
+  </Tab>
+
+  <Tab title="Claude Code">
+    Ejecuta este comando en tu terminal:
+
+    ```bash
+    claude mcp add --transport http --scope user alara https://mcp.alaramx.com/mcp
+    ```
+
+    Después escribe `/mcp` dentro de Claude Code y elige autenticarte. Se abrirá el navegador.
+
+    Con `--scope user` el servidor queda disponible en todos tus proyectos. Quita esa opción si lo quieres solo en el proyecto actual.
+  </Tab>
+
+  <Tab title="Otros clientes">
+    Busca la sección de conectores, servidores MCP o integraciones de tu aplicación, elige agregar un servidor remoto por URL y pega:
+
+    ```
+    https://mcp.alaramx.com/mcp
+    ```
+
+    Si te pide un tipo de transporte, elige HTTP. No tienes que copiar ningún identificador ni secreto adicional.
+  </Tab>
+</Tabs>
+
+<Note>
+  Necesitas un cliente MCP reciente, capaz de conectarse a un servidor remoto por OAuth. Los clientes que solo aceptan servidores locales por línea de comandos no sirven aquí.
+</Note>
+
+---
+
+## Qué verás al autorizar
+
+Todos los caminos anteriores terminan igual, en tu navegador.
+
+<Steps>
+  <Step title="Inicia sesión en el Dashboard">
+    Tu cliente abrirá el navegador en el Dashboard de Alara. Si no tienes una sesión activa, entra con tu correo y contraseña de siempre.
+  </Step>
+
+  <Step title="Revisa la solicitud">
+    Verás la pantalla **Autorizar conexión** con:
+
+    - La aplicación que pide acceso.
+    - La **cuenta** de Alara a la que se conectará.
+    - El **acceso** solicitado: consulta de pases, escaneos y métricas.
+    - El **destino** al que Alara enviará la respuesta.
+
+    Si la aplicación no fue verificada por Alara, la pantalla lo indica. Conecta solo aplicaciones que reconozcas y que tú mismo acabas de abrir.
+  </Step>
+
+  <Step title="Autoriza">
+    Presiona **Permitir y conectar**. El navegador regresa a tu aplicación y el asistente queda conectado a tu cuenta.
+  </Step>
+</Steps>
+
+---
+
+## Quién puede conectarse
+
+Autorizas la conexión con tu usuario del Dashboard, así que el asistente ve los datos de tu cuenta y nada más.
+
+- Pueden conectarse los roles Propietario, Administrador, Editor y Visualizador.
+- Los usuarios con rol de escáner no pueden conectarse.
+- La cuenta debe estar activa.
+
+Alara vuelve a verificar tu usuario y tu cuenta en cada consulta del asistente. Si eliminas al usuario desde [Equipo y usuarios](/equipo-y-usuarios), le cambias el rol a escáner o desactivas la cuenta, la conexión deja de funcionar en la siguiente consulta.
+
+<Tip>
+  Cada persona debe conectar su propio cliente con su propio usuario. Así revocas un acceso individual editando o eliminando ese usuario.
+</Tip>
+
+---
+
+## Qué puede consultar el asistente
+
+El servidor expone estas herramientas. No las invocas tú; el asistente elige la que corresponde a tu pregunta.
+
+| Herramienta | Para qué sirve |
+| --- | --- |
+| `alara_list_passes` | Listar pases con búsqueda, estados, rango de fechas, orden y filtros por campo. |
+| `alara_get_pass` | Consultar un pase completo por su `pass_id`. |
+| `alara_get_pass_fields` | Consultar solo los campos de un pase, o unas llaves específicas. |
+| `alara_list_scans` | Listar escaneos con búsqueda, estados, lectores, rango de fechas y filtros por campo. |
+| `alara_get_scan` | Consultar un escaneo por su ID. |
+| `alara_get_metrics` | Obtener conteos de pases por estado, incluyendo instalados y desinstalados, y de escaneos por resultado. |
+
+**Alcance de cuenta.** Ninguna herramienta recibe un identificador de cuenta. Alara deriva el alcance de tu credencial y filtra los resultados a tus datos.
+
+**Mismos datos que la API.** Los identificadores de pase son los mismos que usas en `/v1`, sin prefijos internos.
+
+**Listas paginadas.** Los listados devuelven 25 filas por omisión y hasta 100 por consulta, junto con el total. Si tu pregunta abarca más, el asistente pagina.
+
+**Datos ocultos.** Los listados nunca incluyen el objeto `hidden`. Para verlo en un pase, el asistente tiene que pedirlo aparte.
+
+<Warning>
+  Un asistente conectado puede leer los datos personales que guardas en tus pases. Antes de autorizar una aplicación, revisa qué hace con los datos que consulta.
+</Warning>
+
+---
+
+## Acceso servidor a servidor
+
+Si construyes tu propia integración en vez de usar un cliente interactivo, autentícate con la API key de tu cuenta como token `Bearer`.
+
+```bash
+curl "https://mcp.alaramx.com/mcp" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "alara_list_passes",
+      "arguments": { "limit": 10 }
+    }
+  }'
+```
+
+Las herramientas y los resultados son los mismos. La única diferencia es que la API key identifica a la cuenta, no a una persona.
+
+<Warning>
+  Tu API key da acceso a todos los datos de tu cuenta. Úsala **solo desde tu servidor**, nunca en un cliente de IA de escritorio, en el navegador ni en una aplicación móvil. Para uso interactivo, conéctate siempre con OAuth. Consulta [Autenticación](/api/autenticacion).
+</Warning>
+
+---
+
+## Si algo falla
+
+| Qué ves | Qué revisar |
+| --- | --- |
+| El cliente falla sin llegar a abrir el navegador | Su versión puede ser demasiado antigua para este tipo de conexión. Actualízalo e inténtalo de nuevo. |
+| El cliente pide autorizar una y otra vez | Completa el flujo en el navegador hasta **Permitir y conectar**. Si cierras la ventana antes, no se guarda ninguna conexión. |
+| "No se puede completar esta autorización" | La solicitud expiró o ya se usó. Cierra la página y vuelve a empezar desde tu aplicación. |
+| El asistente dice que no tiene acceso | Revisa que tu usuario siga existiendo, que su rol no sea escáner y que la cuenta esté activa. |
+| El asistente no encuentra un pase | Confirma que el `pass_id` sea el de tu cuenta y que el pase no haya sido eliminado. |
+
+Si nada de esto lo resuelve, escríbenos a [dev@alaramx.com](mailto:dev@alaramx.com).
+
+---
+
+<CardGroup cols={2}>
+  <Card title="API de Alara" icon="code" href="/api/introduccion">
+    Para emitir pases, registrar escaneos y automatizar tu programa.
+  </Card>
+
+  <Card title="Equipo y usuarios" icon="users" href="/equipo-y-usuarios">
+    Administra quién tiene acceso a tu cuenta y con qué rol.
+  </Card>
+</CardGroup>
