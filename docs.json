@@ -164,6 +164,12 @@
               "api/webhooks/verificar-firmas",
               "api/webhooks/entregas"
             ]
+          },
+          {
+            "group": "MCP",
+            "pages": [
+              "api/mcp"
+            ]
           }
         ]
       }
