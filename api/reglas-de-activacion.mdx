@@ -321,6 +321,56 @@ Devuelve `200 OK` con la regla.
 
 ---
 
+## Previsualizar una regla
+
+```http
+GET /v1/trigger-rules/{rule_id}/preview
+```
+
+Evalúa la condición de la regla **en este momento** y devuelve los pases que la cumplen, sin ejecutar ninguna acción. Es la forma de comprobar el alcance de una regla antes de activarla: funciona igual con reglas desactivadas (`enabled: false`).
+
+<ParamField path="rule_id" type="string" required>
+  UUID de la regla. Un valor que no sea UUID devuelve `400 INVALID_RULE_ID`.
+</ParamField>
+
+Devuelve `200 OK` con un objeto `{ "pass_ids": [ ... ] }`.
+
+<ResponseField name="pass_ids" type="array">
+  Los `pass_id` de los pases que cumplen la condición. Es el mismo identificador que usas en [`GET /v1/passes/{id}`](/api/pases#consultar-un-pase). Si ninguno la cumple, el arreglo llega vacío.
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl "https://api.alaramx.com/v1/trigger-rules/8f7e6d5c-4b3a-4291-8807-6f5e4d3c2b1a/preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY"
+```
+
+```json Respuesta 200
+{
+  "pass_ids": ["cliente-001", "cliente-047", "cliente-112"]
+}
+```
+</CodeGroup>
+
+<Note>
+  La previsualización es una foto del momento, no un pronóstico. No descuenta los pases sobre los que la regla ya se ejecutó, así que un pase puede aparecer aquí aunque no vuelva a recibir las acciones (una regla corre **como máximo una vez** por combinación de regla, pase y ocasión).
+</Note>
+
+<Warning>
+  En reglas `datetime_field` la previsualización solo considera una ventana de **un minuto** hacia atrás, la misma que usa la evaluación programada. Lo normal es que devuelva un arreglo vacío incluso cuando la regla está bien configurada; no lo tomes como señal de error.
+</Warning>
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `400` | `INVALID_RULE_ID` | El `rule_id` no es un UUID. |
+| `400` | `RULE_PREVIEW_UNSUPPORTED` | La regla es de tipo `stamp_threshold`. Estas reglas se disparan por un evento (el sellado del pase), no por una condición que pueda consultarse, así que no hay nada que previsualizar. |
+| `404` | `RESOURCE_NOT_FOUND` | La regla no existe. |
+| `403` | `UNAUTHORIZED` | La regla pertenece a otra cuenta. |
+
+---
+
 ## Actualizar una regla
 
 ```http
