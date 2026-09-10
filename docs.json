@@ -122,6 +122,12 @@
             ]
           },
           {
+            "group": "Lectores",
+            "pages": [
+              "lectores"
+            ]
+          },
+          {
             "group": "FAQ",
             "pages": [
               "problemas-comunes",
