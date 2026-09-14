@@ -158,7 +158,8 @@
               "api/tarjetas-fisicas",
               "api/notificaciones",
               "api/reglas-de-activacion",
-              "api/recompensas"
+              "api/recompensas",
+              "api/autorizacion-de-beneficios"
             ]
           },
           {

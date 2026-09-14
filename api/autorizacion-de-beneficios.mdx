@@ -1,0 +1,212 @@
+---
+title: "Autorización de beneficios"
+description: "Autoriza beneficios de lealtad desde el punto de venta y revierte los que se cancelen."
+---
+
+# Autorización de beneficios
+
+Cuando un portador presenta su pase en la caja, tu punto de venta le pregunta a Alara si puede tomar un beneficio en ese momento. Alara evalúa las reglas del programa configurado para tu cuenta, registra lo que otorgó y devuelve el texto que el cajero debe ver en pantalla.
+
+<Note>
+  Este recurso solo existe para las cuentas con un programa de beneficios configurado. Si la tuya no lo tiene, ambos endpoints responden `404 RESOURCE_NOT_FOUND`. Para habilitarlo escríbenos a [dev@alaramx.com](mailto:dev@alaramx.com).
+</Note>
+
+---
+
+## Cómo funciona
+
+- Un rechazo **no** es un error. La API responde `200 OK` con `approved: false` y un `reason` legible por máquina.
+- Una autorización aprobada consume una unidad del límite del beneficio. Para devolverla, revierte la autorización con `POST /v1/loyalty/authorize/void`.
+- Los límites se cuentan en la zona horaria de la Ciudad de México (UTC−6, sin horario de verano): el día empieza a la medianoche local y el mes, el día 1.
+- Al aprobar o revertir, Alara actualiza el contador del beneficio en el pase del portador. El cambio llega al teléfono unos segundos después, no dentro de la misma respuesta.
+
+<Warning>
+  La llamada no es idempotente: cada aprobación consume una unidad. Si se te agota el tiempo de espera y no sabes si quedó registrada, reintentar puede dejarte con dos autorizaciones; revierte la sobrante con el `redemption_id` que devuelva la segunda.
+</Warning>
+
+<Note>
+  Dos terminales que cobran el mismo pase en el mismo instante pueden aprobarse ambas aunque quede una sola unidad disponible. Si tu integración puede emitir llamadas en paralelo sobre un mismo pase, espácialas.
+</Note>
+
+---
+
+## Autorizar un beneficio
+
+```http
+POST /v1/loyalty/authorize
+```
+
+<ParamField body="pass_id" type="string" required>
+  El `pass_id` del pase, el mismo que usas en `GET /v1/passes/{id}`. Si la caja leyó una tarjeta física, resuelve primero el pase con [`GET /v1/cards/{card_uid}`](/api/tarjetas-fisicas#consultar-una-tarjeta).
+</ParamField>
+
+<ParamField body="intent" type="string" default="default">
+  Qué beneficio pide el cajero: `default` o `monthly_box`. Cualquier otro valor devuelve `400 INVALID_REQUEST`.
+</ParamField>
+
+<ParamField body="property_id" type="string">
+  Sucursal donde ocurre la venta. Se registra en la autorización.
+</ParamField>
+
+<ParamField body="rvc_id" type="string">
+  Centro de ingresos del punto de venta. Se registra en la autorización.
+</ParamField>
+
+<ParamField body="workstation_id" type="string">
+  Terminal donde ocurre la venta. Se registra en la autorización.
+</ParamField>
+
+<ParamField body="check_total" type="number">
+  Total de la cuenta. Se registra para reportes y no influye en la decisión.
+</ParamField>
+
+<ParamField body="currency" type="string">
+  Moneda de `check_total`, por ejemplo `MXN`.
+</ParamField>
+
+`property_id`, `rvc_id`, `workstation_id`, `check_total` y `currency` quedan guardados junto con la autorización, pero ninguno cambia el resultado: la decisión depende solo del pase y del beneficio pedido.
+
+### Respuesta aprobada
+
+<ResponseField name="approved" type="boolean">
+  `true`. Léelo antes que cualquier otro campo: la respuesta aprobada y la rechazada no comparten forma.
+</ResponseField>
+<ResponseField name="redemption_id" type="string">
+  Identificador (UUID) de la autorización. Guárdalo: es lo único que permite revertirla.
+</ResponseField>
+<ResponseField name="benefit" type="string">
+  Beneficio otorgado: `partner_discount`, `free_drink` o `monthly_box`.
+</ResponseField>
+<ResponseField name="target" type="string">
+  A qué se aplica el descuento: `check` (toda la cuenta) o `item` (un solo artículo).
+</ResponseField>
+<ResponseField name="discount_object_number" type="integer">
+  Número del objeto de descuento que el punto de venta debe aplicar. Un `0` significa que Alara no lo tiene configurado y tu extensión debe usar su propia configuración local.
+</ResponseField>
+<ResponseField name="display" type="string">
+  Texto listo para mostrar en la pantalla del cajero.
+</ResponseField>
+
+### Respuesta rechazada
+
+<ResponseField name="approved" type="boolean">
+  `false`.
+</ResponseField>
+<ResponseField name="reason" type="string">
+  Motivo del rechazo, legible por máquina. Es el campo del que debe depender tu código.
+</ResponseField>
+<ResponseField name="display" type="string">
+  Texto listo para mostrar en la pantalla del cajero.
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/loyalty/authorize" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pass_id": "cliente-001",
+    "property_id": "sucursal-centro",
+    "rvc_id": "1",
+    "workstation_id": "caja-02",
+    "check_total": 340.5,
+    "currency": "MXN"
+  }'
+```
+
+```json Respuesta aprobada
+{
+  "approved": true,
+  "redemption_id": "9f8e7d6c-5b4a-4c3d-8e2f-1a0b9c8d7e6f",
+  "benefit": "free_drink",
+  "target": "item",
+  "discount_object_number": 4021,
+  "display": "Café 1/2"
+}
+```
+
+```json Respuesta rechazada
+{
+  "approved": false,
+  "reason": "already_used_today",
+  "display": "Ya utilizado hoy"
+}
+```
+</CodeGroup>
+
+### Beneficios y límites
+
+| `benefit` | `target` | Límite |
+| --- | --- | --- |
+| `partner_discount` | `check` | 1 por día |
+| `free_drink` | `item` | 2 por día |
+| `monthly_box` | `item` | 1 por mes |
+
+El beneficio que resuelve `intent: default` depende del programa que tenga el pase. Un pase que no participa en el programa del beneficio pedido se rechaza con `wrong_card`.
+
+### Motivos de rechazo
+
+| `reason` | Qué ocurrió |
+| --- | --- |
+| `not_found` | El pase no existe o pertenece a otra cuenta. |
+| `inactive` | El pase está eliminado o no está emitido ni activo. |
+| `expired` | La vigencia del pase ya pasó. Vale durante todo el día indicado y vence a la medianoche siguiente. |
+| `wrong_card` | Ese pase no tiene derecho al beneficio pedido. |
+| `already_used_today` | El beneficio diario ya se usó hoy. |
+| `daily_limit_reached` | Se agotaron las unidades del día. |
+| `monthly_limit_reached` | El beneficio del mes ya se canjeó. |
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `400` | `INVALID_REQUEST` | Falta `pass_id`, el cuerpo no es JSON válido, o `intent` no es `default` ni `monthly_box`. |
+| `404` | `RESOURCE_NOT_FOUND` | Tu cuenta no tiene un programa de beneficios configurado. |
+
+<Tip>
+  Un pase inexistente **no** produce `404`: se rechaza con `200 OK` y `reason: not_found`, para que la caja muestre un mensaje en lugar de tratarlo como una falla de integración.
+</Tip>
+
+---
+
+## Revertir una autorización
+
+```http
+POST /v1/loyalty/authorize/void
+```
+
+Cancela una autorización y devuelve la unidad consumida al límite. Úsalo cuando el cobro se cancele o se cierre sin el beneficio.
+
+<ParamField body="redemption_id" type="string" required>
+  El `redemption_id` que devolvió la autorización aprobada.
+</ParamField>
+
+Devuelve `200 OK` con `{ "reverted": true }`. Es idempotente: revertir una autorización ya revertida vuelve a responder lo mismo.
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.alaramx.com/v1/loyalty/authorize/void" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "redemption_id": "9f8e7d6c-5b4a-4c3d-8e2f-1a0b9c8d7e6f"
+  }'
+```
+
+```json Respuesta
+{
+  "reverted": true
+}
+```
+</CodeGroup>
+
+<Note>
+  La unidad regresa a la ventana en la que se tomó. Revertir la autorización de ayer no aumenta lo que queda disponible hoy.
+</Note>
+
+### Errores
+
+| HTTP | `code` | Causa |
+| --- | --- | --- |
+| `400` | `INVALID_REQUEST` | Falta `redemption_id` o el cuerpo no es JSON válido. |
+| `404` | `RESOURCE_NOT_FOUND` | El `redemption_id` no es un UUID, no existe o pertenece a otra cuenta. |
