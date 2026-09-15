@@ -173,6 +173,60 @@ curl -X POST "https://api.alaramx.com/v1/rewards" \
 
 ---
 
+## Previsualizar un `slug`
+
+```http
+POST /v1/rewards/slug-preview
+```
+
+Calcula el `slug` que tendría una recompensa y te dice si sigue libre, **sin crear nada**. Úsalo antes de crear el catálogo para evitar un `409 RESOURCE_CONFLICT` por un `slug` repetido.
+
+<ParamField body="name" type="string">
+  Nombre del beneficio. Si no envías `desired_slug`, el `slug` se genera a partir de este texto.
+</ParamField>
+
+<ParamField body="desired_slug" type="string">
+  `slug` que quieres usar. Si lo envías, se valida tal cual y el `name` se ignora.
+</ParamField>
+
+<ResponseField name="suggested" type="string">
+  `slug` resultante: el `desired_slug` que enviaste, o el generado a partir del `name`.
+</ResponseField>
+<ResponseField name="available" type="boolean">
+  `true` si ese `slug` no lo usa ninguna recompensa de tu catálogo. Es `false` tanto si ya existe como si el `slug` no cumple el formato.
+</ResponseField>
+
+La generación automática pasa el `name` a minúsculas y colapsa cada grupo de caracteres no alfanuméricos en un solo guion bajo: `"Café gratis"` produce `caf_gratis`. Los acentos no son alfanuméricos para este propósito, así que conviene revisar el `suggested` antes de usarlo.
+
+<Warning>
+  `available: true` es una foto del momento, no una reserva. Entre la previsualización y la creación alguien más puede tomar el `slug`.
+</Warning>
+
+<CodeGroup>
+```bash A partir del nombre
+curl -X POST "https://api.alaramx.com/v1/rewards/slug-preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Café gratis" }'
+```
+
+```bash Con un slug propuesto
+curl -X POST "https://api.alaramx.com/v1/rewards/slug-preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Café gratis", "desired_slug": "cafe_gratis" }'
+```
+
+```json Respuesta 200
+{
+  "suggested": "cafe_gratis",
+  "available": true
+}
+```
+</CodeGroup>
+
+---
+
 ## Listar el catálogo
 
 ```http
