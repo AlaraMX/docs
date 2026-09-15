@@ -173,6 +173,75 @@ curl -X POST "https://api.alaramx.com/v1/rewards" \
 
 ---
 
+## Previsualizar un slug
+
+```http
+POST /v1/rewards/slug-preview
+```
+
+Calcula el `slug` que tendría una recompensa y te dice si está libre, sin crear nada. Úsalo antes de [crear una recompensa](#crear-una-recompensa) para no chocar con un `slug` ya ocupado.
+
+<ParamField body="name" type="string">
+  Nombre del beneficio. Se usa para generar el `slug` cuando no envías `desired_slug`.
+</ParamField>
+
+<ParamField body="desired_slug" type="string">
+  Slug que quieres verificar. Si lo envías, se comprueba tal cual y se ignora el `name`.
+</ParamField>
+
+Devuelve `200 OK`.
+
+<ResponseField name="suggested" type="string">
+  El `slug` resultante: el `desired_slug` que enviaste, o uno derivado del `name`.
+</ResponseField>
+
+<ResponseField name="available" type="boolean">
+  `true` si puedes usarlo. Llega en `false` tanto si ya existe una recompensa con ese `slug` en tu cuenta como si el valor no cumple el formato válido.
+</ResponseField>
+
+<CodeGroup>
+```bash Desde un nombre
+curl -X POST "https://api.alaramx.com/v1/rewards/slug-preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Café gratis" }'
+```
+
+```bash Verificar un slug concreto
+curl -X POST "https://api.alaramx.com/v1/rewards/slug-preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Café gratis", "desired_slug": "cafe_gratis" }'
+```
+
+```json Respuesta 200
+{
+  "suggested": "cafe_gratis",
+  "available": true
+}
+```
+</CodeGroup>
+
+Al derivar el `slug` de un `name`, todo pasa a minúsculas y cada tramo de caracteres que no sea alfanumérico se colapsa en un solo guion bajo. Los acentos y la `ñ` no se transliteran: se tratan como separadores, igual que un espacio.
+
+| `name` | `suggested` |
+| --- | --- |
+| `Café gratis` | `caf_gratis` |
+| `2x1 en bebidas` | `2x1_en_bebidas` |
+| `¡Postre de regalo!` | `postre_de_regalo` |
+
+<Note>
+  Como `Café gratis` produce `caf_gratis`, conviene enviar un `desired_slug` explícito cuando el nombre lleva acentos y quieres un identificador legible.
+</Note>
+
+<Warning>
+  La respuesta no reserva el `slug`. Entre la previsualización y la creación otra petición puede tomarlo, y entonces `POST /v1/rewards` devolverá `409`.
+</Warning>
+
+Un `slug` válido cumple el patrón `minusculas_y_numeros` (tramos alfanuméricos separados por guion bajo, sin guion bajo al inicio ni al final) y no pasa de 80 caracteres. Si `name` y `desired_slug` llegan vacíos, `suggested` sale vacío y `available` es `false`.
+
+---
+
 ## Listar el catálogo
 
 ```http
