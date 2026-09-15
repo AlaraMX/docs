@@ -34,6 +34,20 @@ El pase es el objeto central de Alara. Estos endpoints te permiten emitirlos, ma
   </Expandable>
 </ResponseField>
 
+<ResponseField name="geolocations" type="array | null">
+  Ubicaciones que hacen aparecer el pase en la pantalla de bloqueo cuando la persona se acerca a ellas.
+
+  Presente solo cuando el pase trae ubicaciones propias. Si usa las de su plantilla, la llave se omite.
+
+  <Expandable title="propiedades">
+    <ResponseField name="latitude" type="number">Latitud del punto.</ResponseField>
+    <ResponseField name="longitude" type="number">Longitud del punto.</ResponseField>
+    <ResponseField name="radius_meters" type="integer">Radio en metros alrededor del punto. Ausente si no se definió.</ResponseField>
+    <ResponseField name="altitude" type="number">Altitud en metros. Ausente si no se definió.</ResponseField>
+    <ResponseField name="message" type="string">Texto que ve la persona al acercarse. Ausente si no se definió.</ResponseField>
+  </Expandable>
+</ResponseField>
+
 <ResponseField name="qr_value" type="string | null">
   El valor codificado en el código QR del pase. Sólo aplica en pases QR. Consulta con el equipo de soporte el uso de este campo ya que generalmente se utiliza para identificar el pase.
 </ResponseField>
@@ -130,11 +144,29 @@ Emite un pase nuevo.
   </Expandable>
 </ParamField>
 
+<ParamField body="geolocations" type="array">
+  Hasta **10** ubicaciones que hacen aparecer el pase en la pantalla de bloqueo cuando la persona se acerca a ellas.
+
+  Si omites la llave, el pase hereda las ubicaciones configuradas en su plantilla. Envía un arreglo vacío para emitirlo sin ninguna.
+
+  <Expandable title="propiedades">
+    <ParamField body="latitude" type="number" required>Entre `-90` y `90`.</ParamField>
+    <ParamField body="longitude" type="number" required>Entre `-180` y `180`.</ParamField>
+    <ParamField body="radius_meters" type="integer">Radio en metros alrededor del punto. Debe ser mayor a `0`.</ParamField>
+    <ParamField body="altitude" type="number">Altitud en metros.</ParamField>
+    <ParamField body="message" type="string">Texto que ve la persona al acercarse a la ubicación.</ParamField>
+  </Expandable>
+</ParamField>
+
 <ParamField body="initial_platform" type="string">
   Opcional. Pista sobre la plataforma del portador para preparar el pase desde el inicio. Solo acepta `ios` o `android`; cualquier otro valor devuelve `400 INVALID_REQUEST`.
 
   Si lo omites, el pase queda listo para ambas plataformas. Es un dato de apoyo al momento de emitir: no se guarda ni se devuelve en la respuesta.
 </ParamField>
+
+<Note>
+  En Android, `radius_meters`, `altitude` y `message` no aplican: el sistema operativo decide el radio y el texto del aviso. Además, dependiendo de cómo esté configurada tu plantilla, Android puede considerar solo la primera ubicación de la lista. Escríbele a soporte si necesitas varias ubicaciones activas en Android.
+</Note>
 
 ### Respuesta
 
@@ -191,6 +223,7 @@ curl -X POST "https://api.alaramx.com/v1/passes" \
 | `422` | `PASS_TEMPLATE_NOT_FOUND` | La plantilla no existe. |
 | `422` | `PASS_TEMPLATE_DATA_INVALID` | Los datos no son válidos para esa plantilla. |
 | `400` | `INVALID_INPUT` | Una llave de `visible` no existe en la plantilla o está bloqueada. |
+| `400` | `INVALID_INPUT` | `geolocations` trae más de 10 ubicaciones, una coordenada fuera de rango o un `radius_meters` menor o igual a `0`. |
 | `502` | `PASS_PROVIDER_UNAVAILABLE` | El servicio de emisión no respondió. |
 
 <Tip>
@@ -277,6 +310,17 @@ Actualización parcial: los campos que no envíes quedan intactos.
 
 <ParamField body="appearance" type="object | null">
   Envía un objeto para cambiar la apariencia, o `null` explícito para limpiarla. Si omites la llave, la apariencia no cambia.
+</ParamField>
+
+<ParamField body="geolocations" type="array | null">
+  **Reemplaza** la lista completa; no se fusiona con las ubicaciones actuales. Aplican las mismas reglas y propiedades que en [Crear un pase](#crear-un-pase).
+
+  - Un arreglo con ubicaciones deja exactamente esas.
+  - Un arreglo vacío deja el pase sin ninguna ubicación.
+  - `null` explícito quita las ubicaciones propias del pase y lo devuelve a las de su plantilla.
+  - Si omites la llave, las ubicaciones no cambian.
+
+  El cambio se envía al wallet de la persona aunque no modifiques ningún campo `visible`.
 </ParamField>
 
 Devuelve `204 No Content`.
