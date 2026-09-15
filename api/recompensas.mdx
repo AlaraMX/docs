@@ -173,6 +173,65 @@ curl -X POST "https://api.alaramx.com/v1/rewards" \
 
 ---
 
+## Previsualizar un slug
+
+```http
+POST /v1/rewards/slug-preview
+```
+
+Calcula el `slug` que tendría una recompensa y te dice si está libre, sin crear nada. Sirve para validar el identificador antes de crear la recompensa, o para mostrar el slug sugerido mientras el usuario escribe el nombre.
+
+<ParamField body="name" type="string" required>
+  Nombre del beneficio. Se convierte a slug cuando no envías `desired_slug`.
+</ParamField>
+
+<ParamField body="desired_slug" type="string">
+  Slug propuesto. Si lo envías, se evalúa tal cual y `name` se ignora.
+</ParamField>
+
+Devuelve `200 OK`.
+
+<ResponseField name="suggested" type="string">
+  El slug resultante: `desired_slug` si lo enviaste, o el generado a partir de `name`.
+</ResponseField>
+
+<ResponseField name="available" type="boolean">
+  Si puedes usar ese slug al crear la recompensa.
+</ResponseField>
+
+<Note>
+  `available` es `false` tanto si el slug ya existe en tu catálogo como si no cumple el patrón `minusculas_y_numeros` o excede los 80 caracteres. En ambos casos `suggested` te devuelve el valor evaluado para que lo corrijas.
+</Note>
+
+<Warning>
+  Al generar el slug desde `name`, **solo se conservan las letras `a`–`z` y los dígitos**: cada tramo de otros caracteres se convierte en un guion bajo. Las vocales acentuadas y la `ñ` no se transliteran, se sustituyen. `"Café gratis"` produce `caf_gratis`, no `cafe_gratis`. Si el nombre lleva acentos, envía `desired_slug` con el identificador que quieras.
+</Warning>
+
+<CodeGroup>
+```bash Desde el nombre
+curl -X POST "https://api.alaramx.com/v1/rewards/slug-preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Café gratis" }'
+```
+
+```bash Con un slug propuesto
+curl -X POST "https://api.alaramx.com/v1/rewards/slug-preview" \
+  -H "Authorization: Bearer $ALARA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Café gratis", "desired_slug": "cafe_gratis" }'
+```
+
+```json Respuesta 200
+{
+  "suggested": "caf_gratis",
+  "available": true
+}
+```
+</CodeGroup>
+
+---
+
 ## Listar el catálogo
 
 ```http
