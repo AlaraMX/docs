@@ -75,8 +75,33 @@ Las recompensas separan **el catálogo** de **las asignaciones individuales**:
 <ResponseField name="assignment_source_type" type="string">
   `manual` (asignado por API o desde el Dashboard) o `automatic` (asignado por una regla de activación).
 </ResponseField>
+<ResponseField name="assignment_actor_type" type="string | null">
+  Quién asignó el derecho: `api_client` (una llamada con tu llave de API), `dashboard_user` (una persona de tu equipo desde el Dashboard) o `staff_user` (el equipo de Alara, normalmente dando soporte).
+
+  Se omite cuando `assignment_source_type` es `automatic`: una regla de activación no se atribuye a nadie.
+</ResponseField>
 <ResponseField name="created_at" type="string">RFC 3339.</ResponseField>
 <ResponseField name="updated_at" type="string">RFC 3339.</ResponseField>
+
+---
+
+## El objeto canje
+
+Es el registro de un canje concreto. Lo devuelve [Canjear un derecho](#canjear-un-derecho).
+
+<ResponseField name="id" type="string">Identificador (UUID) del canje.</ResponseField>
+<ResponseField name="entitlement_id" type="string">Derecho sobre el que se aplicó.</ResponseField>
+<ResponseField name="amount" type="integer">Cuántos canjes descontó.</ResponseField>
+<ResponseField name="actor_type" type="string | null">
+  Quién lo registró, con los mismos valores que `assignment_actor_type`: `api_client`, `dashboard_user` o `staff_user`.
+</ResponseField>
+<ResponseField name="context" type="string | null">Dónde se canjeó, si se envió.</ResponseField>
+<ResponseField name="note" type="string | null">Nota libre, si se envió.</ResponseField>
+<ResponseField name="created_at" type="string">RFC 3339.</ResponseField>
+
+<Note>
+  Ni `assignment_actor_type` ni `actor_type` identifican a la persona, solo el tipo de actor. Para saber quién en concreto movió un derecho, escríbenos a [dev@alaramx.com](mailto:dev@alaramx.com).
+</Note>
 
 ---
 
@@ -277,6 +302,7 @@ curl -X POST "https://api.alaramx.com/v1/passes/cliente-001/rewards/assign" \
   "remaining_redemptions": 1,
   "expiration_timestamp": "2026-08-23T16:05:00Z",
   "assignment_source_type": "manual",
+  "assignment_actor_type": "api_client",
   "created_at": "2026-07-24T16:05:00Z",
   "updated_at": "2026-07-24T16:05:00Z"
 }
@@ -339,7 +365,7 @@ POST /v1/passes/{id}/rewards/{entitlement_id}/redeem
   Nota libre sobre el canje.
 </ParamField>
 
-Devuelve `200 OK` con el registro del canje y el derecho actualizado.
+Devuelve `200 OK` con `{ "redemption": { ... }, "entitlement": { ... } }`: [el canje](#el-objeto-canje) que acabas de registrar y [el derecho](#el-objeto-derecho) ya actualizado.
 
 <CodeGroup>
 ```bash cURL
@@ -359,6 +385,7 @@ curl -X POST "https://api.alaramx.com/v1/passes/cliente-001/rewards/d4c3b2a1-9f8
     "id": "2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
     "entitlement_id": "d4c3b2a1-9f8e-4d7c-8b6a-5f4e3d2c1b0a",
     "amount": 1,
+    "actor_type": "api_client",
     "context": "sucursal-centro-01",
     "note": "Ticket A-4471",
     "created_at": "2026-07-24T18:20:00Z"
@@ -372,6 +399,7 @@ curl -X POST "https://api.alaramx.com/v1/passes/cliente-001/rewards/d4c3b2a1-9f8
     "status": "redeemed",
     "remaining_redemptions": 0,
     "assignment_source_type": "manual",
+    "assignment_actor_type": "api_client",
     "created_at": "2026-07-24T16:05:00Z",
     "updated_at": "2026-07-24T18:20:00Z"
   }
@@ -421,4 +449,4 @@ curl "https://api.alaramx.com/v1/rewards/entitlement-counts" \
 
 ## Asignación automática
 
-Para otorgar recompensas sin intervención manual, usa la acción `assign_reward` de una [regla de activación](/api/reglas-de-activacion#tipos-de-acci-n). Los derechos así creados llegan con `assignment_source_type: "automatic"`.
+Para otorgar recompensas sin intervención manual, usa la acción `assign_reward` de una [regla de activación](/api/reglas-de-activacion#tipos-de-acci-n). Los derechos así creados llegan con `assignment_source_type: "automatic"` y sin `assignment_actor_type`.
